@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Target Coordinate Calculator | Tính toán tọa độ mục tiêu</title>
+
+    <!-- Leaflet CSS - Thư viện bản đồ tương tác -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <!-- Main Application Container -->
+    <div class="app-container">
+    
+        <!-- Header Section -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    Hệ thống tính toán tọa độ mục tiêu
+                </h1>
+                <p class="app-subtitle">
+                    Tính toán trong không gian 2D (phẳng)
+                </p>
+            </div>
+        </header>
+
+        <!-- Main Content: Sidebar + Map -->
+        <div class="main-content">
+        
+            <!-- Sidebar - Input Panel -->
+            <aside class="sidebar">
+                
+                <!-- Mode Toggle Button -->
+                <div class="mode-toggle-section">
+                    <label class="mode-label">Định dạng tọa độ:</label>
+                    <button id="toggleModeBtn" class="btn-toggle" title="Chuyển đổi giữa Decimal và DMS">
+                        <span id="modeText">Decimal</span>
+                        <span class="toggle-icon">⇄</span>
+                    </button>
+                </div>
+
+                <!-- Observer Coordinates Section -->
+                <section class="input-section">
+                <h2 class="section-title">
+                    <span class="icon-marker red">📍</span>
+                    Tọa độ Quan sát viên
+                </h2>
+
+                <!-- Decimal Degrees Input (Default) -->
+                <div id="decimalInputs" class="input-group">
+                    <div class="field">
+                        <label for="latDecimal">Vĩ độ (°)</label>
+                        <input 
+                            type="number" 
+                            id="latDecimal" 
+                            step="0.000001" 
+                            value="10.762622"
+                            placeholder="10.762622"
+                            min="-90"
+                            max="90"
+                        />
+                        <small class="field-hint">Phạm vi: -90° đến 90°</small>
+                    </div>
+
+                    <div class="field">
+                        <label for="lonDecimal">Kinh độ (°)</label>
+                        <input 
+                            type="number" 
+                            id="lonDecimal" 
+                            step="0.000001" 
+                            value="106.660172"
+                            placeholder="106.660172"
+                            min="-180"
+                            max="180"
+                        />
+                        <small class="field-hint">Phạm vi: -180° đến 180°</small>
+                    </div>
+                </div>
+
+                <!-- DMS Input (Hidden by default) -->
+                <div id="dmsInputs" class="input-group" style="display: none;">
+                    <!-- Latitude DMS -->
+                    <div class="field">
+                        <label>Vĩ độ (D° M' S")</label>
+                        <div class="dms-row">
+                            <input type="number" id="latDeg" placeholder="°" value="10" min="-90" max="90" />
+                            <input type="number" id="latMin" placeholder="'" value="45" min="0" max="59" />
+                            <input type="number" id="latSec" placeholder='"' value="45.44" min="0" max="59.99" step="0.01" />
+                        </div>
+                    </div>
+
+                    <!-- Longitude DMS -->
+                    <div class="field">
+                        <label>Kinh độ (D° M' S")</label>
+                        <div class="dms-row">
+                            <input type="number" id="lonDeg" placeholder="°" value="106" min="-180" max="180" />
+                            <input type="number" id="lonMin" placeholder="'" value="39" min="0" max="59" />
+                            <input type="number" id="lonSec" placeholder='"' value="36.62" min="0" max="59.99" step="0.01" />
+                        </div>
+                    </div>
+                </div>
+                </section>
+
+                <!-- Measurement Data Section -->
+                <section class="input-section">
+                    <h2 class="section-title">
+                        <span class="icon-marker green">🧭</span>
+                        Dữ liệu đo đạc
+                    </h2>
+
+                    <div class="field">
+                        <label for="azimuth">
+                            Góc ngắm (°)
+                            <span class="label-hint">(0° = Bắc)</span>
+                        </label>
+                        <input 
+                        type="number" 
+                        id="azimuth" 
+                        step="0.1" 
+                        value="45"
+                        placeholder="45"
+                        min="0"
+                        max="360"
+                        />
+                        <small class="field-hint">0° = Bắc, 90° = Đông, 180° = Nam, 270° = Tây</small>
+                    </div>
+
+                    <div class="field">
+                        <label for="distance">Khoảng cách (km)</label>
+                        <input 
+                        type="number" 
+                        id="distance" 
+                        step="0.01" 
+                        value="2.5"
+                        placeholder="2.5"
+                        min="0.001"
+                        />
+                        <small class="field-hint">Độ chính xác tốt nhất: &lt; 10 km</small>
+                    </div>
+                </section>
+
+                <!-- Calculate Button -->
+                <button id="calculateBtn" class="btn-calculate">
+                    <span class="btn-icon">📐</span>
+                    TÍNH TOÁN TỌA ĐỘ
+                </button>
+
+                <!-- Error Display -->
+                <div id="errorMessage" class="error-message" style="display: none;">
+                    <span class="error-icon">⚠️</span>
+                    <span id="errorText"></span>
+                </div>
+
+                <!-- Result Display -->
+                <div id="resultSection" class="result-section" style="display: none;">
+                    <h3 class="result-title">
+                        <span class="icon-marker blue">🎯</span>
+                        Tọa độ Mục tiêu
+                    </h3>
+                    
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Vĩ độ:</span>
+                            <span id="resultLat" class="result-value">–</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Kinh độ:</span>
+                            <span id="resultLon" class="result-value">–</span>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="result-label">Khoảng cách:</span>
+                            <span id="resultDistance" class="result-value">–</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Phương vị:</span>
+                            <span id="resultAzimuth" class="result-value">–</span>
+                        </div>
+                    </div>
+
+                    <!-- Copy Button -->
+                    <button id="copyBtn" class="btn-copy" title="Copy tọa độ">
+                        <span class="copy-icon">📋</span>
+                        Copy tọa độ
+                    </button>
+                </div>
+
+                <!-- Info Box -->
+                <div class="info-box">
+                    <div class="info-title">! Lưu ý quan trọng</div>
+                    <ul class="info-list">
+                        <li>Azimuth: 0° = Bắc, 90° = Đông, 180° = Nam, 270° = Tây</li>
+                        <li>Độ chính xác tốt nhất cho khoảng cách &lt; 10km</li>
+                        <li>Tính toán dựa trên mô hình cầu (spherical)</li>
+                        <li>Sử dụng công thức Haversine cho geodesic calculations</li>
+                    </ul>
+                </div>
+
+            </aside>
+
+            <!-- Map Container -->
+            <main class="map-container">
+                <!-- Leaflet Map will be rendered here -->
+                <div id="map"></div>
+
+                <!-- Map Legend -->
+                <div class="map-legend">
+                    <div class="legend-title">Chú giải</div>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <span class="legend-dot red"></span>
+                            <span>Quan sát viên</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-dot blue"></span>
+                            <span>Mục tiêu</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-line"></span>
+                            <span>Đường ngắm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Zoom Controls Info (Optional) -->
+                <div class="map-controls-info">
+                    <small>💡 Tip: Scroll để zoom, kéo để di chuyển bản đồ</small>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Leaflet JS - Thư viện bản đồ -->
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin="">
+    </script>
+
+    <!-- Custom JavaScript Modules -->
+    <script src="js/coordinateCalculator.js"></script>
+    <script src="js/mapViewer.js"></script>
+
+    <!-- Main Application Script -->
+    <script>
+        /**
+         * Main Application Initialization
+         * Khởi tạo ứng dụng khi DOM đã load xong
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+        console.log('GPS Target Calculating System - Initialized');
+
+        // Khởi tạo map với tọa độ mặc định (TP.HCM)
+        const defaultLat = 10.762622;
+        const defaultLon = 106.660172;
+        
+        initializeMap('map', defaultLat, defaultLon);
+        
+        // Log thông tin phiên bản
+        console.log('Version: 1.0.0 (Phase 1)');
+        console.log('Map: Leaflet.js v1.9.4');
+        console.log('Coordinate System: WGS-84');
+        });
+    </script>
+</body>
+</html>
