@@ -5,7 +5,7 @@
  * 
  * Chức năng chính:
  * - Chuyển đổi DMS ↔ Decimal
- * - Tính toán tọa độ mục tiêu từ azimuth + distance (Haversine)
+ * - Tính toán tọa độ mục tiêu từ azimuth + distance (Spherical/Haversine) và Ellipsoid (Vincenty)
  * - Validation dữ liệu đầu vào
  * - Tính khoảng cách giữa 2 điểm
  */
@@ -19,6 +19,13 @@
  * Sử dụng mean radius theo IUGG (International Union of Geodesy and Geophysics)
  */
 const EARTH_RADIUS_KM = 6371.0;
+
+/** WGS-84 ellipsoid params for Vincenty */
+const WGS84 = {
+  a: 6378137.0,                 // semi-major axis (m)
+  f: 1 / 298.257223563           // flattening
+};
+WGS84.b = WGS84.a * (1 - WGS84.f);
 
 /**
  * Hệ số chuyển đổi giữa Degrees và Radians
@@ -98,6 +105,92 @@ function decimalToDMS(decimal) {
 // ==================== GEODESIC CALCULATIONS ====================
 
 /**
+ * Spherical destination (current Phase 1 algorithm)
+ */
+function sphericalDestination(lat, lon, azimuthDeg, distanceKm) {
+  const lat1 = lat * DEG_TO_RAD;
+  const lon1 = lon * DEG_TO_RAD;
+  const bearing = azimuthDeg * DEG_TO_RAD;
+  const delta = distanceKm / EARTH_RADIUS_KM;
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(delta) +
+    Math.cos(lat1) * Math.sin(delta) * Math.cos(bearing)
+  );
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(bearing) * Math.sin(delta) * Math.cos(lat1),
+    Math.cos(delta) - Math.sin(lat1) * Math.sin(lat2)
+  );
+  const targetLat = lat2 * RAD_TO_DEG;
+  let targetLon = lon2 * RAD_TO_DEG;
+  targetLon = ((targetLon + 540) % 360) - 180;
+  return { lat: targetLat, lon: targetLon };
+}
+
+/**
+ * Vincenty Direct (ellipsoid WGS-84)
+ * Returns destination point given start lat, lon, initial bearing and distance.
+ * Distance in km; internally converted to meters.
+ */
+function vincentyDestination(lat, lon, azimuthDeg, distanceKm) {
+  const a = WGS84.a, b = WGS84.b, f = WGS84.f;
+  const φ1 = lat * DEG_TO_RAD;
+  const λ1 = lon * DEG_TO_RAD;
+  const α1 = azimuthDeg * DEG_TO_RAD;
+  const s = distanceKm * 1000.0;
+
+  const sinα1 = Math.sin(α1), cosα1 = Math.cos(α1);
+  const tanU1 = (1 - f) * Math.tan(φ1);
+  const cosU1 = 1 / Math.sqrt(1 + tanU1 * tanU1);
+  const sinU1 = tanU1 * cosU1;
+  const σ1 = Math.atan2(tanU1, cosα1);
+  const sinα = cosU1 * sinα1;
+  const cos2α = 1 - sinα * sinα;
+  const u2 = cos2α * (a*a - b*b) / (b*b);
+  const A = 1 + (u2/16384) * (4096 + u2 * (-768 + u2 * (320 - 175*u2)));
+  const B = (u2/1024) * (256 + u2 * (-128 + u2 * (74 - 47*u2)));
+
+  let σ = s / (b * A);
+  let σPrev;
+  let cos2σm, sinσ, cosσ;
+  const MAX_ITERS = 200;
+  let iter = 0;
+  do {
+    cos2σm = Math.cos(2 * σ1 + σ);
+    sinσ = Math.sin(σ);
+    cosσ = Math.cos(σ);
+    const Δσ = B * sinσ * (
+      cos2σm + (B/4) * (
+        cosσ * (-1 + 2 * cos2σm * cos2σm) -
+        (B/6) * cos2σm * (-3 + 4 * sinσ * sinσ) * (-3 + 4 * cos2σm * cos2σm)
+      )
+    );
+    σPrev = σ;
+    σ = (s / (b * A)) + Δσ;
+  } while (Math.abs(σ - σPrev) > 1e-12 && ++iter < MAX_ITERS);
+
+  // Compute destination coordinates
+  const tmp = sinU1 * sinσ - cosU1 * cosσ * cosα1;
+  const φ2 = Math.atan2(
+    sinU1 * cosσ + cosU1 * sinσ * cosα1,
+    (1 - f) * Math.sqrt(sinα * sinα + tmp * tmp)
+  );
+  const λ = Math.atan2(
+    sinσ * sinα1,
+    cosU1 * cosσ - sinU1 * sinσ * cosα1
+  );
+  const C = (f / 16) * (cos2α) * (4 + f * (4 - 3 * cos2α));
+  const L = λ - (1 - C) * f * sinα * (
+    σ + C * sinσ * (cos2σm + C * cosσ * (-1 + 2 * cos2σm * cos2σm))
+  );
+  let λ2 = λ1 + L;
+
+  // Normalize longitude to [-π, π]
+  λ2 = ((λ2 + 3 * Math.PI) % (2 * Math.PI)) - Math.PI;
+
+  return { lat: φ2 * RAD_TO_DEG, lon: λ2 * RAD_TO_DEG };
+}
+
+/**
  * Tính tọa độ điểm đích (destination point) sử dụng công thức Haversine
  * 
  * Công thức này tính toán trên mô hình cầu đơn giản của Trái Đất.
@@ -118,38 +211,10 @@ function decimalToDMS(decimal) {
  * const target = calculateTargetCoordinate(10.762622, 106.660172, 45, 2.5);
  * console.log(target); // {lat: 10.778945, lon: 106.677834}
  */
-function calculateTargetCoordinate(lat, lon, azimuthDeg, distanceKm) {
-  // Chuyển đổi sang radian
-  const lat1 = lat * DEG_TO_RAD;
-  const lon1 = lon * DEG_TO_RAD;
-  const bearing = azimuthDeg * DEG_TO_RAD;
-  
-  // Tính angular distance (góc ở tâm Trái Đất)
-  const delta = distanceKm / EARTH_RADIUS_KM;
-  
-  // Tính vĩ độ điểm đích
-  const lat2 = Math.asin(
-    Math.sin(lat1) * Math.cos(delta) +
-    Math.cos(lat1) * Math.sin(delta) * Math.cos(bearing)
-  );
-  
-  // Tính kinh độ điểm đích
-  const lon2 = lon1 + Math.atan2(
-    Math.sin(bearing) * Math.sin(delta) * Math.cos(lat1),
-    Math.cos(delta) - Math.sin(lat1) * Math.sin(lat2)
-  );
-  
-  // Chuyển về degrees
-  const targetLat = lat2 * RAD_TO_DEG;
-  let targetLon = lon2 * RAD_TO_DEG;
-  
-  // Normalize kinh độ về khoảng [-180, 180]
-  targetLon = ((targetLon + 540) % 360) - 180;
-  
-  return {
-    lat: targetLat,
-    lon: targetLon
-  };
+// Backwards-compatible wrapper: if algo omitted, use spherical.
+function calculateTargetCoordinate(lat, lon, azimuthDeg, distanceKm, algo = 'spherical-haversine') {
+  const fn = algo === 'vincenty' ? vincentyDestination : sphericalDestination;
+  return fn(lat, lon, azimuthDeg, distanceKm);
 }
 
 /**
@@ -458,6 +523,8 @@ function estimateError(distanceKm, gpsError = 10, azimuthError = 0.5, distanceEr
  */
 function calculateTarget(input) {
   const { observerLat, observerLon, azimuth, distance } = input;
+  const algorithm = input.algorithm || 'spherical-haversine';
+  const compareWith = input.compareWith || [];
   
   // Validate input
   const validationError = validateInput({
@@ -466,100 +533,90 @@ function calculateTarget(input) {
     azimuth: azimuth,
     distance: distance
   });
-  
   if (validationError) {
-    return {
-      success: false,
-      error: validationError
-    };
+    return { success: false, error: validationError };
   }
   
   try {
-    // Tính tọa độ mục tiêu
-    const target = calculateTargetCoordinate(
-      observerLat,
-      observerLon,
-      azimuth,
-      distance
+    const primary = calculateTargetCoordinate(
+      observerLat, observerLon, azimuth, distance, algorithm
     );
     
-    // Verify bằng cách tính ngược lại khoảng cách
+    // Verify bằng Haversine (khoảng cách & bearing)
     const verifyDistance = calculateDistance(
-      observerLat,
-      observerLon,
-      target.lat,
-      target.lon
+      observerLat, observerLon, primary.lat, primary.lon
     );
-    
-    // Tính bearing ngược lại để verify
     const verifyBearing = calculateBearing(
-      observerLat,
-      observerLon,
-      target.lat,
-      target.lon
+      observerLat, observerLon, primary.lat, primary.lon
     );
-    
-    // Ước lượng sai số
     const estimatedError = estimateError(distance);
+    
+    // Optional comparisons
+    const comparisons = [];
+    for (const algo of compareWith) {
+      const other = calculateTargetCoordinate(
+        observerLat, observerLon, azimuth, distance, algo
+      );
+      const deltaMeters = calculateDistance(
+        primary.lat, primary.lon, other.lat, other.lon
+      ) * 1000.0;
+      comparisons.push({
+        algorithm: algo,
+        target: other,
+        deltaMeters,
+        deltaFormatted: `${deltaMeters.toFixed(2)} m`
+      });
+    }
     
     return {
       success: true,
       data: {
-        // Tọa độ quan sát viên
+        algorithm,
+        algorithmsAvailable: listAlgorithms(),
+        // Observer
         observer: {
           lat: observerLat,
           lon: observerLon,
           latFormatted: formatDecimal(observerLat),
           lonFormatted: formatDecimal(observerLon),
-          dms: {
-            lat: decimalToDMS(observerLat),
-            lon: decimalToDMS(observerLon)
-          }
+          dms: { lat: decimalToDMS(observerLat), lon: decimalToDMS(observerLon) }
         },
-        
-        // Tọa độ mục tiêu
+        // Target (primary)
         target: {
-          lat: target.lat,
-          lon: target.lon,
-          latFormatted: formatDecimal(target.lat),
-          lonFormatted: formatDecimal(target.lon),
-          dms: {
-            lat: decimalToDMS(target.lat),
-            lon: decimalToDMS(target.lon)
-          }
+          lat: primary.lat,
+          lon: primary.lon,
+          latFormatted: formatDecimal(primary.lat),
+          lonFormatted: formatDecimal(primary.lon),
+          dms: { lat: decimalToDMS(primary.lat), lon: decimalToDMS(primary.lon) }
         },
-        
-        // Thông tin đo đạc
         measurement: {
-          azimuth: azimuth,
+          azimuth,
           azimuthFormatted: formatAzimuth(azimuth),
-          distance: distance,
+          distance,
           distanceFormatted: formatDistance(distance)
         },
-        
-        // Verification data
         verification: {
           distance: verifyDistance,
           bearing: verifyBearing,
           distanceError: Math.abs(verifyDistance - distance),
           bearingError: Math.abs(verifyBearing - azimuth)
         },
-        
-        // Ước lượng sai số
-        estimatedError: {
-          meters: estimatedError,
-          formatted: `±${estimatedError.toFixed(1)}m`
-        }
+        estimatedError: { meters: estimatedError, formatted: `±${estimatedError.toFixed(1)}m` },
+        comparisons
       }
     };
-    
   } catch (error) {
-    return {
-      success: false,
-      error: `Lỗi tính toán: ${error.message}`
-    };
+    return { success: false, error: `Lỗi tính toán: ${error.message}` };
   }
 }
+
+// ==================== ALGORITHM REGISTRY ====================
+
+const Algorithms = {
+  'spherical-haversine': sphericalDestination,
+  'vincenty': vincentyDestination
+};
+function listAlgorithms() { return Object.keys(Algorithms); }
 
 // ==================== EXPORT FOR BROWSER ====================
 
@@ -578,6 +635,7 @@ if (typeof window !== 'undefined') {
     calculateDistance,
     calculateBearing,
     calculateTarget,
+    listAlgorithms,
     
     // Validation functions
     validateInput,
@@ -611,6 +669,7 @@ if (typeof module !== 'undefined' && module.exports) {
     calculateDistance,
     calculateBearing,
     calculateTarget,
+    listAlgorithms,
     validateInput,
     validateDMS,
     formatDecimal,

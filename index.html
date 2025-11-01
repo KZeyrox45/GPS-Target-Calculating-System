@@ -48,6 +48,22 @@
                     </button>
                 </div>
 
+                <!-- Algorithm Selector -->
+                <section class="input-section">
+                    <h2 class="section-title">
+                        <span class="icon-marker green">⚙️</span>
+                        Thuật toán tính toán
+                    </h2>
+                    <div class="field">
+                        <label for="algorithmSelect">Chọn thuật toán</label>
+                        <select id="algorithmSelect" class="select-input" title="Chọn thuật toán geodesic">
+                            <option value="spherical-haversine">Spherical (Haversine)</option>
+                            <option value="vincenty">Vincenty (WGS-84 Ellipsoid)</option>
+                        </select>
+                        <small class="field-hint">Có thể so sánh kết quả giữa các thuật toán trong phần kết quả</small>
+                    </div>
+                </section>
+
                 <!-- Observer Coordinates Section -->
                 <section class="input-section">
                 <h2 class="section-title">
@@ -169,6 +185,15 @@
                     
                     <div class="result-grid">
                         <div class="result-item">
+                            <span class="result-label">Thuật toán:</span>
+                            <span id="resultAlgo" class="result-value">–</span>
+                        </div>
+                    </div>
+
+                    <div class="result-divider"></div>
+
+                    <div class="result-grid">
+                        <div class="result-item">
                             <span class="result-label">Vĩ độ:</span>
                             <span id="resultLat" class="result-value">–</span>
                         </div>
@@ -189,6 +214,14 @@
                             <span class="result-label">Phương vị:</span>
                             <span id="resultAzimuth" class="result-value">–</span>
                         </div>
+                    </div>
+
+                    <div id="compareSection" class="result-section" style="display: none; margin-top: 0.75rem;">
+                        <h3 class="result-title">
+                            <span class="icon-marker blue">🔬</span>
+                            So sánh với thuật toán khác
+                        </h3>
+                        <div id="compareContent" class="result-grid"></div>
                     </div>
 
                     <!-- Copy Button -->
@@ -253,6 +286,7 @@
     <!-- Custom JavaScript Modules -->
     <script src="js/coordinateCalculator.js"></script>
     <script src="js/mapViewer.js"></script>
+    <script src="js/benchmark.js"></script>
 
     <!-- Main Application Script -->
     <script>
