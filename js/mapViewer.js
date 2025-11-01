@@ -366,13 +366,24 @@ function handleCalculate() {
   
   const azimuth = parseFloat(document.getElementById('azimuth').value);
   const distance = parseFloat(document.getElementById('distance').value);
+  const algoSelect = document.getElementById('algorithmSelect');
+  const algorithm = algoSelect ? algoSelect.value : 'spherical-haversine';
+  
+  // Prepare comparison list (all others)
+  let compareWith = [];
+  try {
+    const list = window.CoordinateCalculator.listAlgorithms();
+    compareWith = list.filter(a => a !== algorithm);
+  } catch (e) { /* ignore */ }
   
   // Tính toán
   const result = window.CoordinateCalculator.calculateTarget({
     observerLat,
     observerLon,
     azimuth,
-    distance
+    distance,
+    algorithm,
+    compareWith
   });
   
   if (result.success) {
@@ -451,12 +462,31 @@ function displayResult(data) {
   const resultLon = document.getElementById('resultLon');
   const resultDistance = document.getElementById('resultDistance');
   const resultAzimuth = document.getElementById('resultAzimuth');
+  const resultAlgo = document.getElementById('resultAlgo');
   
-  // Cập nhật nội dung
+  // Cập nhật nội dung chính
+  resultAlgo.textContent = data.algorithm;
   resultLat.textContent = data.target.latFormatted;
   resultLon.textContent = data.target.lonFormatted;
   resultDistance.textContent = data.measurement.distanceFormatted;
   resultAzimuth.textContent = data.measurement.azimuthFormatted;
+  
+  // So sánh thuật toán khác (nếu có)
+  const compareSection = document.getElementById('compareSection');
+  const compareContent = document.getElementById('compareContent');
+  if (data.comparisons && data.comparisons.length > 0) {
+    compareContent.innerHTML = '';
+    data.comparisons.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'result-item';
+      div.innerHTML = `<span class="result-label">${c.algorithm}:</span>
+        <span class="result-value">${c.target.lat.toFixed(6)}°, ${c.target.lon.toFixed(6)}° | Δ=${c.deltaFormatted}</span>`;
+      compareContent.appendChild(div);
+    });
+    compareSection.style.display = 'block';
+  } else {
+    compareSection.style.display = 'none';
+  }
   
   // Hiển thị result section
   resultSection.style.display = 'block';
@@ -561,8 +591,10 @@ function loadTestCase(testCase) {
  * @returns {string} Text formatted
  */
 function exportResultAsText(data) {
+  const cmp = (data.comparisons || []).map(c => `  - ${c.algorithm}: ${c.target.lat.toFixed(6)}°, ${c.target.lon.toFixed(6)}° | Δ=${c.deltaFormatted}`).join('\n');
   return `
 === TỌA ĐỘ MỤC TIÊU ===
+Thuật toán: ${data.algorithm}
 
 QUAN SÁT VIÊN:
 Vĩ độ:  ${data.observer.latFormatted}
@@ -575,6 +607,9 @@ Kinh độ: ${data.target.lonFormatted}
 THÔNG TIN ĐO ĐẠC:
 Khoảng cách: ${data.measurement.distanceFormatted}
 Phương vị:   ${data.measurement.azimuthFormatted}
+
+SO SÁNH THUẬT TOÁN:
+${cmp || '  (không)'}
 
 SAI SỐ ƯỚC LƯỢNG: ${data.estimatedError.formatted}
 
