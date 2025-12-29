@@ -83,19 +83,19 @@ function initializeMap(containerId, lat, lon, zoom = 13) {
       zoomControl: true,
       attributionControl: true
     });
-    
+
     // Thêm OpenStreetMap tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    
+
     // Thêm marker quan sát viên tại vị trí ban đầu
-    observerMarker = L.marker([lat, lon], { 
+    observerMarker = L.marker([lat, lon], {
       icon: RedIcon,
       title: 'Vị trí Quan sát viên'
     }).addTo(map);
-    
+
     observerMarker.bindPopup(`
       <div style="font-size: 14px;">
         <strong>🔴 Quan sát viên</strong><br>
@@ -103,13 +103,13 @@ function initializeMap(containerId, lat, lon, zoom = 13) {
         Kinh độ: ${lon.toFixed(6)}°
       </div>
     `);
-    
+
     // Setup event handlers
     setupEventHandlers();
-    
+
     console.log('Map initialized successfully');
     return map;
-    
+
   } catch (error) {
     console.error('Error initializing map:', error);
     showError('Không thể khởi tạo bản đồ. Vui lòng kiểm tra kết nối Internet.');
@@ -146,7 +146,7 @@ function updateObserverMarker(lat, lon) {
  * @param {number} distance - Khoảng cách từ quan sát viên
  * @param {number} azimuth - Góc phương vị
  */
-function updateTargetMarker(lat, lon, distance, azimuth) {
+function updateTargetMarker(lat, lon, distance, azimuth, errorFormatted) {
   if (targetMarker) {
     // Cập nhật marker hiện tại
     targetMarker.setLatLng([lat, lon]);
@@ -157,17 +157,18 @@ function updateTargetMarker(lat, lon, distance, azimuth) {
         Kinh độ: ${lon.toFixed(6)}°<br>
         <hr style="margin: 8px 0;">
         Khoảng cách: ${distance.toFixed(2)} km<br>
-        Phương vị: ${azimuth.toFixed(1)}°
+        Phương vị: ${azimuth.toFixed(1)}°<br>
+        <strong>Sai số: ${errorFormatted}</strong>
       </div>
     `);
     targetMarker.setOpacity(1);
   } else {
     // Tạo marker mới
-    targetMarker = L.marker([lat, lon], { 
+    targetMarker = L.marker([lat, lon], {
       icon: BlueIcon,
       title: 'Vị trí Mục tiêu'
     }).addTo(map);
-    
+
     targetMarker.bindPopup(`
       <div style="font-size: 14px;">
         <strong>🎯 Mục tiêu</strong><br>
@@ -175,11 +176,12 @@ function updateTargetMarker(lat, lon, distance, azimuth) {
         Kinh độ: ${lon.toFixed(6)}°<br>
         <hr style="margin: 8px 0;">
         Khoảng cách: ${distance.toFixed(2)} km<br>
-        Phương vị: ${azimuth.toFixed(1)}°
+        Phương vị: ${azimuth.toFixed(1)}°<br>
+        <strong>Sai số: ${errorFormatted}</strong>
       </div>
     `);
   }
-  
+
   // Mở popup tự động
   targetMarker.openPopup();
 }
@@ -197,10 +199,10 @@ function drawBearingLine(obsLat, obsLon, tgtLat, tgtLon) {
   if (bearingLine) {
     map.removeLayer(bearingLine);
   }
-  
+
   // Vẽ đường mới
   bearingLine = L.polyline(
-    [[obsLat, obsLon], [tgtLat, tgtLon]], 
+    [[obsLat, obsLon], [tgtLat, tgtLon]],
     {
       color: '#ef4444',
       weight: 3,
@@ -209,11 +211,11 @@ function drawBearingLine(obsLat, obsLon, tgtLat, tgtLon) {
       lineJoin: 'round'
     }
   ).addTo(map);
-  
+
   // Thêm tooltip ở giữa đường
   const midLat = (obsLat + tgtLat) / 2;
   const midLon = (obsLon + tgtLon) / 2;
-  
+
   bearingLine.bindTooltip('Đường ngắm', {
     permanent: false,
     direction: 'center',
@@ -233,7 +235,7 @@ function fitMapToBounds(obsLat, obsLon, tgtLat, tgtLon) {
   const bounds = L.latLngBounds(
     [[obsLat, obsLon], [tgtLat, tgtLon]]
   );
-  
+
   map.fitBounds(bounds, {
     padding: [50, 50],
     maxZoom: 15,
@@ -253,19 +255,19 @@ function setupEventHandlers() {
   if (toggleBtn) {
     toggleBtn.addEventListener('click', handleModeToggle);
   }
-  
+
   // Calculate button
   const calcBtn = document.getElementById('calculateBtn');
   if (calcBtn) {
     calcBtn.addEventListener('click', handleCalculate);
   }
-  
+
   // Copy button
   const copyBtn = document.getElementById('copyBtn');
   if (copyBtn) {
     copyBtn.addEventListener('click', handleCopyCoordinates);
   }
-  
+
   // Enter key to calculate
   const inputs = document.querySelectorAll('input[type="number"]');
   inputs.forEach(input => {
@@ -275,7 +277,7 @@ function setupEventHandlers() {
       }
     });
   });
-  
+
   console.log('Event handlers setup complete');
 }
 
@@ -286,17 +288,17 @@ function handleModeToggle() {
   const decimalInputs = document.getElementById('decimalInputs');
   const dmsInputs = document.getElementById('dmsInputs');
   const modeText = document.getElementById('modeText');
-  
+
   if (currentMode === 'decimal') {
     // Chuyển sang DMS
     // Lấy giá trị decimal hiện tại
     const latDec = parseFloat(document.getElementById('latDecimal').value);
     const lonDec = parseFloat(document.getElementById('lonDecimal').value);
-    
+
     // Chuyển đổi sang DMS
     const latDMS = window.CoordinateCalculator.decimalToDMS(latDec);
     const lonDMS = window.CoordinateCalculator.decimalToDMS(lonDec);
-    
+
     // Cập nhật DMS inputs
     document.getElementById('latDeg').value = latDMS.degrees;
     document.getElementById('latMin').value = latDMS.minutes;
@@ -304,13 +306,13 @@ function handleModeToggle() {
     document.getElementById('lonDeg').value = lonDMS.degrees;
     document.getElementById('lonMin').value = lonDMS.minutes;
     document.getElementById('lonSec').value = lonDMS.seconds;
-    
+
     // Toggle display
     decimalInputs.style.display = 'none';
     dmsInputs.style.display = 'flex';
     modeText.textContent = 'DMS';
     currentMode = 'dms';
-    
+
   } else {
     // Chuyển sang Decimal
     // Lấy giá trị DMS hiện tại
@@ -320,15 +322,15 @@ function handleModeToggle() {
     const lonDeg = parseFloat(document.getElementById('lonDeg').value);
     const lonMin = parseFloat(document.getElementById('lonMin').value);
     const lonSec = parseFloat(document.getElementById('lonSec').value);
-    
+
     // Chuyển đổi sang Decimal
     const latDec = window.CoordinateCalculator.dmsToDecimal(latDeg, latMin, latSec);
     const lonDec = window.CoordinateCalculator.dmsToDecimal(lonDeg, lonMin, lonSec);
-    
+
     // Cập nhật Decimal inputs
     document.getElementById('latDecimal').value = latDec.toFixed(6);
     document.getElementById('lonDecimal').value = lonDec.toFixed(6);
-    
+
     // Toggle display
     decimalInputs.style.display = 'flex';
     dmsInputs.style.display = 'none';
@@ -344,10 +346,10 @@ function handleCalculate() {
   // Hide error và result cũ
   hideError();
   hideResult();
-  
+
   // Lấy dữ liệu input
   let observerLat, observerLon;
-  
+
   if (currentMode === 'decimal') {
     observerLat = parseFloat(document.getElementById('latDecimal').value);
     observerLon = parseFloat(document.getElementById('lonDecimal').value);
@@ -359,14 +361,14 @@ function handleCalculate() {
     const lonDeg = parseFloat(document.getElementById('lonDeg').value);
     const lonMin = parseFloat(document.getElementById('lonMin').value);
     const lonSec = parseFloat(document.getElementById('lonSec').value);
-    
+
     observerLat = window.CoordinateCalculator.dmsToDecimal(latDeg, latMin, latSec);
     observerLon = window.CoordinateCalculator.dmsToDecimal(lonDeg, lonMin, lonSec);
   }
-  
+
   const azimuth = parseFloat(document.getElementById('azimuth').value);
   const distance = parseFloat(document.getElementById('distance').value);
-  
+
   // Tính toán
   const result = window.CoordinateCalculator.calculateTarget({
     observerLat,
@@ -374,18 +376,19 @@ function handleCalculate() {
     azimuth,
     distance
   });
-  
+
   if (result.success) {
     // Hiển thị kết quả
     displayResult(result.data);
-    
+
     // Cập nhật map
     updateObserverMarker(observerLat, observerLon);
     updateTargetMarker(
       result.data.target.lat,
       result.data.target.lon,
       distance,
-      azimuth
+      azimuth,
+      result.data.estimatedError.formatted
     );
     drawBearingLine(
       observerLat,
@@ -399,7 +402,7 @@ function handleCalculate() {
       result.data.target.lat,
       result.data.target.lon
     );
-    
+
   } else {
     // Hiển thị lỗi
     showError(result.error);
@@ -412,9 +415,9 @@ function handleCalculate() {
 function handleCopyCoordinates() {
   const latText = document.getElementById('resultLat').textContent;
   const lonText = document.getElementById('resultLon').textContent;
-  
+
   const coordinates = `${latText}, ${lonText}`;
-  
+
   // Copy to clipboard
   navigator.clipboard.writeText(coordinates).then(() => {
     // Thay đổi text button tạm thời
@@ -424,7 +427,7 @@ function handleCopyCoordinates() {
     copyBtn.style.backgroundColor = '#d1fae5';
     copyBtn.style.color = '#065f46';
     copyBtn.style.borderColor = '#6ee7b7';
-    
+
     // Reset sau 2 giây
     setTimeout(() => {
       copyBtn.innerHTML = originalHTML;
@@ -451,19 +454,21 @@ function displayResult(data) {
   const resultLon = document.getElementById('resultLon');
   const resultDistance = document.getElementById('resultDistance');
   const resultAzimuth = document.getElementById('resultAzimuth');
-  
+  const resultError = document.getElementById('resultError');
+
   // Cập nhật nội dung
   resultLat.textContent = data.target.latFormatted;
   resultLon.textContent = data.target.lonFormatted;
   resultDistance.textContent = data.measurement.distanceFormatted;
   resultAzimuth.textContent = data.measurement.azimuthFormatted;
-  
+  resultError.textContent = data.estimatedError.formatted;
+
   // Hiển thị result section
   resultSection.style.display = 'block';
-  
+
   // Smooth scroll to result (if needed)
   resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  
+
   console.log('Result displayed:', data);
 }
 
@@ -485,14 +490,14 @@ function hideResult() {
 function showError(message) {
   const errorDiv = document.getElementById('errorMessage');
   const errorText = document.getElementById('errorText');
-  
+
   if (errorDiv && errorText) {
     errorText.textContent = message;
     errorDiv.style.display = 'flex';
-    
+
     // Smooth scroll to error
     errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    
+
     console.warn('Error:', message);
   }
 }
@@ -516,7 +521,7 @@ function hideError() {
  */
 function getCurrentCoordinates() {
   let lat, lon;
-  
+
   if (currentMode === 'decimal') {
     lat = parseFloat(document.getElementById('latDecimal').value);
     lon = parseFloat(document.getElementById('lonDecimal').value);
@@ -527,11 +532,11 @@ function getCurrentCoordinates() {
     const lonDeg = parseFloat(document.getElementById('lonDeg').value);
     const lonMin = parseFloat(document.getElementById('lonMin').value);
     const lonSec = parseFloat(document.getElementById('lonSec').value);
-    
+
     lat = window.CoordinateCalculator.dmsToDecimal(latDeg, latMin, latSec);
     lon = window.CoordinateCalculator.dmsToDecimal(lonDeg, lonMin, lonSec);
   }
-  
+
   return { lat, lon };
 }
 
@@ -545,12 +550,12 @@ function loadTestCase(testCase) {
   document.getElementById('lonDecimal').value = testCase.observer.lon;
   document.getElementById('azimuth').value = testCase.azimuth;
   document.getElementById('distance').value = testCase.distance;
-  
+
   // Switch to decimal mode if needed
   if (currentMode === 'dms') {
     document.getElementById('toggleModeBtn').click();
   }
-  
+
   console.log('📋 Test case loaded:', testCase.name);
 }
 
@@ -600,7 +605,7 @@ function downloadResult(data) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
+
   console.log('💾 Result downloaded');
 }
 
@@ -652,13 +657,13 @@ function setupKeyboardShortcuts() {
       e.preventDefault();
       handleCalculate();
     }
-    
+
     // Ctrl/Cmd + M = Toggle Mode
     if ((e.ctrlKey || e.metaKey) && e.key === 'm') {
       e.preventDefault();
       handleModeToggle();
     }
-    
+
     // Ctrl/Cmd + C (when result visible) = Copy coordinates
     if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
       const resultSection = document.getElementById('resultSection');
@@ -668,7 +673,7 @@ function setupKeyboardShortcuts() {
       }
     }
   });
-  
+
   console.log('Keyboard shortcuts enabled');
   console.log('  - Ctrl+Enter: Calculate');
   console.log('  - Ctrl+M: Toggle Mode');
@@ -680,12 +685,12 @@ function setupKeyboardShortcuts() {
 /**
  * Initialize everything when DOM is ready
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('MapViewer module initializing...');
-  
+
   // Setup keyboard shortcuts
   setupKeyboardShortcuts();
-  
+
   // Add helper functions to window for console debugging
   if (typeof window !== 'undefined') {
     window.MapViewer = {
@@ -694,29 +699,29 @@ document.addEventListener('DOMContentLoaded', function() {
       updateTargetMarker,
       drawBearingLine,
       fitMapToBounds,
-      
+
       // UI functions
       displayResult,
       hideResult,
       showError,
       hideError,
-      
+
       // Utility functions
       getCurrentCoordinates,
       loadTestCase,
       loadRandomTestCase,
       exportResultAsText,
       downloadResult,
-      
+
       // Data
       SAMPLE_TEST_CASES,
-      
+
       // References
       getMap: () => map,
       getObserverMarker: () => observerMarker,
       getTargetMarker: () => targetMarker
     };
-    
+
     console.log('✅ MapViewer module loaded and ready');
   }
 });

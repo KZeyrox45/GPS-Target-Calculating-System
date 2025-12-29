@@ -56,10 +56,10 @@ function dmsToDecimal(degrees, minutes, seconds) {
   // Xử lý trường hợp degrees âm (Nam hoặc Tây)
   const sign = degrees < 0 ? -1 : 1;
   const absDegrees = Math.abs(degrees);
-  
+
   // Tính toán decimal
   const decimal = absDegrees + (minutes / 60) + (seconds / 3600);
-  
+
   return sign * decimal;
 }
 
@@ -77,17 +77,17 @@ function decimalToDMS(decimal) {
   // Xác định dấu
   const sign = decimal < 0 ? -1 : 1;
   const absolute = Math.abs(decimal);
-  
+
   // Tính degrees (phần nguyên)
   const degrees = Math.floor(absolute);
-  
+
   // Tính minutes
   const minutesFloat = (absolute - degrees) * 60;
   const minutes = Math.floor(minutesFloat);
-  
+
   // Tính seconds
   const seconds = (minutesFloat - minutes) * 60;
-  
+
   return {
     degrees: sign * degrees,
     minutes: minutes,
@@ -123,29 +123,29 @@ function calculateTargetCoordinate(lat, lon, azimuthDeg, distanceKm) {
   const lat1 = lat * DEG_TO_RAD;
   const lon1 = lon * DEG_TO_RAD;
   const bearing = azimuthDeg * DEG_TO_RAD;
-  
+
   // Tính angular distance (góc ở tâm Trái Đất)
   const delta = distanceKm / EARTH_RADIUS_KM;
-  
+
   // Tính vĩ độ điểm đích
   const lat2 = Math.asin(
     Math.sin(lat1) * Math.cos(delta) +
     Math.cos(lat1) * Math.sin(delta) * Math.cos(bearing)
   );
-  
+
   // Tính kinh độ điểm đích
   const lon2 = lon1 + Math.atan2(
     Math.sin(bearing) * Math.sin(delta) * Math.cos(lat1),
     Math.cos(delta) - Math.sin(lat1) * Math.sin(lat2)
   );
-  
+
   // Chuyển về degrees
   const targetLat = lat2 * RAD_TO_DEG;
   let targetLon = lon2 * RAD_TO_DEG;
-  
+
   // Normalize kinh độ về khoảng [-180, 180]
   targetLon = ((targetLon + 540) % 360) - 180;
-  
+
   return {
     lat: targetLat,
     lon: targetLon
@@ -178,18 +178,18 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const φ2 = lat2 * DEG_TO_RAD;
   const Δφ = (lat2 - lat1) * DEG_TO_RAD;
   const Δλ = (lon2 - lon1) * DEG_TO_RAD;
-  
+
   // Công thức Haversine
-  const a = 
+  const a =
     Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
     Math.cos(φ1) * Math.cos(φ2) *
     Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  
+
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  
+
   // Khoảng cách
   const distance = EARTH_RADIUS_KM * c;
-  
+
   return distance;
 }
 
@@ -206,14 +206,14 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
   const φ1 = lat1 * DEG_TO_RAD;
   const φ2 = lat2 * DEG_TO_RAD;
   const Δλ = (lon2 - lon1) * DEG_TO_RAD;
-  
+
   const y = Math.sin(Δλ) * Math.cos(φ2);
   const x = Math.cos(φ1) * Math.sin(φ2) -
-            Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
-  
+    Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ);
+
   const θ = Math.atan2(y, x);
   const bearing = (θ * RAD_TO_DEG + 360) % 360;
-  
+
   return bearing;
 }
 
@@ -243,37 +243,37 @@ function calculateBearing(lat1, lon1, lat2, lon2) {
  */
 function validateInput(data) {
   const { lat, lon, azimuth, distance } = data;
-  
+
   // Kiểm tra vĩ độ
   if (lat < LAT_MIN || lat > LAT_MAX) {
     return `Vĩ độ phải trong khoảng ${LAT_MIN}° đến ${LAT_MAX}°`;
   }
-  
+
   // Kiểm tra kinh độ
   if (lon < LON_MIN || lon > LON_MAX) {
     return `Kinh độ phải trong khoảng ${LON_MIN}° đến ${LON_MAX}°`;
   }
-  
+
   // Kiểm tra azimuth
   if (azimuth < AZIMUTH_MIN || azimuth > AZIMUTH_MAX) {
     return `Góc azimuth phải trong khoảng ${AZIMUTH_MIN}° đến ${AZIMUTH_MAX}°`;
   }
-  
+
   // Kiểm tra khoảng cách
   if (distance <= 0) {
     return 'Khoảng cách phải lớn hơn 0 km';
   }
-  
+
   // Cảnh báo nếu khoảng cách lớn
   if (distance > 100) {
     return 'Cảnh báo: Khoảng cách lớn (>100km) có thể làm giảm độ chính xác tính toán trên mô hình cầu';
   }
-  
+
   // Kiểm tra NaN
   if (isNaN(lat) || isNaN(lon) || isNaN(azimuth) || isNaN(distance)) {
     return 'Dữ liệu đầu vào không hợp lệ. Vui lòng kiểm tra lại các giá trị';
   }
-  
+
   // Hợp lệ
   return '';
 }
@@ -292,16 +292,16 @@ function validateDMS(degrees, minutes, seconds, type) {
   if (isNaN(degrees) || isNaN(minutes) || isNaN(seconds)) {
     return 'Giá trị DMS không hợp lệ';
   }
-  
+
   // Kiểm tra minutes và seconds
   if (minutes < 0 || minutes >= 60) {
     return 'Phút phải trong khoảng 0-59';
   }
-  
+
   if (seconds < 0 || seconds >= 60) {
     return 'Giây phải trong khoảng 0-59.99';
   }
-  
+
   // Kiểm tra degrees theo loại
   if (type === 'lat') {
     if (Math.abs(degrees) > 90) {
@@ -312,7 +312,7 @@ function validateDMS(degrees, minutes, seconds, type) {
       return 'Độ kinh độ phải trong khoảng -180 đến 180';
     }
   }
-  
+
   return '';
 }
 
@@ -384,11 +384,11 @@ function formatAzimuth(azimuth) {
     { angle: 315, short: 'NW', full: 'Tây Bắc' },
     { angle: 360, short: 'N', full: 'Bắc' }
   ];
-  
+
   // Tìm hướng gần nhất
   let closestDir = directions[0];
   let minDiff = Math.abs(azimuth - directions[0].angle);
-  
+
   for (const dir of directions) {
     const diff = Math.abs(azimuth - dir.angle);
     if (diff < minDiff) {
@@ -396,7 +396,7 @@ function formatAzimuth(azimuth) {
       closestDir = dir;
     }
   }
-  
+
   return `${azimuth.toFixed(1)}° (${closestDir.short} - ${closestDir.full})`;
 }
 
@@ -419,17 +419,17 @@ function formatAzimuth(azimuth) {
 function estimateError(distanceKm, gpsError = 10, azimuthError = 0.5, distanceError = 0.5) {
   // Chuyển azimuth error sang radian
   const azimuthErrorRad = azimuthError * DEG_TO_RAD;
-  
+
   // Sai số do azimuth (perpendicular error)
   const azimuthErrorMeters = distanceKm * 1000 * Math.sin(azimuthErrorRad);
-  
+
   // Tổng hợp sai số (root sum square)
   const totalError = Math.sqrt(
     Math.pow(gpsError, 2) +
     Math.pow(azimuthErrorMeters, 2) +
     Math.pow(distanceError, 2)
   );
-  
+
   return totalError;
 }
 
@@ -458,7 +458,7 @@ function estimateError(distanceKm, gpsError = 10, azimuthError = 0.5, distanceEr
  */
 function calculateTarget(input) {
   const { observerLat, observerLon, azimuth, distance } = input;
-  
+
   // Validate input
   const validationError = validateInput({
     lat: observerLat,
@@ -466,14 +466,14 @@ function calculateTarget(input) {
     azimuth: azimuth,
     distance: distance
   });
-  
+
   if (validationError) {
     return {
       success: false,
       error: validationError
     };
   }
-  
+
   try {
     // Tính tọa độ mục tiêu
     const target = calculateTargetCoordinate(
@@ -482,7 +482,7 @@ function calculateTarget(input) {
       azimuth,
       distance
     );
-    
+
     // Verify bằng cách tính ngược lại khoảng cách
     const verifyDistance = calculateDistance(
       observerLat,
@@ -490,7 +490,7 @@ function calculateTarget(input) {
       target.lat,
       target.lon
     );
-    
+
     // Tính bearing ngược lại để verify
     const verifyBearing = calculateBearing(
       observerLat,
@@ -498,10 +498,10 @@ function calculateTarget(input) {
       target.lat,
       target.lon
     );
-    
+
     // Ước lượng sai số
     const estimatedError = estimateError(distance);
-    
+
     return {
       success: true,
       data: {
@@ -516,7 +516,7 @@ function calculateTarget(input) {
             lon: decimalToDMS(observerLon)
           }
         },
-        
+
         // Tọa độ mục tiêu
         target: {
           lat: target.lat,
@@ -528,7 +528,7 @@ function calculateTarget(input) {
             lon: decimalToDMS(target.lon)
           }
         },
-        
+
         // Thông tin đo đạc
         measurement: {
           azimuth: azimuth,
@@ -536,7 +536,7 @@ function calculateTarget(input) {
           distance: distance,
           distanceFormatted: formatDistance(distance)
         },
-        
+
         // Verification data
         verification: {
           distance: verifyDistance,
@@ -544,15 +544,15 @@ function calculateTarget(input) {
           distanceError: Math.abs(verifyDistance - distance),
           bearingError: Math.abs(verifyBearing - azimuth)
         },
-        
+
         // Ước lượng sai số
         estimatedError: {
           meters: estimatedError,
-          formatted: `±${estimatedError.toFixed(1)}m`
+          formatted: `±${(Math.ceil(estimatedError * 10) / 10).toFixed(1)}m`
         }
       }
     };
-    
+
   } catch (error) {
     return {
       success: false,
@@ -572,32 +572,32 @@ if (typeof window !== 'undefined') {
     // Conversion functions
     dmsToDecimal,
     decimalToDMS,
-    
+
     // Calculation functions
     calculateTargetCoordinate,
     calculateDistance,
     calculateBearing,
     calculateTarget,
-    
+
     // Validation functions
     validateInput,
     validateDMS,
-    
+
     // Formatting functions
     formatDecimal,
     formatDMS,
     formatDistance,
     formatAzimuth,
-    
+
     // Error estimation
     estimateError,
-    
+
     // Constants
     EARTH_RADIUS_KM,
     DEG_TO_RAD,
     RAD_TO_DEG
   };
-  
+
   console.log('✅ CoordinateCalculator module loaded');
 }
 
