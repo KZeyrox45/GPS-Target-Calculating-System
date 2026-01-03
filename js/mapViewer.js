@@ -146,7 +146,7 @@ function updateObserverMarker(lat, lon) {
  * @param {number} distance - Khoảng cách từ quan sát viên
  * @param {number} azimuth - Góc phương vị
  */
-function updateTargetMarker(lat, lon, distance, azimuth, errorFormatted) {
+function updateTargetMarker(lat, lon, distance, azimuth) {
   if (targetMarker) {
     // Cập nhật marker hiện tại
     targetMarker.setLatLng([lat, lon]);
@@ -157,8 +157,7 @@ function updateTargetMarker(lat, lon, distance, azimuth, errorFormatted) {
         Kinh độ: ${lon.toFixed(6)}°<br>
         <hr style="margin: 8px 0;">
         Khoảng cách: ${distance.toFixed(2)} km<br>
-        Phương vị: ${azimuth.toFixed(1)}°<br>
-        <strong>Sai số: ${errorFormatted}</strong>
+        Phương vị: ${azimuth.toFixed(1)}°
       </div>
     `);
     targetMarker.setOpacity(1);
@@ -176,8 +175,7 @@ function updateTargetMarker(lat, lon, distance, azimuth, errorFormatted) {
         Kinh độ: ${lon.toFixed(6)}°<br>
         <hr style="margin: 8px 0;">
         Khoảng cách: ${distance.toFixed(2)} km<br>
-        Phương vị: ${azimuth.toFixed(1)}°<br>
-        <strong>Sai số: ${errorFormatted}</strong>
+        Phương vị: ${azimuth.toFixed(1)}°
       </div>
     `);
   }
@@ -387,8 +385,7 @@ function handleCalculate() {
       result.data.target.lat,
       result.data.target.lon,
       distance,
-      azimuth,
-      result.data.estimatedError.formatted
+      azimuth
     );
     drawBearingLine(
       observerLat,
@@ -454,14 +451,12 @@ function displayResult(data) {
   const resultLon = document.getElementById('resultLon');
   const resultDistance = document.getElementById('resultDistance');
   const resultAzimuth = document.getElementById('resultAzimuth');
-  const resultError = document.getElementById('resultError');
 
   // Cập nhật nội dung
   resultLat.textContent = data.target.latFormatted;
   resultLon.textContent = data.target.lonFormatted;
   resultDistance.textContent = data.measurement.distanceFormatted;
   resultAzimuth.textContent = data.measurement.azimuthFormatted;
-  resultError.textContent = data.estimatedError.formatted;
 
   // Hiển thị result section
   resultSection.style.display = 'block';
