@@ -548,7 +548,7 @@ function calculateTarget(input) {
         // Ước lượng sai số
         estimatedError: {
           meters: estimatedError,
-          formatted: `±${(Math.ceil(estimatedError * 10) / 10).toFixed(1)}m`
+          formatted: `±${estimatedError.toFixed(1)}m`
         }
       }
     };
