@@ -1,0 +1,121 @@
+\section{Yêu cầu về hệ thống}
+
+\subsection{Yêu cầu chức năng}
+Hệ thống tính toán tọa độ mục tiêu cần đáp ứng các yêu cầu chức năng sau:
+
+\subsubsection{Nhập dữ liệu quan sát}
+\begin{itemize}
+    \item \textbf{RF-01}: Hệ thống phải cho phép người dùng nhập tọa độ người quan sát dưới hai định dạng:
+    \begin{itemize}
+        \item Decimal Degrees (DD): Vĩ độ và kinh độ dạng thập phân (ví dụ: 10.762622°, 106.660172°).
+        \item Degrees Minutes Seconds (DMS): Vĩ độ và kinh độ dạng độ-phút-giây (ví dụ: 10° 45' 45.44", 106° 39' 36.62").
+    \end{itemize}
+    \item \textbf{RF-02}: Hệ thống phải hỗ trợ chuyển đổi tự động giữa hai định dạng tọa độ (DD $\leftrightarrow$ DMS) mà không làm mất dữ liệu.
+    \item \textbf{RF-03}: Hệ thống phải cho phép nhập góc phương vị (Azimuth) từ 0° đến 360°, với 0° là hướng Bắc địa lý.
+    \item \textbf{RF-04}: Hệ thống phải cho phép nhập khoảng cách đến mục tiêu (Distance) tính bằng kilômét, với giá trị dương.
+\end{itemize}
+
+\subsubsection{Validation dữ liệu đầu vào}
+\begin{itemize}
+    \item \textbf{RF-05}: Hệ thống phải kiểm tra tính hợp lệ của tọa độ:
+    \begin{itemize}
+        \item Vĩ độ: $-90° \leq \phi \leq 90°$
+        \item Kinh độ: $-180° \leq \lambda \leq 180°$
+    \end{itemize}
+    \item \textbf{RF-06}: Hệ thống phải kiểm tra góc phương vị: $0° \leq \theta \leq 360°$
+    \item \textbf{RF-07}: Hệ thống phải kiểm tra khoảng cách: $d > 0$ km
+    \item \textbf{RF-08}: Hệ thống phải hiển thị thông báo lỗi rõ ràng khi dữ liệu đầu vào không hợp lệ.
+    \item \textbf{RF-09}: Hệ thống phải cảnh báo người dùng khi khoảng cách lớn hơn 100 km về khả năng sai số tăng cao do sử dụng mô hình cầu.
+\end{itemize}
+
+\subsubsection{Tính toán tọa độ mục tiêu}
+\begin{itemize}
+    \item \textbf{RF-10}: Hệ thống phải tính toán tọa độ mục tiêu sử dụng công thức Haversine \cite{sinnot1984virtues} trên mô hình cầu với bán kính Trái Đất $R = 6371$ km.
+    \item \textbf{RF-11}: Hệ thống phải cung cấp kết quả tọa độ mục tiêu với độ chính xác tối thiểu 6 chữ số thập phân (tương đương ~0.1 mét).
+    \item \textbf{RF-12}: Hệ thống phải tính toán ngược lại khoảng cách và góc phương vị từ tọa độ kết quả để xác minh độ chính xác (verification).
+    \item \textbf{RF-13}: Hệ thống phải ước lượng sai số tổng hợp dựa trên các nguồn sai số từ GPS, góc phương vị và khoảng cách.
+\end{itemize}
+
+\subsubsection{Hiển thị kết quả trên bản đồ}
+\begin{itemize}
+    \item \textbf{RF-14}: Hệ thống phải hiển thị vị trí người quan sát và mục tiêu trên bản đồ tương tác sử dụng thư viện Leaflet.js \cite{leafletjs}.
+    \item \textbf{RF-15}: Hệ thống phải sử dụng marker khác màu để phân biệt:
+    \begin{itemize}
+        \item Marker đỏ: Vị trí người quan sát
+        \item Marker xanh: Vị trí mục tiêu
+    \end{itemize}
+    \item \textbf{RF-16}: Hệ thống phải vẽ đường nối (bearing line) giữa người quan sát và mục tiêu để trực quan hóa hướng ngắm.
+    \item \textbf{RF-17}: Hệ thống phải tự động điều chỉnh mức zoom và vị trí trung tâm bản đồ (fitBounds) để hiển thị cả hai điểm trong khung nhìn.
+    \item \textbf{RF-18}: Hệ thống phải hiển thị popup thông tin chi tiết khi người dùng click vào marker, bao gồm tọa độ, khoảng cách và góc phương vị.
+\end{itemize}
+
+\subsubsection{Xuất và chia sẻ dữ liệu}
+\begin{itemize}
+    \item \textbf{RF-19}: Hệ thống phải cho phép sao chép (copy) tọa độ mục tiêu vào clipboard.
+    \item \textbf{RF-20}: Hệ thống phải hiển thị thông tin kết quả dưới dạng văn bản có cấu trúc, dễ đọc.
+\end{itemize}
+
+\subsection{Yêu cầu phi chức năng}
+
+\subsubsection{Hiệu năng}
+\begin{itemize}
+    \item \textbf{NFR-01}: Thời gian tính toán tọa độ mục tiêu phải nhỏ hơn 100ms trên thiết bị có cấu hình trung bình.
+    \item \textbf{NFR-02}: Thời gian render bản đồ và marker phải nhỏ hơn 500ms sau khi nhận được kết quả tính toán.
+    \item \textbf{NFR-03}: Hệ thống phải hoạt động mượt mà với tần suất cập nhật tối đa 10 lần/giây (cho trường hợp tích hợp cảm biến thời gian thực trong tương lai).
+\end{itemize}
+
+\subsubsection{Khả năng sử dụng (Usability)}
+\begin{itemize}
+    \item \textbf{NFR-04}: Giao diện người dùng phải trực quan, dễ sử dụng cho người không chuyên về GIS.
+    \item \textbf{NFR-05}: Hệ thống phải hỗ trợ phím tắt:
+    \begin{itemize}
+        \item Enter: Thực hiện tính toán
+        \item Ctrl+M: Chuyển đổi định dạng tọa độ
+        \item Ctrl+C: Sao chép kết quả (khi đang hiển thị)
+    \end{itemize}
+    \item \textbf{NFR-06}: Thông báo lỗi phải rõ ràng, hướng dẫn người dùng cách khắc phục.
+    \item \textbf{NFR-07}: Giao diện phải responsive, hoạt động tốt trên màn hình từ 320px đến 1920px.
+\end{itemize}
+
+\subsubsection{Tương thích}
+\begin{itemize}
+    \item \textbf{NFR-08}: Hệ thống phải tương thích với các trình duyệt hiện đại:
+    \begin{itemize}
+        \item Chrome/Edge (phiên bản 90+)
+        \item Firefox (phiên bản 88+)
+        \item Safari (phiên bản 14+)
+    \end{itemize}
+    \item \textbf{NFR-09}: Hệ thống phải hoạt động trên cả thiết bị desktop và mobile (iOS, Android).
+    \item \textbf{NFR-10}: Hệ thống phải sử dụng chuẩn WGS-84 \cite{wgs84} để đảm bảo tương thích với các hệ thống GPS toàn cầu.
+\end{itemize}
+
+\subsubsection{Bảo trì và mở rộng}
+\begin{itemize}
+    \item \textbf{NFR-11}: Mã nguồn phải được tổ chức theo kiến trúc module rõ ràng:
+    \begin{itemize}
+        \item Module tính toán (coordinateCalculator.js)
+        \item Module hiển thị bản đồ (mapViewer.js)
+        \item Module giao diện (index.html, style.css)
+    \end{itemize}
+    \item \textbf{NFR-12}: Mã nguồn phải có comment đầy đủ, tuân thủ chuẩn JSDoc cho JavaScript.
+    \item \textbf{NFR-13}: Hệ thống phải dễ dàng mở rộng để tích hợp:
+    \begin{itemize}
+        \item Backend API trong tương lai
+        \item Thuật toán tính toán chính xác hơn (Vincenty, Karney \cite{karney2013algorithms})
+        \item Dữ liệu độ cao (Elevation API)
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Độ tin cậy}
+\begin{itemize}
+    \item \textbf{NFR-14}: Hệ thống phải xử lý gracefully các trường hợp ngoại lệ (exception handling) mà không bị crash.
+    \item \textbf{NFR-15}: Hệ thống phải hoạt động offline sau khi đã tải trang lần đầu (không cần kết nối Internet để tính toán).
+    \item \textbf{NFR-16}: Bản đồ nền (OpenStreetMap tiles) phải có cơ chế fallback khi không tải được.
+\end{itemize}
+
+\subsubsection{Bảo mật}
+\begin{itemize}
+    \item \textbf{NFR-17}: Hệ thống không được lưu trữ dữ liệu nhạy cảm trên trình duyệt (localStorage, cookies) trong phiên bản hiện tại.
+    \item \textbf{NFR-18}: Hệ thống phải sử dụng HTTPS khi triển khai trên môi trường production.
+    \item \textbf{NFR-19}: Mã nguồn phải được kiểm tra bảo mật cơ bản (XSS, injection) trước khi triển khai.
+\end{itemize}

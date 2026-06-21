@@ -1,0 +1,9 @@
+\section{Giới thiệu}
+\begin{itemize}
+    \item Trong các hệ thống chỉ huy - điều khiển hỏa lực, việc tính toán chính xác vị trí mục tiêu dựa trên thông tin đo thực địa là yếu tố quyết định thành công. Đồ án này nhằm xây dựng thuật toán xác định tọa độ địa lý (kinh độ, vĩ độ, cao độ) của mục tiêu từ các dữ liệu: vị trí GPS của người quan sát, góc ngắm (azimuth, elevation) đo từ IMU/la bàn, khoảng cách trực tiếp đo bằng laser rangefinder. Dữ liệu này sẽ được chuyển đổi thành nhiều hệ tọa độ trung gian (ECEF, ENU/NED) để thuận tiện cho xử lý số, góp phần hiển thị tọa độ mục tiêu trên bản đồ số (WebGIS), phục vụ nhiều ứng dụng quân sự và dân sự. 
+    \item Việc xác định tọa độ mục tiêu trong không gian thực dựa trên thông tin vị trí GPS, góc ngắm (azimuth, elevation) và khoảng cách đo bằng laser là bài toán nền tảng trong lĩnh vực quân sự (chỉ huy hỏa lực, định vị mục tiêu), GIS thực địa, robotics và tự động hóa di động. Hệ thống này có vai trò “giao tiếp” giữa thế giới thực (tọa độ địa lý) và bài toán động học, phục vụ cả việc tác chiến chính xác, khảo sát bản đồ cũng như định vị đối tượng di động hoặc cố định trong môi trường không đồng nhất.
+    \item Yêu cầu của đồ án hướng đến việc thu thập, tổng hợp, xử lý các thông tin từ tổ hợp đa cảm biến (GPS, cảm biến đo khoảng cách laser LiDAR hoặc Time-of-Flight, la bàn điện tử...), tính toán kết hợp cả góc ngắm không gian (phổ biến là azimuth/elevation), đồng thời giải bài toán chuyển đổi qua lại giữa các hệ tọa độ bản đồ thực tế (WGS84, VN2000, UTM v.v...).
+
+\end{itemize}
+
+

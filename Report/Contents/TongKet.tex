@@ -1,0 +1,59 @@
+\section{Tổng kết và Hướng phát triển}
+
+\subsection{Tổng kết Giai đoạn 1}
+Trong Giai đoạn 1 của đồ án, nhóm đã tập trung nghiên cứu cơ sở lý thuyết và xây dựng nền tảng ban đầu cho hệ thống tính toán tọa độ mục tiêu. Các kết quả đạt được bao gồm:
+
+\begin{itemize}
+    \item \textbf{Nghiên cứu lý thuyết}:
+    \begin{itemize}
+        \item Tìm hiểu sâu về hệ thống định vị toàn cầu GPS, các hệ tọa độ không gian (Geodetic, ECEF, ENU, NED) và các phép chuyển đổi giữa chúng.
+        \item Phân tích các nguồn sai số trong GPS và cảm biến (IMU, Laser Rangefinder) cũng như các phương pháp hiệu chuẩn cơ bản.
+        \item Nắm vững nguyên lý tính toán trắc địa trên mặt cầu (Haversine) và mặt ellipsoid (Vincenty).
+    \end{itemize}
+    
+    \item \textbf{Hiện thực ứng dụng (Prototype)}:
+    \begin{itemize}
+        \item Xây dựng thành công ứng dụng Web Map Viewer sử dụng thư viện Leaflet.js.
+        \item Hiện thực module tính toán tọa độ mục tiêu từ vị trí quan sát, góc phương vị và khoảng cách với giao diện trực quan.
+        \item Tích hợp các công cụ hỗ trợ như chuyển đổi định dạng tọa độ (DMS/Decimal), đo đạc khoảng cách và hiển thị trực quan trên bản đồ số.
+    \end{itemize}
+\end{itemize}
+
+Hệ thống hiện tại hoạt động ổn định trên trình duyệt, đáp ứng tốt các yêu cầu cơ bản về tính toán và hiển thị trong phạm vi khoảng cách ngắn (< 100km) với sai số chấp nhận được cho các bài toán quan sát thông thường.
+
+\subsection{Hạn chế}
+Mặc dù đã đạt được những kết quả bước đầu, hệ thống vẫn còn một số hạn chế cần khắc phục:
+\begin{itemize}
+    \item \textbf{Mô hình toán học}: Vẫn sử dụng công thức Haversine trên mô hình cầu, chưa áp dụng triệt để mô hình Ellipsoid WGS-84 cho độ chính xác cao nhất ở khoảng cách xa.
+    \item \textbf{Dữ liệu độ cao}: Chưa tích hợp dữ liệu độ cao (Elevation/DEM), dẫn đến việc tính toán chỉ dừng lại ở mặt phẳng 2D, bỏ qua sai số do chênh lệch độ cao giữa người quan sát và mục tiêu.
+    \item \textbf{Lưu trữ}: Chưa có Backend và Cơ sở dữ liệu để lưu trữ lịch sử đo đạc, quản lý người dùng và chia sẻ dữ liệu giữa các nhóm.
+\end{itemize}
+
+\subsection{Hướng phát triển Giai đoạn 2}
+Dựa trên kết quả và hạn chế của Giai đoạn 1, nhóm đề xuất kế hoạch phát triển cho Giai đoạn 2 như sau:
+
+\begin{enumerate}
+    \item \textbf{Nâng cấp thuật toán}:
+    \begin{itemize}
+        \item Chuyển đổi hoàn toàn sang công thức Vincenty hoặc Karney để tính toán trên Ellipsoid WGS-84.
+        \item Tích hợp API lấy dữ liệu độ cao (Google Elevation API hoặc OpenTopography) để tính toán 3D (Slant range to Horizontal distance).
+    \end{itemize}
+    
+    \item \textbf{Phát triển Backend}:
+    \begin{itemize}
+        \item Xây dựng Server (Node.js/Python) và Database (PostgreSQL/PostGIS) để quản lý dữ liệu không gian.
+        \item Hiện thực API RESTful cho phép ứng dụng mobile hoặc thiết bị nhúng gửi dữ liệu trực tiếp.
+    \end{itemize}
+    
+    \item \textbf{Tích hợp phần cứng (Hardware Integration)}:
+    \begin{itemize}
+        \item Kết nối thử nghiệm với module GPS (u-blox), IMU (MPU6050/9250) và Laser Rangefinder thực tế.
+        \item Xây dựng luồng dữ liệu từ cảm biến $\rightarrow$ Vi điều khiển $\rightarrow$ Web Server.
+    \end{itemize}
+    
+    \item \textbf{Nâng cao trải nghiệm người dùng}:
+    \begin{itemize}
+        \item Hỗ trợ bản đồ Offline (MBTiles).
+        \item Thêm tính năng dẫn đường (Routing) đến mục tiêu đã xác định.
+    \end{itemize}
+\end{enumerate}
