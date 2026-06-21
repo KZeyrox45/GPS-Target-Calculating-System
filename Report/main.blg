@@ -1,0 +1,51 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+Reallocating 'name_of_file' (item size: 1) to 6 items.
+The style file: plain.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--can't use both volume and number fields in amann2001laser
+Warning--empty journal in ghilani2010adjustment
+You've used 23 entries,
+            2118 wiz_defined-function locations,
+            643 strings with 7199 characters,
+and the built_in function-call counts, 5704 in all, are:
+= -- 552
+> -- 227
+< -- 2
++ -- 96
+- -- 70
+* -- 334
+:= -- 1009
+add.period$ -- 70
+call.type$ -- 23
+change.case$ -- 99
+chr.to.int$ -- 0
+cite$ -- 25
+duplicate$ -- 257
+empty$ -- 492
+format.name$ -- 70
+if$ -- 1186
+int.to.chr$ -- 0
+int.to.str$ -- 23
+missing$ -- 33
+newline$ -- 118
+num.names$ -- 44
+pop$ -- 120
+preamble$ -- 1
+purify$ -- 82
+quote$ -- 0
+skip$ -- 147
+stack$ -- 0
+substring$ -- 188
+swap$ -- 27
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 66
+warning$ -- 2
+while$ -- 52
+width$ -- 25
+write$ -- 262
+(There were 2 warnings)

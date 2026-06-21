@@ -1,0 +1,281 @@
+\section{Tổng quan Nghiên cứu Liên quan}
+
+Phần này trình bày tổng quan về các nghiên cứu, hệ thống và phương pháp liên quan đến tính toán tọa độ mục tiêu từ dữ liệu GPS, góc phương vị và khoảng cách. Việc nghiên cứu các công trình trước đây giúp định vị đúng vị trí của đề tài, xác định khoảng trống nghiên cứu và đưa ra định hướng phát triển phù hợp.
+
+\subsection{Lịch sử Phát triển Hệ thống Định vị}
+
+\subsubsection{Từ Định vị Truyền thống đến GPS}
+Trước khi GPS ra đời, các phương pháp định vị chủ yếu dựa vào:
+\begin{itemize}
+    \item \textbf{Thiên văn định vị}: Sử dụng quan sát các thiên thể (mặt trời, sao) để xác định vị trí. Phương pháp này được hàng hải sử dụng từ thế kỷ 15, có độ chính xác khoảng 1-2 hải lý ($\sim$2-4 km) \cite{hofmann2012global}.
+    
+    \item \textbf{Tam giác đạc}: Đo góc và khoảng cách đến các điểm mốc đã biết. Được Charles Mason và Jeremiah Dixon sử dụng để đo đạc biên giới Maryland-Pennsylvania (1763-1767), độ chính xác $\sim$10m với khoảng cách ngắn.
+    
+    \item \textbf{Radio navigation}: LORAN (Long Range Navigation) phát triển trong Thế chiến II, sử dụng sự chênh lệch thời gian tín hiệu radio từ nhiều trạm phát. Độ chính xác $\sim$200m-2km tùy khoảng cách \cite{kaplan2017understanding}.
+\end{itemize}
+
+GPS (Global Positioning System) được Bộ Quốc phòng Mỹ phát triển từ thập niên 1970, hoạt động chính thức năm 1995 với 24 vệ tinh. Đây là bước nhảy vọt về độ chính xác (từ km xuống m) và khả năng phủ sóng toàn cầu 24/7.
+
+\subsubsection{Các Hệ thống GNSS Toàn cầu}
+Hiện nay có 4 hệ thống định vị vệ tinh toàn cầu (GNSS):
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|c|c|c|p{4cm}|}
+\hline
+\textbf{Hệ thống} & \textbf{Quốc gia} & \textbf{Số vệ tinh} & \textbf{Độ chính xác} & \textbf{Ghi chú} \\
+\hline
+GPS & Mỹ & 31 & 5-10m & Hoạt động từ 1995 \\
+\hline
+GLONASS & Nga & 24 & 5-10m & Phục hồi đầy đủ 2011 \\
+\hline
+Galileo & EU & 30 & 1m (dân sự) & Hoạt động từ 2016 \\
+\hline
+BeiDou & Trung Quốc & 35 & 10m (toàn cầu) & Hoàn thành 2020 \\
+\hline
+\end{tabular}
+\caption{So sánh các hệ thống GNSS toàn cầu \cite{groves2013principles}}
+\end{table}
+
+Việc kết hợp nhiều hệ thống GNSS (multi-GNSS) giúp:
+\begin{itemize}
+    \item Tăng số lượng vệ tinh khả dụng (từ 8-12 lên 20-30)
+    \item Cải thiện độ chính xác (geometric dilution of precision - GDOP tốt hơn)
+    \item Tăng độ tin cậy trong môi trường đô thị (urban canyon)
+\end{itemize}
+
+\subsection{Các Phương pháp Tính toán Geodesic}
+
+\subsubsection{Mô hình Cầu và Haversine Formula}
+Công thức Haversine được R.W. Sinnott công bố năm 1984 \cite{sinnot1984virtues}, dựa trên giả định Trái Đất là hình cầu hoàn hảo với bán kính R = 6371 km. Công thức này đơn giản nhưng hiệu quả cho khoảng cách ngắn:
+
+\begin{equation}
+\begin{aligned}
+a &= \sin^2\left(\frac{\Delta\varphi}{2}\right) + \cos\varphi_1 \cdot \cos\varphi_2 \cdot \sin^2\left(\frac{\Delta\lambda}{2}\right) \\
+c &= 2 \cdot \arctan2\left(\sqrt{a}, \sqrt{1-a}\right) \\
+d &= R \cdot c
+\end{aligned}
+\end{equation}
+
+\textbf{Ưu điểm}:
+\begin{itemize}
+    \item Tính toán nhanh ($\sim$0.002ms)
+    \item Code đơn giản, dễ implement
+    \item Độ chính xác chấp nhận được (<0.5\% với d<100km)
+\end{itemize}
+
+\textbf{Nhược điểm}:
+\begin{itemize}
+    \item Sai số tăng nhanh với khoảng cách lớn
+    \item Không chính xác ở vĩ độ cao (>60°)
+    \item Bỏ qua hình dạng ellipsoid thực của Trái Đất
+\end{itemize}
+
+\subsubsection{Vincenty Formula và Ellipsoid WGS-84}
+Thaddeus Vincenty (1975) phát triển công thức chính xác trên ellipsoid WGS-84 \cite{vincenty1975direct}, sử dụng phương pháp lặp (iterative) để tìm geodesic (đường ngắn nhất trên ellipsoid).
+
+Công thức Vincenty direct problem (tìm điểm đích từ điểm xuất phát, azimuth và khoảng cách):
+
+\begin{equation}
+\begin{aligned}
+\tan U_1 &= (1-f) \tan\varphi_1 \\
+\sigma_1 &= \arctan2(\tan U_1, \cos\alpha_1) \\
+\sin\alpha &= \cos U_1 \sin\alpha_1 \\
+\cos^2\alpha &= 1 - \sin^2\alpha \\
+u^2 &= \cos^2\alpha \frac{a^2 - b^2}{b^2}
+\end{aligned}
+\end{equation}
+
+Sau đó lặp để tìm $\sigma$ (angular distance), và cuối cùng tính $\varphi_2, \lambda_2$.
+
+\textbf{Ưu điểm}:
+\begin{itemize}
+    \item Độ chính xác cực cao ($\sim$0.1mm trên 1000km)
+    \item Stable với hầu hết các trường hợp
+    \item Chuẩn được sử dụng trong surveying/geodesy
+\end{itemize}
+
+\textbf{Nhược điểm}:
+\begin{itemize}
+    \item Phức tạp hơn $\sim$10x so với Haversine
+    \item Chậm hơn $\sim$10x ($\sim$0.02ms)
+    \item Có thể không converge gần antipodal points
+\end{itemize}
+
+\subsubsection{Karney Algorithm}
+Charles Karney (2013) cải tiến Vincenty với thuật toán ổn định hơn \cite{karney2013algorithms}, giải quyết được vấn đề convergence và cung cấp độ chính xác $\sim$15 nanometers.
+
+\textbf{So sánh các thuật toán}:
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Thuật toán} & \textbf{Độ chính xác} & \textbf{Tốc độ} & \textbf{Độ phức tạp} & \textbf{Stability} \\
+\hline
+Haversine & 0.5\% -> 100km & Nhanh & Thấp & Tốt \\
+\hline
+Vincenty & 0.1mm -> 1000km & Trung bình & Cao & Khá tốt \\
+\hline
+Karney & 15nm -> global & Trung bình & Cao & Rất tốt \\
+\hline
+\end{tabular}
+\caption{So sánh các thuật toán tính geodesic}
+\end{table}
+
+\subsection{Nghiên cứu về Sensor Fusion}
+
+\subsubsection{Kalman Filter trong GPS/INS Integration}
+Kalman Filter (1960) là nền tảng của sensor fusion hiện đại. Extended Kalman Filter (EKF) được ứng dụng rộng rãi trong tích hợp GPS và IMU (Inertial Measurement Unit) \cite{groves2013principles}.
+
+\textbf{Ý tưởng cốt lõi}:
+\begin{itemize}
+    \item GPS: Độ chính xác cao nhưng tần số thấp (1-10 Hz), có thể bị mất tín hiệu
+    \item IMU: Tần số cao (100-1000 Hz), nhưng drift theo thời gian
+    \item Kết hợp: Lấy ưu điểm của cả hai, giảm nhược điểm
+\end{itemize}
+
+Mô hình toán học EKF cho GPS/IMU:
+\begin{equation}
+\begin{aligned}
+\mathbf{x}_{k|k-1} &= f(\mathbf{x}_{k-1}, \mathbf{u}_k) \quad \text{(Prediction)} \\
+\mathbf{P}_{k|k-1} &= \mathbf{F}_k \mathbf{P}_{k-1} \mathbf{F}_k^T + \mathbf{Q}_k \\
+\mathbf{K}_k &= \mathbf{P}_{k|k-1} \mathbf{H}_k^T (\mathbf{H}_k \mathbf{P}_{k|k-1} \mathbf{H}_k^T + \mathbf{R}_k)^{-1} \\
+\mathbf{x}_k &= \mathbf{x}_{k|k-1} + \mathbf{K}_k(\mathbf{z}_k - h(\mathbf{x}_{k|k-1})) \quad \text{(Update)}
+\end{aligned}
+\end{equation}
+
+Trong đó:
+\begin{itemize}
+    \item $\mathbf{x}$: State vector (position, velocity, orientation, IMU biases)
+    \item $\mathbf{P}$: Covariance matrix
+    \item $\mathbf{K}$: Kalman gain
+    \item $\mathbf{Q}$: Process noise covariance
+    \item $\mathbf{R}$: Measurement noise covariance
+\end{itemize}
+
+\subsubsection{Adaptive Filtering}
+Trong môi trường động (GPS intermittent, varying noise), Adaptive Kalman Filter tự động điều chỉnh $\mathbf{Q}$ và $\mathbf{R}$ dựa trên innovation sequence \cite{simon2006optimal}:
+
+\begin{equation}
+\begin{aligned}
+\mathbf{r}_k &= \mathbf{z}_k - h(\mathbf{x}_{k|k-1}) \quad \text{(Innovation)} \\
+\mathbf{C}_r &= \frac{1}{N}\sum_{i=k-N+1}^{k} \mathbf{r}_i \mathbf{r}_i^T \quad \text{(Sample covariance)} \\
+\hat{\mathbf{R}}_k &= \mathbf{C}_r - \mathbf{H}_k \mathbf{P}_{k|k-1} \mathbf{H}_k^T \quad \text{(Adaptive R)}
+\end{aligned}
+\end{equation}
+
+\subsection{Hệ thống Web-based GIS và Mapping}
+
+\subsubsection{Web Mapping Libraries}
+Các thư viện web mapping phổ biến:
+
+\begin{enumerate}
+    \item \textbf{Leaflet.js} \cite{leafletjs}:
+    \begin{itemize}
+        \item Open-source, lightweight ($\sim$42KB)
+        \item Mobile-friendly
+        \item Plugin ecosystem phong phú
+        \item Sử dụng: OpenStreetMap, MapBox, custom tiles
+    \end{itemize}
+    
+    \item \textbf{OpenLayers}:
+    \begin{itemize}
+        \item More features ($\sim$250KB), phức tạp hơn
+        \item Hỗ trợ nhiều projections (EPSG codes)
+        \item Vector tiles, 3D capabilities
+    \end{itemize}
+    
+    \item \textbf{Mapbox GL JS}:
+    \begin{itemize}
+        \item GPU-accelerated rendering
+        \item Beautiful styling, smooth interactions
+        \item Commercial (cần API key)
+    \end{itemize}
+    
+    \item \textbf{Google Maps API}:
+    \begin{itemize}
+        \item Comprehensive features
+        \item Best data coverage
+        \item Expensive ($7/1000$ loads)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Lựa chọn Leaflet cho dự án}:
+\begin{itemize}
+    \item Open-source, không giới hạn
+    \item Đủ nhẹ cho prototype/MVP
+    \item Community support tốt
+    \item Dễ offline (với MBTiles)
+\end{itemize}
+
+\subsubsection{Map Projections và Web Mercator}
+Hầu hết web maps sử dụng Web Mercator (EPSG:3857), một biến thể của Mercator projection \cite{snyder1987map}:
+
+\begin{equation}
+\begin{aligned}
+x &= R \cdot \lambda \\
+y &= R \cdot \ln\left[\tan\left(\frac{\pi}{4} + \frac{\varphi}{2}\right)\right]
+\end{aligned}
+\end{equation}
+
+\textbf{Ưu điểm}:
+\begin{itemize}
+    \item Conformal (bảo toàn góc, hình dạng local)
+    \item Rhumb lines (constant bearing) là đường thẳng
+    \item Tiles dễ cache (256×256 pixels)
+\end{itemize}
+
+\textbf{Nhược điểm}:
+\begin{itemize}
+    \item Biến dạng diện tích lớn (Greenland $\sim$ Africa)
+    \item Không dùng được cho vĩ độ >85°
+    \item Không phải geodesic (đường ngắn nhất bị cong)
+\end{itemize}
+
+\subsection{Ứng dụng Thực tế}
+
+\subsubsection{Military Applications}
+\begin{itemize}
+    \item \textbf{Artillery Targeting Systems}: Hệ thống như AFATDS (Advanced Field Artillery Tactical Data System) sử dụng GPS+IMU+laser rangefinder để tính toán fire missions \cite{kaplan2017understanding}.
+    
+    \item \textbf{Forward Observer Tools}: ATAK (Android Tactical Assault Kit) - Android app cho soldiers, tính toán target coordinates từ observer position + bearing + distance.
+    
+    \item \textbf{Precision-Guided Munitions}: GPS-guided bombs (JDAM) có độ chính xác $\sim$5m CEP (Circular Error Probable).
+\end{itemize}
+
+\subsubsection{Search and Rescue}
+\begin{itemize}
+    \item SAR teams sử dụng handheld GPS + compass + visual range estimation
+    \item RECCO system: Reflector-based location (không cần battery)
+    \item Drone-assisted SAR: Tích hợp gimbal angles để tính victim location
+\end{itemize}
+
+\subsubsection{Surveying and Construction}
+\begin{itemize}
+    \item Total Stations: Tích hợp theodolite + EDM (Electronic Distance Measurement), độ chính xác $\sim$1mm -> 1km
+    \item RTK GPS: Real-Time Kinematic, cm-level accuracy
+    \item BIM (Building Information Modeling): Tích hợp GPS data vào 3D models
+\end{itemize}
+
+\subsection{Khoảng trống Nghiên cứu}
+
+Từ tổng quan nghiên cứu, nhận thấy:
+
+\begin{enumerate}
+    \item \textbf{Thiếu hệ thống lightweight}: Các giải pháp thương mại (ATAK, AFATDS) phức tạp, đắt tiền. Cần giải pháp đơn giản, open-source cho education/training.
+    
+    \item \textbf{Thiếu phân tích sai số tổng hợp}: Hầu hết nghiên cứu tập trung vào GPS error hoặc IMU error riêng lẻ, ít phân tích error propagation toàn hệ thống.
+    
+    \item \textbf{Web-based gap}: Các công cụ hiện có chủ yếu là desktop/mobile apps, ít giải pháp web-based dễ triển khai.
+    
+    \item \textbf{Thiếu so sánh Haversine vs Vincenty}: Ít nghiên cứu định lượng trade-off accuracy vs. performance cho use cases khác nhau.
+\end{enumerate}
+
+Dự án này đóng góp vào các khoảng trống trên bằng cách:
+\begin{itemize}
+    \item Xây dựng hệ thống open-source, web-based, lightweight
+    \item Phân tích chi tiết error propagation từ sensors đến output
+    \item So sánh định lượng Haversine vs. Vincenty
+    \item Cung cấp educational tool với visualization trực quan
+\end{itemize}
