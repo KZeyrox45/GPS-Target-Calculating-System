@@ -20,13 +20,13 @@ function MapAutoCenter() {
     const { lat, lon } = pos;
 
     if (!hasCentered.current) {
-      // First frame — always centre immediately
+      // First frame - always centre immediately
       map.setView([lat, lon], map.getZoom(), { animate: true, duration: 0.3 });
       hasCentered.current = true;
       return;
     }
 
-    // Subsequent frames — soft pan when >20m away
+    // Subsequent frames - soft pan when >20m away
     const center = map.getCenter();
     const dist = map.distance(center, [lat, lon]);
     if (dist > 20) map.panTo([lat, lon], { animate: true, duration: 0.5 });

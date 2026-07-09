@@ -1,4 +1,4 @@
-"""WS smoke test — run standalone to verify the full data pipeline."""
+"""WS smoke test - run standalone to verify the full data pipeline."""
 import asyncio
 import json
 import sys
@@ -46,7 +46,7 @@ async def stream(session_id: str) -> None:
             )
             count += 1
             if count >= 8:
-                print("[WS]  8 frames received — stopping early")
+                print("[WS]  8 frames received - stopping early")
                 break
     print("[WS]  Done.")
 

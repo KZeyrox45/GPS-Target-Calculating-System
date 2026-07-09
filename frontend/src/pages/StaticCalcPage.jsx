@@ -56,7 +56,7 @@ export default function StaticCalcPage() {
     <div style={{ flex: 1, overflowY: 'auto', padding: '2rem', maxWidth: '900px', margin: '0 auto', width: '100%' }}>
       <h1 style={{ fontSize: '1.4rem', marginBottom: '0.3rem' }}>📐 Static Target Calculator</h1>
       <p className="text-sm text-secondary" style={{ marginBottom: '2rem' }}>
-        Phase 1 — Tính tọa độ mục tiêu tĩnh từ GPS + góc ngắm + khoảng cách laser
+        Phase 1 - Tính tọa độ mục tiêu tĩnh từ GPS + góc ngắm + khoảng cách laser
       </p>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>

@@ -1,0 +1,156 @@
+﻿\section{Tuần 4}
+
+\subsection{Đánh giá hiệu suất bộ lọc qua mô phỏng}
+
+\hspace{0.5cm} Để đánh giá định lượng hiệu suất của các bộ lọc, nhóm triển khai kịch bản mô phỏng Monte Carlo không thời gian thực. Phương pháp này cho phép kiểm soát hoàn toàn điều kiện thử nghiệm và lặp lại được kết quả, phù hợp cho giai đoạn đánh giá thuật toán trước khi có dữ liệu cảm biến thực địa.
+
+\subsubsection{Thiết lập kịch bản mô phỏng}
+
+\hspace{0.5cm} Mỗi kịch bản mô phỏng bao gồm một mục tiêu di chuyển trong phạm vi 400 m xung quanh người quan sát đặt tại HCMUT (10,7626$^\circ$N, 106,6602$^\circ$E), kéo dài 120 giây ở tần số 10 Hz (1.200 bước thời gian). Mô hình nhiễu cảm biến sử dụng thông số như Bảng \ref{tab:noise-week4}.
+
+\begin{table}[h!]
+\centering
+\caption{Thông số nhiễu cảm biến trong mô phỏng}
+\label{tab:noise-week4}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Cảm biến} & \textbf{Thông số} & \textbf{Giá trị} \\
+\midrule
+GPS/GNSS       & $\sigma_{GPS}$     & 5,0 m          \\
+IMU (azimuth)  & $\sigma_{az}$      & 0,3$^\circ$    \\
+IMU (elevation)& $\sigma_{el}$      & 0,2$^\circ$    \\
+Laser          & $\sigma_{laser}$   & 0,5 m          \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ba loại mục tiêu được mô phỏng tương ứng với ba trường hợp sử dụng thực tế: người đi bộ (Kalman 2D), xe máy (Kalman 2D), và drone (Kalman 3D với trục Up). Mỗi loại mục tiêu có mô hình chuyển động và mức độ cơ động khác nhau, phản ánh các điều kiện tracking đa dạng.
+
+\subsubsection{Kết quả RMSE}
+
+\hspace{0.5cm} Bảng \ref{tab:rmse-week4} tổng hợp RMSE ngang (horizontal) theo từng kịch bản. Chỉ tiêu yêu cầu của đề tài là RMSE $<$ 5 m trong phạm vi 500 m.
+
+\begin{table}[h!]
+\centering
+\caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (seed = 42)}
+\label{tab:rmse-week4}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Kịch bản} & \textbf{Raw (đo thô)} & \textbf{Alpha-beta} & \textbf{Kalman} & \textbf{Yêu cầu} \\
+\midrule
+Người đi bộ & 0,46 m & \textbf{0,24 m} & 0,84 m & $<$ 5 m \checkmark \\
+Xe máy      & 1,79 m & \textbf{1,01 m} & 2,18 m & $<$ 5 m \checkmark \\
+Drone       & 1,28 m & \textbf{0,73 m} & 2,33 m & $<$ 5 m \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=0.3cm,
+    width=0.9\textwidth,
+    height=6.5cm,
+    enlarge x limits=0.25,
+    ylabel={RMSE ngang (m)},
+    xlabel={Kịch bản mục tiêu},
+    symbolic x coords={Người đi bộ, Xe máy, Drone},
+    xtick=data,
+    ymin=0, ymax=3.2,
+    ytick={0,0.5,1.0,1.5,2.0,2.5,3.0},
+    legend style={at={(0.5,1.03)}, anchor=south, legend columns=3, font=\small},
+    nodes near coords,
+    nodes near coords align={vertical},
+    every node near coord/.append style={font=\scriptsize},
+    grid=major,
+    grid style={dashed, gray!40},
+]
+\addplot+[fill=gray!50, draw=gray!70] coordinates {
+    (Người đi bộ, 0.46) (Xe máy, 1.79) (Drone, 1.28)};
+\addplot+[fill=blue!50, draw=blue!70] coordinates {
+    (Người đi bộ, 0.24) (Xe máy, 1.01) (Drone, 0.73)};
+\addplot+[fill=red!50, draw=red!70] coordinates {
+    (Người đi bộ, 0.84) (Xe máy, 2.18) (Drone, 2.33)};
+\legend{Đo thô, Alpha-beta, Kalman}
+\end{axis}
+\end{tikzpicture}
+\caption{So sánh RMSE ngang giữa ba phương pháp trên ba kịch bản mục tiêu}
+\label{fig:rmse-bar}
+\end{figure}
+
+\subsubsection{Phân tích kết quả}
+
+\hspace{0.5cm} Điểm đáng chú ý là alpha-beta filter đạt RMSE thấp hơn Kalman filter ở cả ba kịch bản. Điều này có thể giải thích qua đặc điểm của bài toán: mô phỏng sử dụng mô hình Constant Velocity (CV), tức là gia tốc bằng không, trong khi alpha-beta filter được thiết kế tối ưu chính xác cho điều kiện này. Với tham số $\alpha = 0{,}4$ theo điều kiện Benedict-Bordner:
+\begin{equation}
+\beta = \frac{\alpha^2}{2 - \alpha} \approx 0{,}13,
+\end{equation}
+
+bộ lọc cân bằng tốt giữa đáp ứng với nhiễu đo lường và độ trơn của ước lượng.
+
+Kalman filter, ngược lại, cần giai đoạn hội tụ ban đầu khi ma trận hiệp phương sai $\mathbf{P}$ còn lớn. Ngoài ra, tham số $\sigma_a$ trong ma trận nhiễu process $\mathbf{Q}$ (mô hình DWNA) được đặt thủ công và chưa được tối ưu theo từng loại mục tiêu.
+
+Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alpha-beta:
+
+\begin{itemize}
+    \item \textbf{Ước lượng độ bất định:} Ma trận $\mathbf{P}_k$ cung cấp ellipse tin cậy tại mỗi bước thời gian, phản ánh mức độ tin tưởng vào ước lượng vị trí. Thông tin này cần thiết khi kết hợp kết quả tracking với các hệ thống chỉ huy.
+
+    \item \textbf{Adaptive measurement noise:} Ma trận $\mathbf{R}_k$ được cập nhật động từ $\sigma_{pos}$ của sensor fusion. Khi mục tiêu vượt ngưỡng cross-over $\approx 794$ m - nơi sai số IMU chiếm ưu thế so với GPS - $\mathbf{R}_k$ tự động tăng, giảm ảnh hưởng của đo lường nhiễu cao.
+\end{itemize}
+
+\subsection{Phân tích sai số sensor fusion theo khoảng cách}
+
+\hspace{0.5cm} Mô hình RSS (Root Sum of Squares) mô tả sự lan truyền sai số từ cảm biến đến tọa độ mục tiêu:
+\begin{equation}
+\sigma_{pos}^2 = \sigma_{gps}^2 + \sigma_{laser}^2 + R^2 \left(\sin^2\sigma_{az} + \sin^2\sigma_{el}\right),
+\label{eq:rss-fusion}
+\end{equation}
+
+trong đó $R$ là khoảng cách từ người quan sát đến mục tiêu. Hai số hạng đầu là hằng số theo $R$; số hạng thứ ba tỉ lệ với $R^2$.
+
+Đặc điểm này dẫn đến sự chuyển tiếp theo khoảng cách: ở gần, GPS chiếm ưu thế sai số ($\sigma_{pos} \approx \sigma_{gps} = 5{,}0$ m); ở xa, sai số góc IMU chiếm ưu thế và tăng nhanh theo $R$. Ngưỡng cross-over xảy ra khi:
+\begin{equation}
+R_{cross} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{el}}} \approx \frac{5{,}0}{0{,}00630} \approx 794 \text{ m}.
+\end{equation}
+
+Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ cho thấy rõ vùng GPS-dominated và IMU-dominated.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.82\textwidth,
+    height=6cm,
+    xlabel={Khoảng cách $R$ (m)},
+    ylabel={$\sigma_{pos}$ (m)},
+    xmin=0, xmax=1200,
+    ymin=0, ymax=12,
+    grid=major,
+    grid style={dashed, gray!40},
+    legend style={at={(0.38,0.97)}, anchor=north, font=\small},
+]
+% sigma_pos = sqrt(25 + 0.25 + R^2*(sin^2(0.00524)+sin^2(0.00349)))
+% sin(0.3deg)=0.005236, sin(0.2deg)=0.003491
+% k = 0.005236^2 + 0.003491^2 = 0.00002742+0.00001219 = 0.000039605
+% sigma_pos = sqrt(25.25 + 0.0000396*R^2)
+\addplot[blue, thick, domain=0:1200, samples=200]
+    {sqrt(25.25 + 0.0000396*x*x)};
+\addplot[red, dashed, thick, domain=0:1200]
+    {5.025};
+\addplot[green!60!black, dashed, thick, domain=0:1200, samples=100]
+    {sqrt(0.0000396)*x};
+\addlegendentry{$\sigma_{pos}(R)$ tổng hợp}
+\addlegendentry{Đóng góp GPS (hằng số)}
+\addlegendentry{Đóng góp IMU (tuyến tính)}
+\draw[dashed, gray] (axis cs:794,0) -- (axis cs:794,8)
+    node[above, font=\scriptsize] {794 m};
+\end{axis}
+\end{tikzpicture}
+\caption{Sai số tổng hợp $\sigma_{pos}$ theo khoảng cách $R$. Ngưỡng cross-over tại $\approx$794 m.}
+\label{fig:sigma-vs-range}
+\end{figure}
+
+Phân tích này định hướng trực tiếp cho việc lựa chọn cảm biến: cải thiện IMU (giảm $\sigma_{az}$, $\sigma_{el}$) mang lại lợi ích đáng kể hơn cải thiện GPS ở khoảng cách xa.

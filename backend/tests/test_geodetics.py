@@ -1,5 +1,5 @@
 """
-test_geodetics.py — Unit tests for geodetic conversion functions
+test_geodetics.py - Unit tests for geodetic conversion functions
 """
 
 import math
@@ -13,7 +13,7 @@ from app.algorithms.geodetics import (
     lla_to_ecef, ecef_to_lla, lla_to_enu, enu_to_lla, polar_to_enu,
 )
 
-# ── Known reference values (HCMC region) ──────────────────────────────────
+# --- Known reference values (HCMC region) ---
 OBS_LAT = 10.762622
 OBS_LON = 106.660172
 OBS_ALT = 10.0

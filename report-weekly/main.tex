@@ -1,0 +1,311 @@
+\documentclass[a4paper]{article}
+
+% ========== ENCODING & LANGUAGE ==========
+\usepackage{vntex}
+\usepackage{mathptmx}[ptm]
+
+% ========== MATH PACKAGES ==========
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{amscd}
+\usepackage[makeroom]{cancel}
+
+% ========== GRAPHICS & FIGURES ==========
+\usepackage{graphicx}  % Replaces both graphics and epsfig
+\usepackage{tikz}
+\usetikzlibrary{arrows,snakes,backgrounds,calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usepackage[framemethod=tikz]{mdframed}
+\usepackage{color}
+
+% ========== TABLES ==========
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{diagbox}
+\usepackage{hhline}
+
+% ========== LAYOUT & FORMATTING ==========
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{float}
+\usepackage{rotating}
+
+% ========== LISTS & ENUMERATIONS ==========
+\usepackage{enumerate}
+\usepackage{enumitem}
+
+% ========== TEXT FORMATTING ==========
+\usepackage[normalem]{ulem}
+\usepackage{alltt}
+
+% ========== CAPTIONS ==========
+\usepackage{caption}
+\usepackage{subcaption}
+
+% ========== COLUMNS ==========
+\usepackage{multicol}
+
+% ========== ALGORITHMS ==========
+\usepackage[lined,boxed,commentsnumbered]{algorithm2e}
+
+% ========== CODE LISTINGS ==========
+\usepackage{listings}
+
+% ========== HYPERLINKS (Load last) ==========
+\usepackage[unicode]{hyperref}
+\hypersetup{urlcolor=blue,linkcolor=black,citecolor=black,colorlinks=true}
+
+% ========== THEOREM ENVIRONMENTS ==========
+\newtheorem{theorem}{{\bf Định lý}}
+\newtheorem{property}{{\bf Tính chất}}
+\newtheorem{proposition}{{\bf Mệnh đề}}
+\newtheorem{corollary}[proposition]{{\bf Hệ quả}}
+\newtheorem{lemma}[proposition]{{\bf Bổ đề}}
+\theoremstyle{definition}
+\newtheorem{exer}{Bài toán}
+
+% ========== PAGE LAYOUT ==========
+% Remove page numbers from TOC, LOF, LOT
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\addtocontents{lof}{\protect\thispagestyle{empty}}
+\addtocontents{lot}{\protect\thispagestyle{empty}}
+
+% Geometry settings (A4: 210 × 297mm)
+\def\thesislayout{	% A4: 210 × 297
+	\geometry{
+		a4paper,
+		total={160mm,240mm},
+		left=30mm,
+		top=22mm,
+		right=20mm,
+		bottom=20mm,
+	}
+}
+\def\thesisheadlayout{	% A4: 210 × 297
+	\geometry{
+		a4paper,
+		total={160mm,240mm},
+		left=30mm,
+		top=10mm,
+	}
+}
+\thesislayout
+
+% ========== CODE LISTINGS SETTINGS ==========
+\lstdefinelanguage{JavaScript}{
+  keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstset{
+    language=JavaScript,
+    basicstyle=\footnotesize\ttfamily,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{white},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=2,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=true,
+    title=\lstname,
+    extendedchars=true,
+    inputencoding=utf8,
+    literate={á}{{\'a}}1 {à}{{\`a}}1 {ả}{{\'a}}1 {ã}{{\~a}}1 {ạ}{{\d{a}}}1
+             {Á}{{\'A}}1 {À}{{\`A}}1 {Ả}{{\'A}}1 {Ã}{{\~A}}1 {Ạ}{{\d{A}}}1
+             {ă}{{\u{a}}}1 {ắ}{{\'{\u{a}}}}1 {ằ}{{\`{\u{a}}}}1 {ẳ}{{\'{\u{a}}}}1 {W}{{\~{\u{a}}}}1 {ặ}{{\d{\u{a}}}}1
+             {Ă}{{\u{A}}}1 {Ắ}{{\'{\u{A}}}}1 {Ằ}{{\`{\u{A}}}}1 {Ẳ}{{\'{\u{A}}}}1 {W}{{\~{\u{A}}}}1 {Ặ}{{\d{\u{A}}}}1
+             {â}{{\^a}}1 {ấ}{{\'{\^a}}}1 {ầ}{{\`{\^a}}}1 {ẩ}{{\'{\^a}}}1 {ẫ}{{\~{\^a}}}1 {ậ}{{\d{\^a}}}1
+             {Â}{{\^A}}1 {Ấ}{{\'{\^A}}}1 {Ầ}{{\`{\^A}}}1 {Ẩ}{{\'{\^A}}}1 {Ẫ}{{\~{\^A}}}1 {Ậ}{{\d{\^A}}}1
+             {đ}{{\d{d}}}1 {Đ}{{\d{D}}}1
+             {é}{{\'e}}1 {è}{{\`e}}1 {ẻ}{{\'e}}1 {ẽ}{{\~e}}1 {ẹ}{{\d{e}}}1
+             {É}{{\'E}}1 {È}{{\`E}}1 {Ẻ}{{\'E}}1 {Ẽ}{{\~E}}1 {Ẹ}{{\d{E}}}1
+             {ê}{{\^e}}1 {ế}{{\'{\^e}}}1 {ề}{{\`{\^e}}}1 {ể}{{\'{\^e}}}1 {ễ}{{\~{\^e}}}1 {ệ}{{\d{\^e}}}1
+             {Ê}{{\^E}}1 {Ế}{{\'{\^E}}}1 {Ề}{{\`{\^E}}}1 {Ể}{{\'{\^E}}}1 {Ễ}{{\~{\^E}}}1 {Ệ}{{\d{\^E}}}1
+             {í}{{\'i}}1 {ì}{{\`i}}1 {ỉ}{{\'i}}1 {ĩ}{{\~i}}1 {ị}{{\d{i}}}1
+             {Í}{{\'I}}1 {Ì}{{\`I}}1 {Ỉ}{{\'I}}1 {Ĩ}{{\~I}}1 {Ị}{{\d{I}}}1
+             {ó}{{\'o}}1 {ò}{{\`o}}1 {ỏ}{{\'o}}1 {õ}{{\~o}}1 {ọ}{{\d{o}}}1
+             {Ó}{{\'O}}1 {Ò}{{\`O}}1 {Ỏ}{{\'O}}1 {Õ}{{\~O}}1 {Ọ}{{\d{O}}}1
+             {ô}{{\^o}}1 {ố}{{\'{\^o}}}1 {ồ}{{\`{\^o}}}1 {ổ}{{\'{\^o}}}1 {ỗ}{{\~{\^o}}}1 {ộ}{{\d{\^o}}}1
+             {Ô}{{\^O}}1 {Ố}{{\'{\^O}}}1 {Ồ}{{\`{\^O}}}1 {Ổ}{{\'{\^O}}}1 {Ỗ}{{\~{\^O}}}1 {Ộ}{{\d{\^O}}}1
+             {ơ}{{\h{o}}}1 {ớ}{{\'{\h{o}}}}1 {ờ}{{\`{\h{o}}}}1 {ở}{{\'{\h{o}}}}1 {ỡ}{{\~{\h{o}}}}1 {ợ}{{\d{\h{o}}}}1
+             {Ơ}{{\h{O}}}1 {Ớ}{{\'{\h{O}}}}1 {Ờ}{{\`{\h{O}}}}1 {Ở}{{\'{\h{O}}}}1 {Ỡ}{{\~{\h{O}}}}1 {Ợ}{{\d{\h{O}}}}1
+             {ú}{{\'u}}1 {ù}{{\`u}}1 {ủ}{{\'u}}1 {ũ}{{\~u}}1 {ụ}{{\d{u}}}1
+             {Ú}{{\'U}}1 {Ù}{{\`U}}1 {Ủ}{{\'U}}1 {Ũ}{{\~U}}1 {Ụ}{{\d{U}}}1
+             {ư}{{\h{u}}}1 {ứ}{{\'{\h{u}}}}1 {ừ}{{\`{\h{u}}}}1 {ử}{{\'{\h{u}}}}1 {ữ}{{\~{\h{u}}}}1 {ự}{{\d{\h{u}}}}1
+             {Ư}{{\h{U}}}1 {Ứ}{{\'{\h{U}}}}1 {Ừ}{{\`{\h{U}}}}1 {Ử}{{\'{\h{U}}}}1 {Ữ}{{\~{\h{U}}}}1 {Ự}{{\d{\h{U}}}}1
+             {ý}{{\'y}}1 {ỳ}{{\`y}}1 {ỷ}{{\'y}}1 {ỹ}{{\~y}}1 {ỵ}{{\d{y}}}1
+             {Ý}{{\'Y}}1 {Ỳ}{{\`Y}}1 {Ỷ}{{\'Y}}1 {Ỹ}{{\~Y}}1 {Ỵ}{{\d{Y}}}1
+             {°}{{$^{\circ}$}}1
+             {©}{{\textcopyright}}1
+}
+%\usepackage{fancyhdr}
+\setlength{\headheight}{40pt}
+\pagestyle{fancy}
+\fancyhead{} % clear all header fields
+\renewcommand{\footruleskip}{1mm}
+
+\fancyhead[L]{
+ \begin{tabular}{rl}
+    \begin{picture}(25,15)(0,0)
+    \put(0,-8){\includegraphics[width=10mm, height=10mm]{Images/hcmut.png}}
+    %\put(0,-8){\epsfig{width=10mm,figure=hcmut.eps}}
+   \end{picture}&
+	%\includegraphics[width=8mm, height=8mm]{hcmut.png} & %
+	\begin{tabular}{l}
+		\textbf{  Trường Đại Học Bách Khoa - Đại học Quốc gia TP.HCM }\\
+		\textbf{  Khoa Khoa Học \& Kỹ Thuật Máy Tính}
+	\end{tabular} 	
+ \end{tabular}
+}
+\fancyhead[R]{
+	\begin{tabular}{l}
+		\tiny \bf \\
+		\tiny \bf 
+	\end{tabular}  }
+\fancyfoot{} % clear all footer fields
+\fancyfoot[L]{\scriptsize  Báo cáo Đồ án tốt nghiệp (CO4347) - HK3 2025 - 2026}
+\fancyfoot[R]{\scriptsize  Trang {\thepage}/\pageref{LastPage}}
+
+\renewcommand{\headrulewidth}{0.3pt}
+\renewcommand{\footrulewidth}{0.3pt}
+
+%%%
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{3}
+% ========== SECTION NUMBERING (4 levels) ==========
+\makeatletter
+\newcounter{subsubsubsection}[subsubsection]
+\renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
+    {-3.25ex\@plus -1ex \@minus -.2ex}%
+    {1.5ex \@plus .2ex}%
+    {\normalfont\normalsize\bfseries}}
+\newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
+\newcommand*{\subsubsubsectionmark}[1]{}
+\makeatother
+
+% ========== MATH & CAPTION FORMATTING ==========
+\everymath{\color{black}}
+\sloppy
+
+% Caption settings
+\captionsetup[figure]{
+    labelfont={small,bf},
+    textfont={small,it}
+}
+\captionsetup[table]{
+    labelfont={small,bf},
+    textfont={small,it},
+    belowskip=-1pt,
+    aboveskip=7pt
+}
+
+% Float spacing
+\setlength{\floatsep}{5pt plus 2pt minus 2pt}
+\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
+\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+
+\thesislayout
+
+% ========== BEGIN DOCUMENT ==========
+\begin{document}
+
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+  \draw[line width = 4pt] ($(current page.north west) + (1cm,-1cm)$) rectangle ($(current page.south east) + (-1cm,1cm)$);
+  \draw[line width=1.5pt]
+    ($ (current page.north west) + (1.1cm,-1.1cm) $)
+    rectangle
+    ($ (current page.south east) + (-1.1cm,1.1cm) $);
+\end{tikzpicture}
+
+\begin{center}
+\LARGE \textbf{ĐẠI HỌC QUỐC GIA THÀNH PHỐ HỒ CHÍ MINH} \\
+\vspace{0.2cm}
+\LARGE \textbf{TRƯỜNG ĐẠI HỌC BÁCH KHOA} \\
+\vspace{0.2cm}
+\LARGE \textbf{KHOA KHOA HỌC VÀ KỸ THUẬT MÁY TÍNH}
+\end{center}
+
+\vspace{0.3cm}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=4cm]{Images/hcmut.png}
+\end{center}
+\end{figure}
+
+\vspace{0.3cm}
+
+\begin{center}
+\begin{tabular}{c}
+\multicolumn{1}{c}{\textbf{{\LARGE BÁO CÁO TUẦN}}}\\
+\\[0.3cm]
+\textbf{\Large ĐỒ ÁN TỐT NGHIỆP (KỸ THUẬT MÁY TÍNH) (CO4347)}\\
+\\[0.3cm]
+\textbf{\LARGE Xây dựng thuật toán tính toán tọa độ mục tiêu từ dữ liệu GPS,}\\
+\textbf{\LARGE góc ngắm và khoảng cách}\\
+\\[0.2cm]
+\textbf{\Large Mở rộng: Tracking mục tiêu di động thời gian thực}\\
+\textbf{\Large với đa cảm biến Laser-IMU-GNSS}\\
+\\[0.5cm]
+\Large NGÀNH: Kỹ Thuật Máy Tính
+\end{tabular}
+\end{center}
+
+\vspace{0.5cm}
+
+\begin{center}
+\begin{tabular}{ll}
+\hspace{5cm} &  \textbf{\Large GVHD:} {\Large TS Võ Tuấn Bình} \\
+\\[0.2cm]
+\hspace{5cm} &  \textbf{\Large SVTH1:} {\Large Bùi Nguyễn Thành Luân (2111700)} \\
+\\[0.2cm]
+\hspace{5cm} &  \textbf{\Large SVTH2:} {\Large Nguyễn Trung Hiếu (2113357)} \\
+\end{tabular}
+\end{center}
+
+\vspace{1.5cm}
+\begin{center}
+{\Large TP. HỒ CHÍ MINH, 07/2026}
+\end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+\input{Contents/week-1}
+\newpage
+\input{Contents/week-2}
+\newpage
+\input{Contents/week-3}
+\newpage
+\input{Contents/week-4}
+
+\end{document}

@@ -1,5 +1,5 @@
 /**
- * trackingStore.js — Global state for the tracking system
+ * trackingStore.js - Global state for the tracking system
  * Uses Zustand for lightweight, boilerplate-free state management.
  */
 import { create } from 'zustand';
@@ -7,17 +7,17 @@ import { create } from 'zustand';
 const MAX_HISTORY = 500;   // Maximum trajectory points kept in memory
 
 const useTrackingStore = create((set) => ({
-  // ── Connection state ──────────────────────────────────────────────────
+  // --- Connection state ---
   connected: false,
   sessionId: null,
   setConnected: (v) => set({ connected: v }),
   setSessionId: (id) => set({ sessionId: id }),
 
-  // ── Current frame (latest tracking data) ─────────────────────────────
+  // --- Current frame (latest tracking data) ---
   currentFrame: null,
   setFrame: (frame) => set({ currentFrame: frame }),
 
-  // ── Trajectory history (ring buffer) ─────────────────────────────────
+  // --- Trajectory history (ring buffer) ---
   groundTruthHistory:  [],   // [{lat, lon}, ...]
   rawHistory:          [],
   kalmanHistory:       [],
@@ -53,7 +53,7 @@ const useTrackingStore = create((set) => ({
     kalmanHistory: [], alphaBetaHistory: [],
   }),
 
-  // ── Metrics history (for charts) ─────────────────────────────────────
+  // --- Metrics history (for charts) ---
   metricsHistory: [],   // [{step, kalman_rmse, alpha_beta_rmse, raw_error}, ...]
 
   appendMetrics: (frame) => {
@@ -73,7 +73,7 @@ const useTrackingStore = create((set) => ({
 
   clearMetrics: () => set({ metricsHistory: [] }),
 
-  // ── Simulation config (mirrors SimulationStartRequest) ───────────────
+  // --- Simulation config (mirrors SimulationStartRequest) ---
   simConfig: {
     observer_lat: 10.762622,
     observer_lon: 106.660172,
@@ -90,24 +90,24 @@ const useTrackingStore = create((set) => ({
     simConfig: { ...s.simConfig, ...patch },
   })),
 
-  // ── Simulation running state ──────────────────────────────────────────
+  // --- Simulation running state ---
   isRunning: false,
   setIsRunning: (v) => set({ isRunning: v }),
   simulationEnded: false,
   setSimulationEnded: (v) => set({ simulationEnded: v }),
 
-  // ── Visible layers toggle ─────────────────────────────────────────────
+  // --- Visible layers toggle ---
   showGroundTruth: true,
   showRaw:         true,
   showKalman:      true,
   showAlphaBeta:   true,
   toggleLayer: (name) => set((s) => ({ [name]: !s[name] })),
 
-  // ── FPS counter ───────────────────────────────────────────────────────
+  // --- FPS counter ---
   fps: 0,
   setFps: (v) => set({ fps: v }),
 
-  // ── Full reset ────────────────────────────────────────────────────────
+  // --- Full reset ---
   reset: () => set({
     connected: false, sessionId: null, currentFrame: null,
     groundTruthHistory: [], rawHistory: [], kalmanHistory: [], alphaBetaHistory: [],

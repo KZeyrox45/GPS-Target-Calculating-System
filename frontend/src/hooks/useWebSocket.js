@@ -1,5 +1,5 @@
 /**
- * useWebSocket.js — WebSocket connection manager
+ * useWebSocket.js - WebSocket connection manager
  * Handles connect, auto-reconnect on drop, and message dispatch to the store.
  */
 import { useRef, useCallback } from 'react';

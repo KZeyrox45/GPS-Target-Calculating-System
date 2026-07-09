@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const FEATURES = [
   { icon: '📡', title: 'Real-Time Tracking', desc: 'Theo dõi mục tiêu di chuyển liên tục qua WebSocket 10 Hz', link: '/tracking' },
   { icon: '📐', title: 'Static Calculator', desc: 'Tính tọa độ mục tiêu tĩnh từ GPS + azimuth + khoảng cách (Phase 1)', link: '/calculator' },
-  { icon: '📊', title: 'Algorithm Comparison', desc: 'So sánh Kalman Filter vs α-β Filter — RMSE theo quỹ đạo', link: '/comparison' },
+  { icon: '📊', title: 'Algorithm Comparison', desc: 'So sánh Kalman Filter vs α-β Filter - RMSE theo quỹ đạo', link: '/comparison' },
 ];
 
 const ALGORITHMS = [
@@ -22,7 +22,7 @@ export default function HomePage() {
           🛰️ Real-Time Moving Target Tracking
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', maxWidth: '600px', margin: '0 auto' }}>
-          Geolocation using Laser · IMU · GNSS Fusion — Đồ án Kỹ thuật Máy tính, Nhóm 072
+          Geolocation using Laser · IMU · GNSS Fusion - Đồ án Kỹ thuật Máy tính, Nhóm 072
         </p>
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.5rem' }}>
           <Link to="/tracking" className="btn btn-primary btn-lg">▶ Bắt đầu mô phỏng</Link>
@@ -66,7 +66,7 @@ export default function HomePage() {
           <strong style={{ color: 'var(--accent-primary)' }}>Đề tài (Giai đoạn 2):</strong>{' '}
           Real-Time Moving Target Tracking and Geolocation Using Laser-IMU-GNSS Fusion<br />
           <strong style={{ color: 'var(--accent-primary)' }}>Giảng viên hướng dẫn:</strong> TS. Võ Tuấn Bình &nbsp;|&nbsp;
-          <strong style={{ color: 'var(--accent-primary)' }}>Nhóm:</strong> 072 — Huỳnh Gia Qui · Nguyễn Trung Hiếu · Bùi Nguyễn Thành Luân &nbsp;|&nbsp;
+          <strong style={{ color: 'var(--accent-primary)' }}>Nhóm:</strong> 072 - Huỳnh Gia Qui · Nguyễn Trung Hiếu · Bùi Nguyễn Thành Luân &nbsp;|&nbsp;
           <strong style={{ color: 'var(--accent-primary)' }}>Yêu cầu:</strong> RMSE &lt; 5m tại cự ly &lt; 1km
         </p>
       </div>

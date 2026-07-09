@@ -1,12 +1,12 @@
 """
-sensor_fusion.py — Sensor Fusion: GPS + IMU + Laser Rangefinder
+sensor_fusion.py - Sensor Fusion: GPS + IMU + Laser Rangefinder
 ================================================================
 Combines three complementary sensor streams to produce a single ENU
 position measurement for the tracking filters.
 
-  GPS     → Observer position (lat, lon, alt) + accuracy σ_gps
-  IMU     → Azimuth + Elevation angles        + accuracy σ_az, σ_el
-  Laser   → Slant range to target             + accuracy σ_range
+  GPS     -> Observer position (lat, lon, alt) + accuracy σ_gps
+  IMU     -> Azimuth + Elevation angles        + accuracy σ_az, σ_el
+  Laser   -> Slant range to target             + accuracy σ_range
 
 Fusion output: ENU vector [East, North, Up] with combined uncertainty σ².
 
@@ -15,15 +15,14 @@ imperfections (used by the simulation engine).
 """
 
 import math
-import numpy as np
 from dataclasses import dataclass
 
-from .geodetics import polar_to_enu, lla_to_enu, enu_to_lla
+from .geodetics import polar_to_enu, enu_to_lla
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 # Sensor specification dataclasses (1-sigma values)
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 
 @dataclass
 class GPSSpec:
@@ -48,9 +47,9 @@ class LaserSpec:
     min_range_m: float = 1.0            # Minimum reliable range
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 # Measurement result
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 
 @dataclass
 class FusedMeasurement:
@@ -64,9 +63,9 @@ class FusedMeasurement:
     target_alt: float  # Target altitude  (metres)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 # Fusion function
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------
 
 def fuse_sensors(
     observer_lat: float, observer_lon: float, observer_alt: float,
@@ -82,8 +81,8 @@ def fuse_sensors(
     individual sensor errors through the polar-to-enu transform using
     first-order error propagation (RSS model):
 
-        σ_lateral  = range · sin(σ_azimuth)     (azimuth error → cross-range)
-        σ_along    = σ_range                     (range error → along-range)
+        σ_lateral  = range · sin(σ_azimuth)     (azimuth error -> cross-range)
+        σ_along    = σ_range                     (range error -> along-range)
         σ_pos²     = σ_GPS² + σ_lateral² + σ_along² + σ_elevation²
 
     Args:
@@ -100,7 +99,7 @@ def fuse_sensors(
     imu   = imu_spec   or IMUSpec()
     laser = laser_spec or LaserSpec()
 
-    # 1. Convert polar measurement → local ENU vector
+    # 1. Convert polar measurement -> local ENU vector
     enu = polar_to_enu(azimuth_deg, elevation_deg, range_m)
 
     # 2. Propagate to geographic coordinates

@@ -1,5 +1,5 @@
 """
-calculator.py — Phase 1 Static Target Calculation REST endpoint
+calculator.py - Static Target Calculation REST endpoint
 ================================================================
 POST /api/calculate
   Accepts observer GPS + azimuth + elevation + distance
@@ -24,7 +24,7 @@ def calculate_static_target(req: StaticCalcRequest):
     """
     import numpy as np
 
-    # Convert polar → ENU → LLA
+    # Convert polar -> ENU -> LLA
     enu = polar_to_enu(req.azimuth_deg, req.elevation_deg, req.distance_m)
     target_lat, target_lon, target_alt = enu_to_lla(
         enu, req.observer_lat, req.observer_lon, req.observer_alt

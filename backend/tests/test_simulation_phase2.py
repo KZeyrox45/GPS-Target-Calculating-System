@@ -1,12 +1,12 @@
 """
-test_simulation_phase2.py — Phase 2 Simulation Tests
+test_simulation_phase2.py - Phase 2 Simulation Tests
 ======================================================
 New tests added during the Week 3 fixes.  Tests cover:
 
-  1. PedestrianTrajectory — pause phases, bounded speed
-  2. MotorcycleTrajectory — straight/turn state machine, speed range
-  3. SimulationBoundary   — clamping, specular reflection
-  4. KalmanFilter3D       — convergence on drone altitude
+  1. PedestrianTrajectory - pause phases, bounded speed
+  2. MotorcycleTrajectory - straight/turn state machine, speed range
+  3. SimulationBoundary   - clamping, specular reflection
+  4. KalmanFilter3D       - convergence on drone altitude
   5. Adaptive R (KalmanFilter + KalmanFilter3D)
   6. Regression: all three trajectories stay within boundary
 """
@@ -28,9 +28,9 @@ from app.simulation.boundary import SimulationBoundary
 from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # Helpers
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 def _rng(seed: int = 42):
     return np.random.default_rng(seed)
@@ -41,9 +41,9 @@ def _run_trajectory(traj, steps: int) -> list[tuple[float, float, float]]:
     return [traj.step() for _ in range(steps)]
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 1. PedestrianTrajectory
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestPedestrianTrajectory:
     DT = 0.1  # 10 Hz
@@ -56,7 +56,7 @@ class TestPedestrianTrajectory:
             de = positions[i][0] - positions[i - 1][0]
             dn = positions[i][1] - positions[i - 1][1]
             speed = math.sqrt(de**2 + dn**2) / self.DT
-            # Speed during pause phase decelerates gracefully — only cap above
+            # Speed during pause phase decelerates gracefully - only cap above
             assert speed <= 2.5, f"Speed {speed:.2f} m/s too fast at step {i}"
 
     def test_pause_phase_position_held(self):
@@ -72,7 +72,7 @@ class TestPedestrianTrajectory:
         assert dist < 0.5, f"Position changed by {dist:.3f}m during pause"
 
     def test_altitude_zero(self):
-        """Pedestrian is a 2D target — altitude must remain 0."""
+        """Pedestrian is a 2D target - altitude must remain 0."""
         ped = PedestrianTrajectory(rng=_rng(1), dt=self.DT)
         for e, n, u in _run_trajectory(ped, 100):
             assert u == 0.0, "Pedestrian altitude should always be 0"
@@ -90,9 +90,9 @@ class TestPedestrianTrajectory:
         assert max_diff_deg <= 2.6, f"Heading changed too sharply: {max_diff_deg:.2f}°"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 2. MotorcycleTrajectory
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestMotorcycleTrajectory:
     DT = 0.1
@@ -118,7 +118,7 @@ class TestMotorcycleTrajectory:
             assert speed >= 2.0, f"Speed {speed:.2f} m/s dropped below floor at step {i}"
 
     def test_altitude_zero(self):
-        """Motorcycle is 2D — altitude must remain 0."""
+        """Motorcycle is 2D - altitude must remain 0."""
         moto = MotorcycleTrajectory(rng=_rng(3), dt=self.DT)
         for e, n, u in _run_trajectory(moto, 100):
             assert u == 0.0
@@ -151,9 +151,9 @@ class TestMotorcycleTrajectory:
             assert all(d <= 0.05 for d in diffs), "CCW turn heading should decrease"
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 3. SimulationBoundary
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestSimulationBoundary:
     def test_inside_unchanged(self):
@@ -227,9 +227,9 @@ class TestSimulationBoundary:
                 )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 4. KalmanFilter3D
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestKalmanFilter3D:
     def test_state_shape(self):
@@ -346,9 +346,9 @@ class TestKalmanFilter3D:
         assert kf.R[0, 0] == pytest.approx(4.0)    # 2^2
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 5. Adaptive R — KalmanFilter (2D)
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
+# 5. Adaptive R - KalmanFilter (2D)
+# -------------------------------------
 
 class TestAdaptiveR2D:
     def test_update_R_changes_diagonal(self):
@@ -403,9 +403,9 @@ class TestAdaptiveR2D:
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 6. Regression — existing kalman 2D tests still work with new interface
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
+# 6. Regression - existing kalman 2D tests still work with new interface
+# -------------------------------------
 
 class TestKalmanFilter2DRegression:
     """Quick sanity checks that the 2D filter is backward-compatible."""
@@ -432,11 +432,11 @@ class TestKalmanFilter2DRegression:
         assert "up" not in kf.get_state_dict()
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 7. TestMotorcycleNoCrash
 #    Property 1: MotorcycleTrajectory does not crash with any seed
 #    Validates: Requirements 1.1, 1.3
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestMotorcycleNoCrash:
     """
@@ -476,11 +476,11 @@ class TestMotorcycleNoCrash:
             )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 8. TestDroneBoundary
 #    Property 3: Drone horizontal distance stays within boundary
 #    Validates: Requirements 2.1, 2.2, 2.3
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestDroneBoundary:
     """
@@ -548,15 +548,15 @@ class TestDroneBoundary:
 
         alt_range = max(alts) - min(alts)
         assert alt_range > 1.0, (
-            f"Altitude range {alt_range:.3f}m too small — altitude may be incorrectly constrained"
+            f"Altitude range {alt_range:.3f}m too small - altitude may be incorrectly constrained"
         )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 # 9. TestBoundaryRadiusSchema
 #    Property 4: boundary_radius_m validation in schema
 #    Validates: Requirements 5.5
-# ─────────────────────────────────────────────────────────────────────────────
+# -------------------------------------
 
 class TestBoundaryRadiusSchema:
     """

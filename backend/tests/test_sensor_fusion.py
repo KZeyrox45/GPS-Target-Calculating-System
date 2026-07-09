@@ -1,5 +1,5 @@
 """
-test_sensor_fusion.py — Sensor fusion unit tests
+test_sensor_fusion.py - Sensor fusion unit tests
 """
 import math
 import pytest

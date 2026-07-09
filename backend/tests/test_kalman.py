@@ -1,5 +1,5 @@
 """
-test_kalman.py — Kalman Filter unit tests
+test_kalman.py - Kalman Filter unit tests
 
 Tests verify:
   - Convergence on a linear trajectory
@@ -61,7 +61,7 @@ class TestKalmanPredict:
         kf.initialize(0.0, 0.0)
         p0 = kf.P.copy()
         kf.predict()
-        # Uncertainty should increase (or stay same with zero Q — but Q > 0 here)
+        # Uncertainty should increase (or stay same with zero Q - but Q > 0 here)
         assert np.trace(kf.P) >= np.trace(p0)
 
 

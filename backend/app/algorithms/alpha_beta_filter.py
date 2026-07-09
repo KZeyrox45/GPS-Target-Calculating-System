@@ -1,5 +1,5 @@
 """
-alpha_beta_filter.py — α-β (g-h) Tracking Filter
+alpha_beta_filter.py - α-β (g-h) Tracking Filter
 ==================================================
 A simpler two-parameter fixed-gain filter, useful as a comparison baseline
 against the Kalman filter in the thesis.
@@ -13,7 +13,7 @@ Equations per cycle (1D, applied independently to East and North):
     x_filt  = x_pred + α · (z - x_pred)
     v_filt  = v + (β / dt) · (z - x_pred)
 
-Stability condition:  0 < α < 1,  0 < β ≤ 2α − α²
+Stability condition:  0 < α < 1,  0 < β ≤ 2α - α²
 """
 
 import numpy as np
@@ -28,7 +28,7 @@ class AlphaBetaFilter:
 
     Attributes:
         alpha: Position smoothing factor  (0 < α < 1)
-        beta:  Velocity adaptation factor (0 < β ≤ 2α − α²)
+        beta:  Velocity adaptation factor (0 < β ≤ 2α - α²)
         dt:    Time step (seconds)
     """
 
@@ -46,7 +46,7 @@ class AlphaBetaFilter:
         """
         Args:
             alpha: Position smoothing (higher = trust measurement more).
-                   Typical range: 0.2 – 0.8.
+                   Typical range: 0.2 - 0.8.
             beta:  Velocity smoothing. If None, derived from alpha via
                    the critically-damped Benedict-Bordner condition.
             dt:    Sample period (seconds).
@@ -71,7 +71,7 @@ class AlphaBetaFilter:
         self._v_n = 0.0    # North velocity (m/s)
         self._initialized = False
 
-    # ─────────────────────────────────────────────────────────── public API ──
+    # --- Public API ---
 
     def initialize(self, east: float, north: float) -> None:
         """Seed filter with first measurement (zero velocity assumption)."""
@@ -118,7 +118,7 @@ class AlphaBetaFilter:
         self._v_e = self._v_n = 0.0
         self._initialized = False
 
-    # ───────────────────────────────────────────────── read-only properties ──
+    # --- Read-only properties ---
 
     @property
     def position(self) -> np.ndarray:

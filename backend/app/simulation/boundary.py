@@ -1,5 +1,5 @@
 """
-boundary.py — Simulation Area Boundary Constraint
+boundary.py - Simulation Area Boundary Constraint
 ==================================================
 Keeps simulated targets within a circular region centred on the observer.
 Targets that reach the boundary are reflected back (specular reflection on
@@ -35,7 +35,7 @@ class SimulationBoundary:
         """
         Args:
             radius_m: Maximum allowed distance from observer (metres).
-                      Should be ≤ laser rangefinder max range.
+                      Should be <= laser rangefinder max range.
         """
         if radius_m <= 0:
             raise ValueError(f"radius_m must be positive, got {radius_m}")
@@ -56,12 +56,12 @@ class SimulationBoundary:
             heading: Current heading in radians (measured from North, CW).
 
         Returns:
-            (east, north, heading) — possibly reflected back inside boundary.
+            (east, north, heading) - possibly reflected back inside boundary.
         """
         dist = math.sqrt(east ** 2 + north ** 2)
 
         if dist <= self.radius_m:
-            return east, north, heading  # inside — no action needed
+            return east, north, heading  # inside - no action needed
 
         # --- 1. Clamp position back onto the boundary circle ---
         scale = self.radius_m / dist

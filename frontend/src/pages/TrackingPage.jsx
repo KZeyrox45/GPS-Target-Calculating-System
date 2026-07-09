@@ -13,13 +13,13 @@ export default function TrackingPage() {
 
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden' }}>
-      {/* ── Left Sidebar: simulation controls ── */}
+      {/* --- Left Sidebar: simulation controls --- */}
       <aside className="sidebar" style={{ width: '280px' }}>
         <SimulationPanel />
         <LayerControl />
       </aside>
 
-      {/* ── Center: map + chart ── */}
+      {/* --- Center: map + chart --- */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
         {/* Simulation ended banner */}
         {simulationEnded && (
@@ -32,11 +32,11 @@ export default function TrackingPage() {
             textAlign: 'center',
             flexShrink: 0,
           }}>
-            ✅ Mô phỏng kết thúc — Dữ liệu quỹ đạo đầy đủ được hiển thị bên dưới
+            ✅ Mô phỏng kết thúc - Dữ liệu quỹ đạo đầy đủ được hiển thị bên dưới
           </div>
         )}
 
-        {/* Map — takes most space */}
+        {/* Map - takes most space */}
         <div style={{ flex: 1, minHeight: 0, display: 'flex' }}>
           <TrackingMap observerPos={observerPos} />
         </div>
@@ -48,7 +48,7 @@ export default function TrackingPage() {
         </div>
       </div>
 
-      {/* ── Right Sidebar: live coordinate readout ── */}
+      {/* --- Right Sidebar: live coordinate readout --- */}
       <aside className="sidebar sidebar-right" style={{ width: '240px' }}>
         <CoordDisplay />
 

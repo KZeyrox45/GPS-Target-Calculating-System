@@ -1,18 +1,18 @@
 """
-main.py — FastAPI Application Entry Point
+main.py - FastAPI Application Entry Point
 ==========================================
-Real-Time Moving Target Tracking System — Backend
+Real-Time Moving Target Tracking System - Backend
 Thesis: "Real-Time Moving Target Tracking and Geolocation Using Laser-IMU-GNSS Fusion"
 
 Routing layout
 ──────────────
-  /api/simulation/start   POST   — create session
-  /api/simulation/stop/*  POST   — stop session
-  /api/simulation/sessions GET   — list sessions
-  /api/calculate          POST   — Phase-1 static calculator
-  /ws/tracking/{id}       WS     — live tracking stream (proxied by Vite /ws)
-  /health                 GET    — health check
-  /docs                   GET    — Swagger UI
+  /api/simulation/start   POST   - create session
+  /api/simulation/stop/*  POST   - stop session
+  /api/simulation/sessions GET   - list sessions
+  /api/calculate          POST   - Phase-1 static calculator
+  /ws/tracking/{id}       WS     - live tracking stream (proxied by Vite /ws)
+  /health                 GET    - health check
+  /docs                   GET    - Swagger UI
 """
 
 import logging
@@ -50,7 +50,7 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS — applies to HTTP requests only (not WS upgrades)
+# CORS - applies to HTTP requests only (not WS upgrades)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -63,11 +63,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── REST endpoints under /api ──────────────────────────────────────────────────
+# --- REST endpoints under /api ---
 app.include_router(simulation_router, prefix="/api", tags=["Simulation"])
 app.include_router(calculator_router,  prefix="/api", tags=["Calculator"])
 
-# ── WebSocket endpoint at root (Vite proxies /ws → ws://localhost:8000) ────────
+# --- WebSocket endpoint at root (Vite proxies /ws → ws://localhost:8000) ---
 app.include_router(ws_router, prefix="", tags=["WebSocket"])
 
 

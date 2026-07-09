@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import HomePage       from './pages/HomePage';
 import TrackingPage   from './pages/TrackingPage';
@@ -10,17 +10,32 @@ import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet default marker icon path (Vite bundler issue)
 import L from 'leaflet';
-import markerIcon2x   from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon     from 'leaflet/dist/images/marker-icon.png';
-import markerShadow   from 'leaflet/dist/images/marker-shadow.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon   from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({ iconUrl: markerIcon, iconRetinaUrl: markerIcon2x, shadowUrl: markerShadow });
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => (t === 'dark' ? 'light' : 'dark'));
+
   return (
     <BrowserRouter>
       <div className="app-layout">
-        {/* ── Top navigation bar ── */}
+        {/* Top navigation bar */}
         <nav className="navbar">
           <NavLink to="/" className="navbar-brand">
             <span>🛰️ TargetTrack</span>
@@ -28,18 +43,35 @@ export default function App() {
           </NavLink>
 
           <div className="navbar-links">
-            <NavLink to="/"           className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>🏠 Dashboard</NavLink>
-            <NavLink to="/tracking"   className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>📡 Live Tracking</NavLink>
-            <NavLink to="/calculator" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>📐 Calculator</NavLink>
-            <NavLink to="/comparison" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>📊 So sánh</NavLink>
+            <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>
+              🏠 Dashboard
+            </NavLink>
+            <NavLink to="/tracking" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              📡 Live Tracking
+            </NavLink>
+            <NavLink to="/calculator" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              📐 Calculator
+            </NavLink>
+            <NavLink to="/comparison" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              📊 So sánh
+            </NavLink>
           </div>
 
           <div className="navbar-status">
+            <button
+              id="theme-toggle"
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
+              aria-label="Toggle colour theme"
+            >
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
             <StatusBar />
           </div>
         </nav>
 
-        {/* ── Page area ── */}
+        {/* Page area */}
         <main className="page-content">
           <Routes>
             <Route path="/"           element={<HomePage />} />

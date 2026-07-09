@@ -1,8 +1,8 @@
 """
-sensor_noise.py — Realistic Sensor Noise Models
+sensor_noise.py - Realistic Sensor Noise Models
 ================================================
 Provides random noise generators that simulate real-world sensor imperfections.
-These are used exclusively by the simulation engine — real hardware bypasses this.
+These are used exclusively by the simulation engine - real hardware bypasses this.
 """
 
 import numpy as np

@@ -1,16 +1,16 @@
 """
-simulation.py — Simulation REST + WebSocket router
+simulation.py - Simulation REST + WebSocket router
 ===================================================
 
 Two separate APIRouter objects are exported:
-  • router   — REST endpoints mounted at /api  (POST /api/simulation/start, etc.)
-  • ws_router — WebSocket endpoint mounted at / (WS  /ws/tracking/{id})
+  - router   - REST endpoints mounted at /api  (POST /api/simulation/start, etc.)
+  - ws_router - WebSocket endpoint mounted at / (WS  /ws/tracking/{id})
 
 This separation is required because FastAPI's CORS middleware does NOT apply to
 WebSocket upgrade requests, which means the browser's Origin header is rejected
 when connecting directly to ws://localhost:8000.  Instead, the frontend proxies
-through Vite's dev-server (/ws → ws://localhost:8000), so the WS path must be
-at /ws/tracking/{id} on the backend — i.e. mounted at root, not under /api.
+through Vite's dev-server (/ws -> ws://localhost:8000), so the WS path must be
+at /ws/tracking/{id} on the backend - i.e. mounted at root, not under /api.
 """
 
 import uuid
@@ -24,17 +24,17 @@ from ..simulation.target_simulator import SimulationEngine, SimulationConfig
 
 log = logging.getLogger(__name__)
 
-# ── REST router (prefix /api added in main.py) ────────────────────────────────
+# --- REST router (prefix /api added in main.py) ---
 router = APIRouter()
 
-# ── WebSocket router (no prefix — mounted at root in main.py) ─────────────────
+# --- WebSocket router (no prefix - mounted at root in main.py) ---
 ws_router = APIRouter()
 
 # In-memory session registry  { session_id: SimulationEngine }
 _sessions: dict[str, SimulationEngine] = {}
 
 
-# ── REST endpoints ─────────────────────────────────────────────────────────────
+# --- REST endpoints ---
 
 @router.post("/simulation/start", response_model=SimulationStartResponse)
 async def start_simulation(request: SimulationStartRequest):
@@ -81,15 +81,15 @@ async def list_sessions():
     return {"active_sessions": list(_sessions.keys())}
 
 
-# ── WebSocket endpoint ─────────────────────────────────────────────────────────
+# --- WebSocket endpoint ---
 
 @ws_router.websocket("/ws/tracking/{session_id}")
 async def ws_tracking(websocket: WebSocket, session_id: str):
     """
-    WebSocket endpoint — streams live TrackingFrame JSON at 10 Hz.
+    WebSocket endpoint - streams live TrackingFrame JSON at 10 Hz.
 
     Path: /ws/tracking/{session_id}
-    Proxied by Vite dev-server: /ws → ws://localhost:8000
+    Proxied by Vite dev-server: /ws -> ws://localhost:8000
 
     Message format: JSON dict (see TrackingFrame.to_dict())
     Terminal message: {"type": "simulation_end"}
@@ -107,7 +107,7 @@ async def ws_tracking(websocket: WebSocket, session_id: str):
         async for frame in engine.run():
             await websocket.send_text(json.dumps(frame.to_dict()))
 
-        # Simulation finished naturally — notify client then close cleanly
+        # Simulation finished naturally - notify client then close cleanly
         await websocket.send_text(json.dumps({"type": "simulation_end"}))
         await websocket.close()
 

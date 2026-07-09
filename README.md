@@ -2,7 +2,7 @@
 
 **Real-Time Moving Target Tracking and Geolocation Using Laser-IMU-GNSS Fusion**
 
-Đề tài tốt nghiệp — Khoa Kỹ thuật Máy tính, HCMUT  
+Đề tài tốt nghiệp - Khoa Kỹ thuật Máy tính, HCMUT  
 Giảng viên hướng dẫn: TS. Võ Tuấn Bình
 
 ---
@@ -11,8 +11,8 @@ Giảng viên hướng dẫn: TS. Võ Tuấn Bình
 
 Hệ thống theo dõi và tính toán tọa độ mục tiêu di động theo thời gian thực, dựa trên dữ liệu hợp nhất từ GPS, góc ngắm (azimuth/elevation) và laser rangefinder. Hệ thống bao gồm hai giai đoạn phát triển:
 
-- **Giai đoạn 1** — Tính toán tọa độ đơn điểm từ GPS + góc ngắm + khoảng cách (2D).
-- **Giai đoạn 2** — Theo dõi mục tiêu di động trong không gian 3D với bộ lọc Kalman và α-β, mô phỏng quỹ đạo người đi bộ, xe máy, và drone.
+- **Giai đoạn 1** - Tính toán tọa độ đơn điểm từ GPS + góc ngắm + khoảng cách (2D).
+- **Giai đoạn 2** - Theo dõi mục tiêu di động trong không gian 3D với bộ lọc Kalman và α-β, mô phỏng quỹ đạo người đi bộ, xe máy, và drone.
 
 ---
 
@@ -21,19 +21,19 @@ Hệ thống theo dõi và tính toán tọa độ mục tiêu di động theo t
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                     Frontend (React)                    │
-│  TrackingPage → TrackingMap (Leaflet) + Charts (CJ2)    │
-│  SimulationPanel → REST POST /api/simulation/start      │
-│  WebSocket consumer → cập nhật store mỗi 100ms          │
+│  TrackingPage -> TrackingMap (Leaflet) + Charts (CJ2)    │
+│  SimulationPanel -> REST POST /api/simulation/start      │
+│  WebSocket consumer -> cập nhật store mỗi 100ms          │
 └────────────────────┬────────────────────────────────────┘
                      │ WebSocket ws://localhost:8000/ws/{id}
 ┌────────────────────▼────────────────────────────────────┐
 │                  Backend (FastAPI)                      │
-│  SimulationEngine → TrajectoryGenerator                 │
-│                   → SensorNoiseModel                    │
-│                   → SensorFusion                        │
-│                   → KalmanFilter / KalmanFilter3D       │
-│                   → AlphaBetaFilter                     │
-│                   → SimulationBoundary                  │
+│  SimulationEngine -> TrajectoryGenerator                 │
+│                   -> SensorNoiseModel                    │
+│                   -> SensorFusion                        │
+│                   -> KalmanFilter / KalmanFilter3D       │
+│                   -> AlphaBetaFilter                     │
+│                   -> SimulationBoundary                  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +46,7 @@ GPS-Target-Calculating-System/
 ├── backend/
 │   ├── app/
 │   │   ├── algorithms/
-│   │   │   ├── geodetics.py        # Chuyển đổi ENU ↔ LLA, haversine
+│   │   │   ├── geodetics.py        # Chuyển đổi ENU <-> LLA, haversine
 │   │   │   ├── kalman_filter.py    # KalmanFilter (2D) + KalmanFilter3D
 │   │   │   ├── alpha_beta_filter.py
 │   │   │   └── sensor_fusion.py    # GPS + IMU + Laser fusion
@@ -55,7 +55,7 @@ GPS-Target-Calculating-System/
 │   │   │   ├── boundary.py         # Circular boundary constraint
 │   │   │   └── sensor_noise.py     # Noise models per target type
 │   │   ├── routers/
-│   │   │   ├── calculator.py       # POST /api/calculate (Phase 1)
+│   │   │   ├── calculator.py       # POST /api/calculate
 │   │   │   └── simulation.py       # POST /api/simulation/start + WebSocket
 │   │   ├── models/schemas.py
 │   │   └── main.py
@@ -124,14 +124,14 @@ uv run pytest tests/ -v
 Kết quả hiện tại: **104 tests passed**.
 
 Các nhóm test bao gồm:
-- `TestPedestrianTrajectory` — kiểm tra tốc độ, pause, waypoint navigation
-- `TestMotorcycleTrajectory` — state machine STRAIGHT/TURNING
-- `TestMotorcycleNoCrash` — chạy 600 bước với 7 seed khác nhau
-- `TestDroneBoundary` — drone ở trong boundary, altitude không bị clamped
-- `TestSimulationBoundary` — reflection geometry
-- `TestKalmanFilter3D` — convergence, covariance, altitude tracking
-- `TestAdaptiveR2D` — adaptive measurement noise
-- `TestBoundaryRadiusSchema` — Pydantic validation [100, 1000]m
+- `TestPedestrianTrajectory` - kiểm tra tốc độ, pause, waypoint navigation
+- `TestMotorcycleTrajectory` - state machine STRAIGHT/TURNING
+- `TestMotorcycleNoCrash` - chạy 600 bước với 7 seed khác nhau
+- `TestDroneBoundary` - drone ở trong boundary, altitude không bị clamped
+- `TestSimulationBoundary` - reflection geometry
+- `TestKalmanFilter3D` - convergence, covariance, altitude tracking
+- `TestAdaptiveR2D` - adaptive measurement noise
+- `TestBoundaryRadiusSchema` - Pydantic validation [100, 1000]m
 
 ---
 
@@ -145,10 +145,10 @@ ENU = polar_to_enu(azimuth, elevation, range)
 σ_pos = f(range)   # sai số tăng theo khoảng cách
 ```
 
-### 2. Kalman Filter (2D — Pedestrian/Motorcycle)
+### 2. Kalman Filter (2D - Pedestrian/Motorcycle)
 State vector: `[East, North, vEast, vNorth]`
 
-Adaptive measurement noise: `R = σ_pos² × I` — filter tự điều chỉnh độ tin cậy dựa trên chất lượng đo.
+Adaptive measurement noise: `R = σ_pos² × I` - filter tự điều chỉnh độ tin cậy dựa trên chất lượng đo.
 
 ### 3. KalmanFilter3D (Drone)
 State vector: `[East, North, Up, vEast, vNorth, vUp]`
@@ -162,9 +162,9 @@ Bộ lọc tham số cố định, đơn giản hơn Kalman, dùng để so sán
 
 | Loại | Mô hình | Tốc độ |
 |---|---|---|
-| Người đi bộ | Waypoint navigation — di chuyển đến đích ngẫu nhiên, dừng lại, chọn đích mới | 1.0–1.8 m/s |
-| Xe máy | State machine STRAIGHT → TURNING → STRAIGHT với bán kính cua 15–40m | 7–13 m/s |
-| Drone | Waypoint patrol — ngắm đến waypoint ngẫu nhiên, altitude sin ±20m | 7–15 m/s |
+| Người đi bộ | Waypoint navigation - di chuyển đến đích ngẫu nhiên, dừng lại, chọn đích mới | 1.0–1.8 m/s |
+| Xe máy | State machine STRAIGHT -> TURNING -> STRAIGHT với bán kính cua 15–40m | 7–13 m/s |
+| Drone | Waypoint patrol - ngắm đến waypoint ngẫu nhiên, altitude sin ±20m | 7–15 m/s |
 
 ---
 
@@ -172,11 +172,11 @@ Bộ lọc tham số cố định, đơn giản hơn Kalman, dùng để so sán
 
 ### Màn hình chính
 
-- **Sidebar trái** — cấu hình mô phỏng: vị trí quan sát viên, loại mục tiêu, thuật toán, thời lượng, bán kính ranh giới
-- **Bản đồ trung tâm** (Leaflet) — hiển thị quỹ đạo 4 lớp: ground truth (xanh lá), raw measurement (vàng), Kalman (xanh dương), α-β (tím)
-- **Biểu đồ RMSE** — sai số theo thời gian (Kalman vs α-β vs raw)
-- **Biểu đồ Altitude** — độ cao ground truth vs Kalman (chỉ hiển thị khi chọn Drone)
-- **Sidebar phải** — tọa độ tức thời, tốc độ, độ không chắc chắn, góc pan-tilt
+- **Sidebar trái** - cấu hình mô phỏng: vị trí quan sát viên, loại mục tiêu, thuật toán, thời lượng, bán kính ranh giới
+- **Bản đồ trung tâm** (Leaflet) - hiển thị quỹ đạo 4 lớp: ground truth (xanh lá), raw measurement (vàng), Kalman (xanh dương), α-β (tím)
+- **Biểu đồ RMSE** - sai số theo thời gian (Kalman vs α-β vs raw)
+- **Biểu đồ Altitude** - độ cao ground truth vs Kalman (chỉ hiển thị khi chọn Drone)
+- **Sidebar phải** - tọa độ tức thời, tốc độ, độ không chắc chắn, góc pan-tilt
 
 ### Layer control
 Toggle hiển thị từng lớp quỹ đạo độc lập để so sánh trực quan.
@@ -234,17 +234,17 @@ Tính tọa độ đơn điểm từ GPS + góc ngắm + khoảng cách.
 Hệ thống hiện tại **tự sinh quỹ đạo** bằng mô hình toán học rồi thêm nhiễu giả. Trong thực tế, dữ liệu đến từ:
 - **Laser rangefinder** đo khoảng cách thực với sai số ±1–3m
 - **IMU/la bàn** đo góc ngắm thực với drift và vibration noise
-- **GPS** của quan sát viên với sai số ±3–5m
+- **GPS** của quan sát viên với sai số ±3-5m
 
 Khi thiếu những nguồn dữ liệu này, mọi "chuyển động thực tế" chỉ là mô phỏng xấp xỉ.
 
 #### 2. Mô hình quỹ đạo có tính định kỳ
-- `DroneTrajectory` bay theo waypoint ngẫu nhiên → trông tự nhiên hơn trước, nhưng vẫn là mẫu toán học, không phải hành vi thực của phi công.
-- `MotorcycleTrajectory` dùng state machine STRAIGHT/TURNING với thời gian lấy ngẫu nhiên → tạo ra pattern giao lộ, nhưng không mô phỏng được giao thông thực (dừng đèn đỏ, tránh xe).
-- `PedestrianTrajectory` dùng waypoint navigation → giống người đi hơn, nhưng thiếu các yếu tố môi trường (tường, vỉa hè, đám đông).
+- `DroneTrajectory` bay theo waypoint ngẫu nhiên -> trông tự nhiên hơn trước, nhưng vẫn là mẫu toán học, không phải hành vi thực của phi công.
+- `MotorcycleTrajectory` dùng state machine STRAIGHT/TURNING với thời gian lấy ngẫu nhiên -> tạo ra pattern giao lộ, nhưng không mô phỏng được giao thông thực (dừng đèn đỏ, tránh xe).
+- `PedestrianTrajectory` dùng waypoint navigation -> giống người đi hơn, nhưng thiếu các yếu tố môi trường (tường, vỉa hè, đám đông).
 
 #### 3. Ranh giới phản xạ nhân tạo
-`SimulationBoundary` phản xạ heading khi target chạm ranh giới — đây là artefact kỹ thuật để target không thoát khỏi vùng quan sát, không phải hành vi vật lý thực.
+`SimulationBoundary` phản xạ heading khi target chạm ranh giới, đây là artefact kỹ thuật để target không thoát khỏi vùng quan sát, không phải hành vi vật lý thực.
 
 #### 4. Nhiễu cảm biến là Gaussian
 Noise model dùng phân phối Gaussian (chuẩn), trong khi nhiễu thực tế có thể là:
@@ -254,10 +254,10 @@ Noise model dùng phân phối Gaussian (chuẩn), trong khi nhiễu thực tế
 
 #### Giải pháp để cải thiện
 Để mô phỏng thực tế hơn, cần:
-1. **Kết nối với hardware thực** — laser rangefinder + IMU + GPS
-2. **Dữ liệu recorded** — replay dataset GPS thực từ thiết bị di động
-3. **Môi trường vật lý** — import bản đồ đường phố để điều khiển quỹ đạo pedestrian/motorcycle
-4. **Noise model nâng cao** — thêm multipath, dropout, bias
+1. **Kết nối với hardware thực** - laser rangefinder + IMU + GPS
+2. **Dữ liệu recorded** - replay dataset GPS thực từ thiết bị di động
+3. **Môi trường vật lý** - import bản đồ đường phố để điều khiển quỹ đạo pedestrian/motorcycle
+4. **Noise model nâng cao** - thêm multipath, dropout, bias
 
 ---
 
@@ -269,7 +269,7 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km):
 |---|---|---|---|
 | Người đi bộ (cự ly ~100m) | ~2–4m | ~4–8m | ✅ Kalman |
 | Xe máy (cự ly ~200m) | ~3–6m | ~6–12m | ✅ Kalman |
-| Drone (cự ly ~150m 3D) | ~4–8m | — | ✅ KF3D |
+| Drone (cự ly ~150m 3D) | ~4–8m | - | ✅ KF3D |
 
 *Kết quả có thể thay đổi tùy seed và boundary_radius_m.*
 
@@ -294,5 +294,5 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km):
 
 ## Tác giả
 
-Nhóm sinh viên thực hiện — Khoa Kỹ thuật Máy tính, HCMUT  
-Giảng viên hướng dẫn: TS. Võ Tuấn Bình (`binh@hcmut.edu.vn`)
+Nhóm sinh viên thực hiện - Khoa Kỹ thuật Máy tính, HCMUT  
+Giảng viên hướng dẫn: TS. Võ Tuấn Bình

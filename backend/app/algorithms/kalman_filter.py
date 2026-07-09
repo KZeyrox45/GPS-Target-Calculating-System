@@ -1,13 +1,13 @@
 """
-kalman_filter.py — Kalman Filters for Target Tracking
+kalman_filter.py - Kalman Filters for Target Tracking
 =======================================================
 Two filters are provided:
 
-  KalmanFilter    — 2D constant-velocity (pedestrian, motorcycle)
+  KalmanFilter    - 2D constant-velocity (pedestrian, motorcycle)
     State:  x = [East, North, vEast, vNorth]          (4x1)
     Measure: z = [East, North]                         (2x1)
 
-  KalmanFilter3D  — 3D constant-velocity (drone)
+  KalmanFilter3D  - 3D constant-velocity (drone)
     State:  x = [East, North, Up, vEast, vNorth, vUp]  (6x1)
     Measure: z = [East, North, Up]                     (3x1)
 
@@ -118,7 +118,7 @@ class KalmanFilter:
 
     # Recommended sigma_a (m/s^2) acceleration noise per target type
     SIGMA_A_PRESETS = {
-        "pedestrian":  0.5,    # slow, smooth motion — low maneuverability
+        "pedestrian":  0.5,    # slow, smooth motion - low maneuverability
         "motorcycle":  5.0,    # banked turns at ~10 m/s; a_lat = v^2/r ~ 6.7 m/s^2
         "drone":       5.0,    # agile 3-axis movement
     }
@@ -176,7 +176,7 @@ class KalmanFilter:
 
         self._initialized = False
 
-    # ───────────────────────────────────────────────────────── public API ──
+    # --- Public API ---
 
     def initialize(self, east: float, north: float) -> None:
         """
@@ -214,7 +214,7 @@ class KalmanFilter:
         """
         z = np.asarray(measurement, dtype=float)
         S = self.H @ self.P @ self.H.T + self.R
-        K = self.P @ self.H.T @ np.linalg.inv(S)
+        K = np.linalg.solve(S.T, (self.P @ self.H.T).T).T
         innovation = z - self.H @ self.x
         self.x = self.x + K @ innovation
         self.P = (np.eye(4) - K @ self.H) @ self.P
@@ -263,7 +263,7 @@ class KalmanFilter:
         self.P = np.eye(4) * sigma_pos_m ** 2
         self._initialized = False
 
-    # ──────────────────────────────────────────────── read-only properties ──
+    # --- Read-only properties ---
 
     @property
     def position(self) -> np.ndarray:
@@ -371,7 +371,7 @@ class KalmanFilter3D:
 
         self._initialized = False
 
-    # ───────────────────────────────────────────────────────── public API ──
+    # --- Public API ---
 
     def initialize(self, east: float, north: float, up: float) -> None:
         """Seed filter with first measurement. Initial velocity = 0."""
@@ -394,7 +394,7 @@ class KalmanFilter3D:
         """
         z = np.asarray(measurement, dtype=float)
         S = self.H @ self.P @ self.H.T + self.R
-        K = self.P @ self.H.T @ np.linalg.inv(S)
+        K = np.linalg.solve(S.T, (self.P @ self.H.T).T).T
         innovation = z - self.H @ self.x
         self.x = self.x + K @ innovation
         self.P = (np.eye(6) - K @ self.H) @ self.P
@@ -435,7 +435,7 @@ class KalmanFilter3D:
         self.P = np.eye(6) * sigma_pos_m ** 2
         self._initialized = False
 
-    # ──────────────────────────────────────────────── read-only properties ──
+    # --- Read-only properties ---
 
     @property
     def position(self) -> np.ndarray:

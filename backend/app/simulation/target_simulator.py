@@ -1,5 +1,5 @@
 """
-target_simulator.py — Moving Target Trajectory Simulation
+target_simulator.py - Moving Target Trajectory Simulation
 ===========================================================
 Generates realistic synthetic trajectories for pedestrians, motorcycles,
 and drones in a local ENU frame. Used by the SimulationEngine to
@@ -21,9 +21,9 @@ from .sensor_noise import SensorNoiseModel
 from .boundary import SimulationBoundary
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 # Output frame (sent over WebSocket)
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 
 @dataclass
 class TrackingFrame:
@@ -62,9 +62,9 @@ class TrackingFrame:
         }
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 # Trajectory generators (ENU in metres relative to observer)
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 
 class _Trajectory:
     """Base class for synthetic target trajectory generators."""
@@ -86,21 +86,21 @@ class PedestrianTrajectory(_Trajectory):
     Realistic pedestrian motion model.
 
     Behaviour:
-      - Walks at 1.0–1.8 m/s with smooth inertial speed changes.
+      - Walks at 1.0-1.8 m/s with smooth inertial speed changes.
       - Uses a waypoint-based navigation: picks a random destination within
         the boundary, walks toward it, then picks a new waypoint. This
         produces natural turning patterns rather than random drift.
-      - Occasionally pauses (0.3 s – 2 s) to simulate stopping at
+      - Occasionally pauses (0.3 s - 2 s) to simulate stopping at
         intersections, looking at a phone, etc.
       - Heading smoothly tracks the waypoint direction with lag.
     """
-    _SPEED_MIN  = 1.0   # m/s – slow stroll
-    _SPEED_MAX  = 1.8   # m/s – brisk walk
-    _SPEED_MEAN = 1.4   # m/s – target cruise speed
+    _SPEED_MIN  = 1.0   # m/s - slow stroll
+    _SPEED_MAX  = 1.8   # m/s - brisk walk
+    _SPEED_MEAN = 1.4   # m/s - target cruise speed
     _PAUSE_PROB = 0.004  # probability of starting a pause each step
     _PAUSE_DUR_S_RANGE = (0.5, 3.0)  # seconds paused
-    _WAYPOINT_RADIUS = 120.0  # metres — max waypoint distance from origin
-    _WAYPOINT_ARRIVAL_M = 8.0  # metres — distance to consider waypoint reached
+    _WAYPOINT_RADIUS = 120.0  # metres - max waypoint distance from origin
+    _WAYPOINT_ARRIVAL_M = 8.0  # metres - distance to consider waypoint reached
 
     def __init__(self, rng, dt, start_east=50.0, start_north=50.0):
         super().__init__(rng, dt)
@@ -141,7 +141,7 @@ class PedestrianTrajectory(_Trajectory):
             dn = self._waypoint_n - self.north
 
         # --- Desired heading toward waypoint ---
-        desired_heading = math.atan2(dw, dn)  # atan2(East, North) → heading from North
+        desired_heading = math.atan2(dw, dn)  # atan2(East, North) -> heading from North
 
         # --- Smoothly rotate heading toward desired (max 25°/s turn rate) ---
         MAX_TURN_RAD_S = math.radians(25)
@@ -166,16 +166,16 @@ class MotorcycleTrajectory(_Trajectory):
     Realistic motorbike motion: alternating straight segments and banked turns.
 
     Behaviour:
-      - Cruises along a straight segment for 3–15 s at 8–12 m/s.
-      - Decelerates into a turn, executes a smooth arc (turn radius 15–40 m),
+      - Cruises along a straight segment for 3-15 s at 8-12 m/s.
+      - Decelerates into a turn, executes a smooth arc (turn radius 15-40 m),
         then accelerates back to cruise speed.
-      - This produces the characteristically long straight → hard-corner
+      - This produces the characteristically long straight -> hard-corner
         pattern of urban motorcycle traffic.
 
     Why this model:
       The original constant-turn-rate arc looks identical to a pedestrian
       random walk when rendered on a map.  A discrete state machine
-      (STRAIGHT → TURNING → STRAIGHT) produces a visually unmistakable
+      (STRAIGHT -> TURNING -> STRAIGHT) produces a visually unmistakable
       trajectory that correctly reflects how motorcycles actually move.
     """
     _CRUISE_SPEED_MEAN = 10.0   # m/s
@@ -232,7 +232,7 @@ class MotorcycleTrajectory(_Trajectory):
         self._turn_rate       = direction * (self._speed / radius)  # ω = v/r
         self._state           = self._State.TURNING
 
-    # -- step ------------------------------------------------------------------
+    # --- Step ------------------------------------------------------------------
 
     def step(self) -> tuple[float, float, float]:
         if self._state == self._State.STRAIGHT:
@@ -265,12 +265,12 @@ class DroneTrajectory(_Trajectory):
     Drone with 3-D motion: waypoint-based patrol pattern with altitude variation.
 
     Behaviour:
-      - Flies toward a series of random waypoints at 8–15 m/s horizontal speed.
+      - Flies toward a series of random waypoints at 8-15 m/s horizontal speed.
       - Banks smoothly toward each waypoint (max 35°/s turn rate).
-      - Altitude varies sinusoidally ±20 m around 30 m baseline — independent
+      - Altitude varies sinusoidally ±20 m around 30 m baseline - independent
         of horizontal motion, simulating a surveillance drone changing altitude.
       - On waypoint arrival, immediately picks a new waypoint at a random
-        bearing and distance (30–200 m), creating a realistic patrol pattern.
+        bearing and distance (30-200 m), creating a realistic patrol pattern.
     """
     H_SPEED_MEAN = 11.0   # m/s
     H_SPEED_STD  = 1.5
@@ -278,8 +278,8 @@ class DroneTrajectory(_Trajectory):
     H_SPEED_MAX  = 15.0
     ALT_AMPLITUDE = 20.0
     ALT_PERIOD_S = 40.0
-    WAYPOINT_RADIUS = 180.0   # metres — max waypoint distance from origin
-    WAYPOINT_ARRIVAL_M = 12.0  # metres — distance to consider waypoint reached
+    WAYPOINT_RADIUS = 180.0   # metres - max waypoint distance from origin
+    WAYPOINT_ARRIVAL_M = 12.0  # metres - distance to consider waypoint reached
     MAX_TURN_RAD_S = math.radians(35)  # max turn rate
 
     def __init__(self, rng, dt, start_east=80.0, start_north=80.0, start_alt=30.0):
@@ -330,9 +330,9 @@ class DroneTrajectory(_Trajectory):
         return self.east, self.north, self.alt
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 # Simulation engine
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------------
 
 @dataclass
 class SimulationConfig:
@@ -352,7 +352,7 @@ class SimulationConfig:
 class SimulationEngine:
     """
     Orchestrates the full simulation loop:
-      trajectory generator → noise model → sensor fusion → filters
+      trajectory generator -> noise model -> sensor fusion -> filters
 
     Usage:
         engine = SimulationEngine(config)
@@ -414,7 +414,7 @@ class SimulationEngine:
             # 1. Ground truth position (ENU, then LLA)
             gt_e, gt_n, gt_u = self._traj.step()
 
-            # 1b. Apply circular boundary — reflect heading if target drifts out
+            # 1b. Apply circular boundary - reflect heading if target drifts out
             if hasattr(self._traj, 'heading'):
                 gt_e, gt_n, new_heading = self._boundary.constrain(
                     gt_e, gt_n, self._traj.heading
@@ -437,7 +437,7 @@ class SimulationEngine:
             noisy_el  = self._noise.apply_elevation_noise(true_elevation)
             noisy_rng = self._noise.apply_range_noise(true_range)
 
-            # 4. Sensor fusion → ENU measurement
+            # 4. Sensor fusion -> ENU measurement
             fused = fuse_sensors(
                 obs_lat, obs_lon, obs_alt,
                 noisy_az, noisy_el, noisy_rng
@@ -459,7 +459,7 @@ class SimulationEngine:
                     fused.east, fused.north,
                     sigma_pos_m=fused.sigma_pos_m
                 )
-                kf_up = fused.up   # 2D filter — take raw fused altitude
+                kf_up = fused.up   # 2D filter - take raw fused altitude
 
             ab_state = self._ab.step(fused.east, fused.north)
 

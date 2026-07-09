@@ -1,5 +1,5 @@
 """
-geodetics.py — Geodetic coordinate conversion utilities
+geodetics.py - Geodetic coordinate conversion utilities
 =======================================================
 Handles all coordinate system conversions needed for the tracking system:
   - LLA (Latitude, Longitude, Altitude)  <->  ECEF (Earth-Centred Earth-Fixed)
@@ -26,9 +26,9 @@ DEG2RAD = math.pi / 180.0
 RAD2DEG = 180.0 / math.pi
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Spherical (Haversine) approximation — adequate for ranges < 100 km
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------
+# Spherical (Haversine) approximation - adequate for ranges < 100 km
+# ---------------------------
 
 def haversine_destination(
     lat_deg: float, lon_deg: float,
@@ -108,9 +108,9 @@ def calculate_bearing(
     return bearing
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------
 # ECEF ↔ LLA conversions  (WGS-84 ellipsoid)
-# ─────────────────────────────────────────────────────────────────────────────
+# ---------------------------
 
 def lla_to_ecef(
     lat_deg: float, lon_deg: float, alt_m: float = 0.0
@@ -143,8 +143,9 @@ def ecef_to_lla(ecef: np.ndarray) -> Tuple[float, float, float]:
     lon = math.atan2(Y, X)
     p = math.sqrt(X ** 2 + Y ** 2)
 
-    # Iterative latitude
+    # Iterative latitude (Bowring's method, 10 iterations max)
     lat = math.atan2(Z, p * (1 - EARTH_E2))
+    lat_new = lat  # fallback if loop converges immediately
     for _ in range(10):
         N = EARTH_A / math.sqrt(1 - EARTH_E2 * math.sin(lat) ** 2)
         lat_new = math.atan2(Z + EARTH_E2 * N * math.sin(lat), p)

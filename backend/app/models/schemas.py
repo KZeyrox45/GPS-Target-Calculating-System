@@ -1,6 +1,6 @@
 """Pydantic schemas for API request/response bodies."""
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
 
 
@@ -22,8 +22,8 @@ class SimulationStartRequest(BaseModel):
         description="Boundary radius (metres). Range: [100, 1000]."
     )
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "observer_lat": 10.762622,
                 "observer_lon": 106.660172,
@@ -37,6 +37,7 @@ class SimulationStartRequest(BaseModel):
                 "boundary_radius_m": 400.0,
             }
         }
+    )
 
 
 class SimulationStartResponse(BaseModel):
@@ -54,8 +55,8 @@ class StaticCalcRequest(BaseModel):
     elevation_deg: float = Field(0.0, ge=-90, le=90)
     distance_m: float   = Field(..., gt=0, le=100_000)
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "observer_lat": 10.762622,
                 "observer_lon": 106.660172,
@@ -65,6 +66,7 @@ class StaticCalcRequest(BaseModel):
                 "distance_m": 500.0,
             }
         }
+    )
 
 
 class StaticCalcResponse(BaseModel):

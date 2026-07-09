@@ -1,11 +1,11 @@
 /* =========================================================
-   index.css — Phase 2 Global Styles
+   index.css - Phase 2 Global Styles
    Extends the Phase 1 dark-mode aesthetic into the React app.
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-/* ── Design tokens ─────────────────────────────────────── */
+/* --- Design tokens --- */
 :root {
   /* Core palette (same as Phase 1) */
   --bg-primary:    #0a0d14;
@@ -53,7 +53,26 @@
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 }
 
-/* ── Reset & base ──────────────────────────────────────── */
+/* --- Light theme overrides --- */
+[data-theme="light"] {
+  --bg-primary:    #f4f6fb;
+  --bg-secondary:  #eaecf4;
+  --bg-card:       #ffffff;
+  --bg-card-alt:   #e8edf7;
+  --bg-hover:      #dce3f0;
+
+  --text-primary:   #1a1f36;
+  --text-secondary: #4a5470;
+  --text-muted:     #7a84a8;
+
+  --border-subtle:  rgba(79, 142, 247, 0.18);
+  --border-active:  rgba(79, 142, 247, 0.5);
+
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.10);
+  --shadow-glow: 0 0 16px rgba(79, 142, 247, 0.10);
+}
+
+/* --- Reset & base ---─ */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -80,7 +99,7 @@ body {
 ::-webkit-scrollbar-thumb { background: var(--bg-card-alt); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
 
-/* ── Typography ────────────────────────────────────────── */
+/* --- Typography --- */
 h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: -0.02em;
@@ -96,7 +115,7 @@ code, .mono {
   font-size: 0.875em;
 }
 
-/* ── App layout ─────────────────────────────────────────── */
+/* --- App layout --------- */
 .app-layout {
   display: flex;
   flex-direction: column;
@@ -104,7 +123,7 @@ code, .mono {
   overflow: hidden;
 }
 
-/* ── Top navigation bar ─────────────────────────────────── */
+/* --- Top navigation bar --- */
 .navbar {
   display: flex;
   align-items: center;
@@ -161,16 +180,40 @@ code, .mono {
 .nav-link:hover { color: var(--text-primary); background: var(--bg-hover); }
 .nav-link.active { color: var(--accent-primary); background: rgba(79, 142, 247, 0.12); }
 
-.navbar-status { margin-left: auto; }
+.navbar-status {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-/* ── Page content area ──────────────────────────────────── */
+/* --- Theme toggle button ---- */
+.theme-toggle-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.theme-toggle-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-active);
+}
+
+/* --- Page content area ------ */
 .page-content {
   flex: 1;
   overflow: hidden;
   display: flex;
 }
 
-/* ── Card component ─────────────────────────────────────── */
+/* --- Card component --- */
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border-subtle);
@@ -196,7 +239,7 @@ code, .mono {
   letter-spacing: 0.06em;
 }
 
-/* ── Buttons ────────────────────────────────────────────── */
+/* --- Buttons ---- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -239,7 +282,7 @@ code, .mono {
 .btn-lg { padding: 0.65rem 1.5rem; font-size: 1rem; }
 .btn-full { width: 100%; }
 
-/* ── Form controls ──────────────────────────────────────── */
+/* --- Form controls --- */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -274,7 +317,7 @@ code, .mono {
 
 .form-select { cursor: pointer; }
 
-/* ── Status badge ───────────────────────────────────────── */
+/* --- Status badge --- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -306,7 +349,7 @@ code, .mono {
   50% { opacity: 0.4; transform: scale(0.7); }
 }
 
-/* ── Metric value display ───────────────────────────────── */
+/* --- Metric value display --- */
 .metric-value {
   font-family: var(--font-mono);
   font-size: 1.4rem;
@@ -329,7 +372,7 @@ code, .mono {
   margin-top: 0.2rem;
 }
 
-/* ── Trajectory legend ──────────────────────────────────── */
+/* --- Trajectory legend ---- */
 .legend-item {
   display: flex;
   align-items: center;
@@ -345,7 +388,7 @@ code, .mono {
   flex-shrink: 0;
 }
 
-/* ── Leaflet overrides ──────────────────────────────────── */
+/* --- Leaflet overrides ----- */
 .leaflet-container {
   background: #0a0d14 !important;
   font-family: var(--font-sans) !important;
@@ -369,7 +412,7 @@ code, .mono {
 
 .leaflet-control-attribution a { color: var(--accent-primary) !important; }
 
-/* ── Target marker animations ───────────────────────────── */
+/* --- Target marker animations ---------------- */
 .target-marker-pulse {
   animation: marker-pulse 1.5s ease-in-out infinite;
 }
@@ -379,7 +422,7 @@ code, .mono {
   50% { transform: scale(1.15); opacity: 0.85; }
 }
 
-/* ── Sidebar panel ──────────────────────────────────────── */
+/* --- Sidebar panel ---─ */
 .sidebar {
   width: 300px;
   flex-shrink: 0;
@@ -398,14 +441,14 @@ code, .mono {
   border-left: 1px solid var(--border-subtle);
 }
 
-/* ── Divider ────────────────────────────────────────────── */
+/* --- Divider ------- */
 .divider {
   height: 1px;
   background: var(--border-subtle);
   margin: 0.25rem 0;
 }
 
-/* ── Toggle switch ──────────────────────────────────────── */
+/* --- Toggle switch --- */
 .toggle-row {
   display: flex;
   align-items: center;
@@ -468,7 +511,7 @@ code, .mono {
   background: var(--accent-primary);
 }
 
-/* ── Section label ──────────────────────────────────────── */
+/* --- Section label --- */
 .section-title {
   font-size: 0.68rem;
   font-weight: 700;
@@ -478,7 +521,7 @@ code, .mono {
   margin-bottom: 0.4rem;
 }
 
-/* ── Loading spinner ────────────────────────────────────── */
+/* --- Loading spinner ------------ */
 .spinner {
   width: 16px; height: 16px;
   border: 2px solid transparent;
@@ -490,7 +533,7 @@ code, .mono {
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── Utility ────────────────────────────────────────────── */
+/* --- Utility --------- */
 .flex     { display: flex; }
 .flex-col { display: flex; flex-direction: column; }
 .items-center { align-items: center; }

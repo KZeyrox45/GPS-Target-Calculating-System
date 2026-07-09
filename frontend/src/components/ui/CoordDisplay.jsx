@@ -6,7 +6,7 @@ function CoordRow({ label, value, unit, color }) {
     <div className="flex justify-between items-center" style={{ padding: '0.2rem 0' }}>
       <span className="text-xs text-secondary">{label}</span>
       <span className="font-mono text-xs" style={{ color: color || 'var(--text-primary)' }}>
-        {value != null ? value : '—'}
+        {value != null ? value : '-'}
         {unit && <span className="text-muted" style={{ marginLeft: '0.2em' }}>{unit}</span>}
       </span>
     </div>

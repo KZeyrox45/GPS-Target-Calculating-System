@@ -1,5 +1,5 @@
 """
-benchmark_rmse.py — Phase 2 RMSE Baseline Benchmark (Fast, non-real-time)
+benchmark_rmse.py - RMSE Baseline Benchmark (Fast, non-real-time)
 ==========================================================================
 Directly calls the simulation components without asyncio sleep pacing.
 Runs each target type for 120 s at 10 Hz (1200 steps) with seed=42.
@@ -113,9 +113,10 @@ def run_scenario(
 
 
 def main():
-    print("GPS Target Calculating System — RMSE Baseline Benchmark")
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # safe on Windows
+    print("GPS Target Calculating System - RMSE Baseline Benchmark")
     print("=" * 60)
-    print(f"Duration: 120 s | Rate: 10 Hz | Seed: 42 | Boundary: 400 m")
+    print("Duration: 120 s | Rate: 10 Hz | Seed: 42 | Boundary: 400 m")
     print()
 
     scenarios = [
@@ -129,7 +130,7 @@ def main():
         print(f"Running {label}...", end=" ", flush=True)
         raw_rmse, ab_rmse, kf_rmse, n = run_scenario(target_type)
         results[label] = (raw_rmse, ab_rmse, kf_rmse, n)
-        print(f"done ({n} steps) — KF RMSE: {kf_rmse:.2f} m")
+        print(f"done ({n} steps) - KF RMSE: {kf_rmse:.2f} m")
 
     print()
     print("=" * 60)
@@ -138,12 +139,12 @@ def main():
     print()
 
     SPEC_M = 5.0  # thesis spec: RMSE < 5m at <= 500m range
-    header = "| Scenario | Raw RMSE | α-β RMSE | Kalman RMSE | Spec (<5m) |"
+    header = "| Scenario | Raw RMSE | a-b RMSE | Kalman RMSE | Spec (<5m) |"
     sep    = "|---|---|---|---|---|"
     print(header)
     print(sep)
     for label, (raw_rmse, ab_rmse, kf_rmse, _) in results.items():
-        pass_fail = "✅ PASS" if kf_rmse < SPEC_M else "❌ FAIL"
+        pass_fail = "PASS" if kf_rmse < SPEC_M else "FAIL"
         print(
             f"| {label} | {raw_rmse:.2f} m | {ab_rmse:.2f} m "
             f"| {kf_rmse:.2f} m | {pass_fail} |"
@@ -154,11 +155,11 @@ def main():
     for label, (raw_rmse, ab_rmse, kf_rmse, _) in results.items():
         kf_imp = (1 - kf_rmse / raw_rmse) * 100 if raw_rmse > 0 else 0
         ab_imp = (1 - ab_rmse / raw_rmse) * 100 if raw_rmse > 0 else 0
-        print(f"  {label}: KF {kf_imp:+.1f}%  α-β {ab_imp:+.1f}%")
+        print(f"  {label}: KF {kf_imp:+.1f}%  a-b {ab_imp:+.1f}%")
 
     print()
     all_pass = all(r[2] < SPEC_M for r in results.values())
-    print("OVERALL:", "✅ ALL PASS — thesis spec met" if all_pass else "❌ SOME FAIL")
+    print("OVERALL:", "ALL PASS - thesis spec met" if all_pass else "SOME FAIL")
 
 
 if __name__ == "__main__":

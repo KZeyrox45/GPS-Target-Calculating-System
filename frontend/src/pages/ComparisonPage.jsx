@@ -93,7 +93,7 @@ export default function ComparisonPage() {
     <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
       <h1 style={{ fontSize: '1.4rem', marginBottom: '0.3rem' }}>📊 So sánh thuật toán</h1>
       <p className="text-sm text-secondary" style={{ marginBottom: '1.5rem' }}>
-        Kalman Filter vs α-β Filter — chạy simulation trên trang Live Tracking trước.
+        Kalman Filter vs α-β Filter - chạy simulation trên trang Live Tracking trước.
       </p>
 
       {!hasData ? (
@@ -143,7 +143,7 @@ export default function ComparisonPage() {
           {/* 2-column charts */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div className="card" style={{ height: '380px' }}>
-              <div className="card-header"><span className="card-title">🗺️ Quỹ đạo (ENU — mét)</span></div>
+              <div className="card-header"><span className="card-title">🗺️ Quỹ đạo (ENU - mét)</span></div>
               <div style={{ flex: 1, height: '320px' }}>
                 <Scatter data={scatterData} options={{
                   ...DARK_OPTS,
