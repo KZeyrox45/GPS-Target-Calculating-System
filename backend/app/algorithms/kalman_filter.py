@@ -21,8 +21,8 @@ Design rationale
   because the tracking update rate (10 Hz) is high enough that prediction
   errors from the CV assumption are absorbed by the process noise Q.
 * Drone tracking requires a third Up axis because altitude changes
-  (sinusoidal, +/-20 m over 40 s) cannot be ignored at close ranges -- the
-  laser measures slant range, so altitude errors directly corrupt the
+  (sinusoidal, +/-20 m over 40 s) cannot be ignored at close ranges; the
+   laser measures slant range, so altitude errors directly corrupt the
   horizontal position estimate.
 * The measurement noise covariance R is kept adaptive: each step the engine
   passes the fused sigma_pos_m (RSS from GPS + IMU + laser errors) so R

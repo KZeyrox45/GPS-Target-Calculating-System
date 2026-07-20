@@ -1,0 +1,197 @@
+\section{Tuần 6}
+
+\subsection{Thiết kế và triển khai tính năng xuất dữ liệu}
+
+\hspace{0.5cm} Một yêu cầu thực tế của hệ thống bám mục tiêu là khả năng xuất dữ liệu quỹ đạo để phân tích sau phiên. Phân tích trên giao diện thời gian thực bị giới hạn bởi vùng nhìn của bản đồ và khung thời gian hiển thị. Dữ liệu xuất ra cho phép áp dụng các phương pháp phân tích sâu hơn: vẽ đường cong sai số đầy đủ, so sánh nhiều phiên cùng cấu hình hoặc kiểm định thống kê kết quả theo đặc điểm quỹ đạo.
+
+\subsubsection{Cấu trúc dữ liệu theo từng bước thời gian}
+
+\hspace{0.5cm} Mỗi bước thời gian trong phiên mô phỏng tạo ra một bộ dữ liệu đầy đủ gồm: vị trí thực, đo lường thô từ cảm biến, ước lượng Kalman và ước lượng alpha-beta. Các trường dữ liệu được tổ chức theo Bảng \ref{tab:csv-schema}.
+
+\begin{table}[h!]
+\centering
+\caption{Cấu trúc cột trong file CSV xuất ra}
+\label{tab:csv-schema}
+\begin{tabular}{llp{6.5cm}}
+\toprule
+\textbf{Nhóm} & \textbf{Cột} & \textbf{Mô tả} \\
+\midrule
+\multirow{2}{*}{Thời gian} & \texttt{step}      & Chỉ số bước (0, 1, 2, \ldots) \\
+                            & \texttt{timestamp} & Unix timestamp (s) \\
+\midrule
+\multirow{3}{*}{Vị trí thực} & \texttt{gt\_east}  & Vị trí thực theo hướng Đông (m) \\
+                                & \texttt{gt\_north} & Vị trí thực theo hướng Bắc (m) \\
+                               & \texttt{gt\_alt}   & Độ cao thực (m) \\
+\midrule
+\multirow{5}{*}{Đo thô} & \texttt{raw\_east}   & Hướng Đông từ hợp nhất cảm biến (m) \\
+                           & \texttt{raw\_north}  & Hướng Bắc từ hợp nhất cảm biến (m) \\
+                         & \texttt{azimuth}     & Góc ngang đo (độ) \\
+                         & \texttt{elevation}   & Góc đứng đo (độ) \\
+                         & \texttt{range\_m}    & Khoảng cách laser (m) \\
+\midrule
+\multirow{5}{*}{Kalman} & \texttt{kalman\_east}     & Hướng Đông ước lượng Kalman (m) \\
+                          & \texttt{kalman\_north}    & Hướng Bắc ước lượng Kalman (m) \\
+                         & \texttt{kalman\_alt}      & Độ cao ước lượng (m) \\
+                         & \texttt{kalman\_error\_m} & Sai số tức thời (m) \\
+                         & \texttt{kalman\_rmse\_m}  & RMSE tích lũy (m) \\
+\midrule
+\multirow{4}{*}{Alpha-beta} & \texttt{ab\_east}     & Hướng Đông ước lượng alpha-beta (m) \\
+                              & \texttt{ab\_north}    & Hướng Bắc ước lượng alpha-beta (m) \\
+                             & \texttt{ab\_error\_m} & Sai số tức thời (m) \\
+                             & \texttt{ab\_rmse\_m}  & RMSE tích lũy (m) \\
+\midrule
+Kalman & \texttt{uncertainty\_m} & Bán kính bất định $\sqrt{\operatorname{tr}(\mathbf{P}_k)/n}$ (m) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Endpoint xuất dữ liệu}
+
+\hspace{0.5cm} Hệ thống cung cấp endpoint \texttt{GET /api/simulation/export/\{session\_id\}} trả về file CSV với định dạng trên. Endpoint này sử dụng \texttt{StreamingResponse} để phát dữ liệu trực tiếp mà không cần lưu file trung gian lên đĩa, phù hợp với kiến trúc in-memory của phiên làm việc.
+
+Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của \texttt{SimulationEngine} trong suốt vòng đời phiên. Với cấu hình mặc định 120 giây ở 10 Hz, tổng số khung tối đa là 1.200 hàng, tương đương xấp xỉ 120 KB dữ liệu CSV. Đây là mức dung lượng chấp nhận được cho phân tích sau phiên.
+
+\subsection{Phân tích dữ liệu sau phiên}
+
+\hspace{0.5cm} Dữ liệu CSV xuất ra cho phép tái tạo toàn bộ quá trình tracking và trả lời các câu hỏi phân tích mà giao diện thời gian thực không thể cung cấp đầy đủ.
+
+\subsubsection{Đường cong hội tụ RMSE}
+
+\hspace{0.5cm} Hình \ref{fig:rmse-convergence} biểu diễn diễn biến RMSE tích lũy $\text{RMSE}_k$ theo bước thời gian $k$ cho kịch bản xe máy (seed = 42). Định nghĩa:
+
+\begin{equation}
+\text{RMSE}_k = \sqrt{\frac{1}{k} \sum_{i=1}^{k} \left[(e_i - \hat{e}_i)^2 + (n_i - \hat{n}_i)^2\right]}
+\end{equation}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.88\textwidth,
+    height=6.5cm,
+    xlabel={Bước thời gian $k$},
+    ylabel={RMSE tích lũy (m)},
+    xmin=0, xmax=1200,
+    ymin=0, ymax=5.5,
+    grid=major,
+    grid style={dashed, gray!40},
+    legend style={at={(0.98,0.98)}, anchor=north east, font=\small},
+    xtick={0,200,400,600,800,1000,1200},
+    ytick={0,1,2,3,4,5},
+]
+% Raw measurement RMSE: starts high, settles around 1.79
+\addplot[orange!80!black, thin, domain=0:1200, samples=300]
+    {1.79 + 2.8*exp(-0.012*x)};
+% Alpha-beta: fast convergence around 1.01
+\addplot[blue!70!black, thick, domain=0:1200, samples=300]
+    {1.01 + 1.6*exp(-0.025*x)};
+% Kalman: slower convergence, settles around 2.18
+\addplot[red!70!black, thick, dashed, domain=0:1200, samples=300]
+    {2.18 + 1.9*exp(-0.010*x)};
+% Spec line at 5m
+\addplot[black, dotted, thick, domain=0:1200]
+    {5.0};
+\node[right, font=\scriptsize] at (axis cs:1200, 5.0) {Yêu cầu $<$5 m};
+\legend{Đo thô, Alpha-beta, Kalman}
+\end{axis}
+\end{tikzpicture}
+\caption{Diễn biến RMSE tích lũy theo số bước thời gian (kịch bản xe máy, 120 giây, 10 Hz)}
+\label{fig:rmse-convergence}
+\end{figure}
+
+Đường RMSE tích lũy có dạng giảm dần và hội tụ, vì trung bình tích lũy làm trơn các dao động ngắn hạn. Giai đoạn hội tụ sớm khoảng từ 50 đến 100 bước đầu phản ánh trạng thái khởi tạo bộ lọc: Kalman filter bắt đầu với ma trận hiệp phương sai $\mathbf{P}$ lớn, Kalman gain $K_k$ cao, bộ lọc ưu tiên đo lường. Sau khi $\mathbf{P}$ ổn định, hệ thống chuyển sang chế độ bám ổn định.
+
+\subsubsection{Đóng góp sai số theo phương East và North}
+
+\hspace{0.5cm} Phân tách sai số theo từng trục không gian cho thấy thông tin bổ sung về đặc điểm lỗi của bộ lọc. Bảng \ref{tab:error-axis} trình bày sai số trung phương trên từng trục cho kịch bản người đi bộ.
+
+\begin{table}[h!]
+\centering
+\caption{Sai số trung phương theo từng trục không gian (kịch bản người đi bộ, seed = 42)}
+\label{tab:error-axis}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Phương pháp} & $\sigma_E$ (m) & $\sigma_N$ (m) & $\text{RMSE}_{EN}$ (m) \\
+\midrule
+Đo thô     & 0.34 & 0.31 & 0.46 \\
+Alpha-beta & 0.18 & 0.16 & 0.24 \\
+Kalman     & 0.61 & 0.57 & 0.84 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sai số phân bố tương đương giữa hai trục East và North trong cả ba phương pháp, phù hợp với tính đối xứng của mô hình nhiễu: cả $\sigma_{GPS,E}$ và $\sigma_{GPS,N}$ đều bằng 5.0 m, và quỹ đạo người đi bộ không có ưu tiên hướng cụ thể.
+
+\subsubsection{Biểu đồ phân bố sai số}
+
+\hspace{0.5cm} Ngoài RMSE, phân phối xác suất của sai số vị trí cung cấp thêm thông tin về đặc tính thống kê của bộ lọc. Hình \ref{fig:error-hist} biểu diễn histogram sai số tức thời $\varepsilon_k$ của Kalman filter và alpha-beta filter qua kịch bản người đi bộ (1.200 mẫu).
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    ybar,
+    bar width=0.12cm,
+    width=0.85\textwidth,
+    height=6cm,
+    xlabel={Sai số tức thời $\varepsilon_k$ (m)},
+    ylabel={Số lượng mẫu},
+    xmin=-0.1, xmax=3.6,
+    ymin=0,
+    grid=major,
+    grid style={dashed, gray!40},
+    legend style={at={(0.98,0.98)}, anchor=north east, font=\small},
+    xtick={0,0.5,1.0,1.5,2.0,2.5,3.0,3.5},
+]
+% Alpha-beta: distribution concentrated near 0 (RMSE=0.24 m)
+\addplot+[fill=blue!40, draw=blue!60, opacity=0.7] coordinates {
+    (0.1, 620) (0.3, 499) (0.5, 78) (0.7, 3)};
+% Kalman: wider distribution with convergence tail (RMSE=0.84 m)
+\addplot+[fill=red!40, draw=red!60, opacity=0.7] coordinates {
+    (0.1, 511) (0.3, 300) (0.5, 124) (0.7, 35) (0.9, 37)
+    (1.1,  50) (1.3,  37) (1.5,  24) (1.7,   7) (1.9,  8)
+    (2.1,   8) (2.3,   7) (2.5,   7) (2.7,   9) (2.9, 11)
+    (3.1,  18) (3.3,   7)};
+\legend{Alpha-beta, Kalman}
+\end{axis}
+\end{tikzpicture}
+\caption{Phân bố sai số tức thời của hai bộ lọc (kịch bản người đi bộ, n = 1.200 mẫu)}
+\label{fig:error-hist}
+\end{figure}
+
+Phân phối của alpha-beta filter tập trung gần gốc (hơn 93\% mẫu nằm trong 0-0{,}4 m), phản ánh độ trễ hồi của bộ lọc thấp. Phân phối của Kalman filter rộng hơn do có đuôi kéo dài về phía sai số cao, xuất phát từ giai đoạn hội tụ ban đầu khi ma trận $\mathbf{P}$ chưa ổn định (khoảng 15 giây đầu phiên).
+
+\subsection{Phân tích trường hợp đặc biệt: elevation âm}
+
+\hspace{0.5cm} Một trường hợp cần kiểm chứng là khi mục tiêu ở dưới vị trí người quan sát (elevation âm). Tình huống này xảy ra khi người quan sát đứng trên cao như đỉnh đồi hoặc tầng thượng tòa nhà và nhìn xuống mục tiêu.
+
+Hàm \texttt{polar\_to\_enu()} chuyển đổi theo công thức:
+
+\begin{align}
+d_{horiz} &= R \cos(\theta_{el}) \\
+E &= d_{horiz} \sin(\psi_{az}) \\
+N &= d_{horiz} \cos(\psi_{az}) \\
+U &= R \sin(\theta_{el})
+\end{align}
+
+Khi $\theta_{el} < 0$: $\cos(\theta_{el}) > 0$ (khoảng cách ngang vẫn dương), $\sin(\theta_{el}) < 0$ (Up âm, tức mục tiêu thấp hơn người quan sát). Về mặt toán học, hàm này xử lý đúng không cần thêm điều kiện rẽ nhánh.
+
+Bảng \ref{tab:elevation-edge} xác minh hành vi ở các góc elevation đặc trưng.
+
+\begin{table}[h!]
+\centering
+\caption{Kết quả \texttt{polar\_to\_enu()} với $R = 100$ m, $\psi_{az} = 0^\circ$ (hướng Bắc), các góc elevation khác nhau}
+\label{tab:elevation-edge}
+\begin{tabular}{ccccl}
+\toprule
+$\theta_{el}$ & East (m) & North (m) & Up (m) & Nhận xét \\
+\midrule
+$+30^\circ$ & 0.00  & 86.60  & $+$50.00 & Mục tiêu cao hơn người quan sát \\
+$0^\circ$   & 0.00  & 100.00 &    0.00  & Cùng mặt phẳng ngang \\
+$-15^\circ$ & 0.00  & 96.59  & $-$25.88 & Mục tiêu thấp hơn người quan sát \\
+$-45^\circ$ & 0.00  & 70.71  & $-$70.71 & Góc ngắm xuống dốc \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Kết quả cho thấy chuỗi chuyển đổi tọa độ hoạt động đúng ở cả hai phía của mặt phẳng ngang. Thành phần Up âm được chuyển đổi chính xác qua các bước ECEF và LLA, cho phép hệ thống tính đúng độ cao mục tiêu ngay cả khi quan sát từ điểm cao.

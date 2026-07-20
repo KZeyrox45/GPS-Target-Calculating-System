@@ -3,10 +3,11 @@ test_sensor_fusion.py - Sensor fusion unit tests
 """
 import math
 import pytest
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from app.algorithms.sensor_fusion import fuse_sensors, GPSSpec, IMUSpec, LaserSpec
+from app.algorithms.sensor_fusion import fuse_sensors
 
 OBS_LAT = 10.762622
 OBS_LON = 106.660172

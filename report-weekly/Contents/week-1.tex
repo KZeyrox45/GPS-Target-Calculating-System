@@ -4,16 +4,16 @@
 
 \hspace{0.5cm} Trong giai đoạn 1 (Phase 1), nhóm đã xây dựng thuật toán tính toán tọa độ mục tiêu ở trạng thái tĩnh. Cụ thể, hệ thống nhận đầu vào là vị trí GPS của người quan sát, góc ngắm (azimuth, elevation) đo từ IMU hoặc la bàn điện tử, và khoảng cách đo bằng laser rangefinder. Đầu ra là tọa độ địa lý (kinh độ, vĩ độ, cao độ) của mục tiêu. Thuật toán được chạy theo kiểu single-point: mỗi lần tính toán là một lần đọc cảm biến riêng biệt, không có sự liên kết giữa các lần đo về mặt thời gian.
 
-Giai đoạn 2 mở rộng bài toán theo một hướng khác. Mục tiêu không còn đứng yên mà có thể di chuyển. Hệ thống phải đảm bảo tính toán liên tục, cập nhật vị trí mục tiêu theo thời gian thực, và hiển thị quá trình di chuyển trên bản đồ số. Điều này đòi hỏi phải xử lý dòng dữ liệu từ nhiều cảm biến cùng lúc, kết hợp chúng với nhau, và áp dụng các bộ lọc để ước lượng vị trí chính xác ngay cả khi tín hiệu bị nhiễu hoặc gián đoạn.
+Giai đoạn 2 mở rộng bài toán: mục tiêu không còn đứng yên mà có thể di chuyển. Hệ thống phải tính toán liên tục, cập nhật vị trí mục tiêu theo thời gian thực và hiển thị quá trình di chuyển trên bản đồ số. Yêu cầu này đòi hỏi xử lý dòng dữ liệu từ nhiều cảm biến đồng thời, kết hợp chúng và áp dụng các bộ lọc để ước lượng vị trí chính xác ngay cả khi tín hiệu bị nhiễu hoặc gián đoạn.
 
-Để đạt được điều đó, nhóm mở rộng kiến trúc hệ thống theo hướng sau:
+Kiến trúc hệ thống được mở rộng theo các hướng sau:
 \begin{itemize}[label={}]
     \item (i) Tích hợp thêm cảm biến IMU để đo hướng và góc nghiêng.
     \item (ii) Áp dụng thuật toán lọc Kalman và alpha-beta để xử lý chuỗi thời gian.
     \item (iii) Xây dựng hệ thống truyền thông thời gian thực bằng WebSocket.
     \item (iv) Xây dựng giao diện bản đồ tương tác trên nền web.
 \end{itemize}
-\hspace{0.5cm} Ngoài ra, hệ thống sẽ được triển khai trên Raspberry Pi để xử lý tại thiết bị di động trước khi gửi lên máy chủ trung tâm. Tuy nhiên, phần cứng hiện chưa có sẵn nên giai đoạn này sẽ thực hiện sau.
+\hspace{0.5cm} Hệ thống được thiết kế để triển khai trên Raspberry Pi nhằm xử lý tại thiết bị di động trước khi gửi lên máy chủ trung tâm. Phần này thuộc triển khai phần cứng và được kiểm chứng qua mô phỏng trong giai đoạn hiện tại.
 
 \subsection{Phát biểu bài toán}
 
@@ -68,18 +68,18 @@ Hệ thống được đề xuất gồm bốn tầng chính:
 
 \subsubsection{Tầng giao diện (Frontend Layer)}
 
-\hspace{0.5cm} Giao diện người dùng được xây dựng bằng React kết hợp với Vite, sử dụng thư viện Leaflet để hiển thị bản đồ. Các chức năng chính bao gồm:
+\hspace{0.5cm} Giao diện người dùng được xây dựng bằng React kết hợp với Vite, sử dụng thư viện Leaflet để hiển thị bản đồ. Các chức năng chính:
 \begin{itemize}
-    \item Hiển thị bản đồ nền (OpenStreetMap) với vị trí người quan sát và mục tiêu.
+    \item Hiển thị bản đồ nền OpenStreetMap với vị trí người quan sát và mục tiêu.
     \item Cập nhật vị trí mục tiêu theo thời gian thực.
     \item Hiển thị lộ trình di chuyển của mục tiêu.
-    \item Hiển thị các thông số đo lường (tọa độ, góc, khoảng cách).
-    \item Điều khiển phiên (bắt đầu, dừng, cấu hình).
+    \item Hiển thị thông số đo lường gồm tọa độ, góc và khoảng cách.
+    \item Điều khiển phiên: bắt đầu, dừng, cấu hình.
 \end{itemize}
 
 \subsection{Cơ sở lý thuyết mở rộng}
 
-\hspace{0.5cm} Trong giai đoạn 1, nhóm đã trình bày các kiến thức nền tảng về GPS, tam giác cầu, các phép chiếu bản đồ, và các thuật toán geodesic (Haversine, Vincenty, Karney). Ở giai đoạn 2, cần mở rộng thêm các khái niệm sau:
+\hspace{0.5cm} Giai đoạn 1 đã trình bày các kiến thức nền tảng về GPS, tam giác cầu, các phép chiếu bản đồ và các thuật toán geodesic (Haversine, Vincenty, Karney). Giai đoạn 2 mở rộng thêm các khái niệm sau:
 
 \subsubsection{Hệ tọa độ Body frame và chuyển đổi}
 
@@ -93,18 +93,18 @@ R_{body}^{ENU} = R_z(\text{yaw}) \cdot R_y(\text{pitch}) \cdot R_x(\text{roll})
 
 \subsubsection{Kết hợp đa cảm biến (Sensor fusion)}
 
-\hspace{0.5cm} Điểm mới của đề tài này là phải kết hợp dữ liệu từ nhiều cảm biến khác nhau. Lý do là:
+\hspace{0.5cm} Việc kết hợp dữ liệu từ nhiều cảm biến là điểm khác biệt chính so với giai đoạn 1:
 \begin{itemize}
-    \item GPS cho vị trí tuyệt đối nhưng tần số thấp (1-10 Hz) và dễ bị mất tín hiệu.
-    \item IMU cho tần số cao (100-1000 Hz) nhưng bị trôi (drift) theo thời gian.
-    \item Laser cho khoảng cách chính xác nhưng cần có LOS (Line of Sight).
+    \item GPS cho vị trí tuyệt đối nhưng tần số thấp (từ 1 đến 10 Hz) và dễ mất tín hiệu.
+    \item IMU có tần số cao (từ 100 đến 1000 Hz) nhưng bị trôi (drift) theo thời gian.
+    \item Laser cho khoảng cách chính xác nhưng yêu cầu tầm nhìn thẳng (LOS).
 \end{itemize}
 
-Kết hợp ba nguồn này cho phép hệ thống ước lượng vị trí mục tiêu ngay cả khi một hoặc hai cảm biến bị suy giảm. Ví dụ, nếu GPS mất tín hiệu, hệ thống vẫn có thể ước lượng vị trí từ IMU và laser cho đến khi GPS hoạt động trở lại.
+Kết hợp ba nguồn này cho phép ước lượng vị trí mục tiêu ngay cả khi một hoặc hai cảm biến suy giảm. Nếu GPS mất tín hiệu, hệ thống vẫn ước lượng từ IMU và laser cho đến khi GPS hoạt động trở lại.
 
 \subsubsection{Kalman filter}
 
-\hspace{0.5cm} Kalman filter là thuật toán cổ điển trong điều khiển và dẫn đường, được Rudolf Kalman công bố năm 1960. Nó cho phép ước lượng trạng thái của một hệ thống từ các đo lường nhiễu và mô hình động học. Trong bài toán tracking, Kalman filter được sử dụng để ước lượng vị trí và tốc độ của mục tiêu.\\
+\hspace{0.5cm} Kalman filter là thuật toán ước lượng trạng thái kinh điển trong điều khiển và dẫn đường, do Rudolf Kalman công bố năm 1960. Thuật toán ước lượng trạng thái của hệ thống từ các đo lường nhiễu và mô hình động học. Trong bài toán bám mục tiêu, Kalman filter ước lượng vị trí và tốc độ của mục tiêu.
 
 Minh họa bộ lọc bằng mô hình đơn giản nhất: mô hình vận tốc không đổi (Constant Velocity) trong không gian 2D (East-North):
 
@@ -124,7 +124,7 @@ Với mục tiêu drone cần theo dõi cả trục Up, vector trạng thái m�
 
 \subsubsection{Alpha-beta filter}
 
-\hspace{0.5cm} Alpha-beta filter (còn gọi là g-h filter) là phiên bản đơn giản hóa của Kalman filter, chỉ dùng hai tham số: alpha (vị trí) và beta (vận tốc). Nó phù hợp cho các hệ thống có tài nguyên tính toán hạn chế như Raspberry Pi, và vẫn cho kết quả tốt với các mục tiêu di chuyển đều.
+\hspace{0.5cm} Alpha-beta filter (còn gọi là g-h filter) là phiên bản đơn giản hóa của Kalman filter, chỉ dùng hai tham số: alpha cho vị trí và beta cho vận tốc. Bộ lọc này phù hợp với các hệ thống có tài nguyên tính toán hạn chế và vẫn cho kết quả tốt với các mục tiêu di chuyển đều.
 
 \begin{equation}
 \begin{aligned}
@@ -136,7 +136,7 @@ x_{k} &= x_{k}^{p} + \alpha (z_{k} - x_{k}^{p}) \quad \text{(Cập nhật vị t
 
 \subsection{Sơ đồ use-case}
 
-\hspace{0.5cm} Hình \ref{fig:usecase} mô tả sơ đồ use-case của hệ thống. Người dùng (người quan sát) có thể khởi tạo phiên tracking, cấu hình tham số, xem lộ trình, hoặc dừng phiên. Hệ thống tự động cập nhật dữ liệu cảm biến, tính toán tọa độ, và hiển thị trên bản đồ. Khi mất tín hiệu, hệ thống sẽ đưa ra cảnh báo.
+\hspace{0.5cm} Hình \ref{fig:usecase} mô tả sơ đồ use-case của hệ thống. Người quan sát có thể khởi tạo phiên bám, cấu hình tham số, xem lộ trình hoặc dừng phiên. Hệ thống tự động cập nhật dữ liệu cảm biến, tính toán tọa độ và hiển thị trên bản đồ. Khi mất tín hiệu, hệ thống đưa ra cảnh báo.
 
 \begin{figure}[h!]
 \centering

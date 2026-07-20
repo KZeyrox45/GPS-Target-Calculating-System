@@ -1,4 +1,4 @@
-﻿\section{Tuần 4}
+\section{Tuần 4}
 
 \subsection{Đánh giá hiệu suất bộ lọc qua mô phỏng}
 
@@ -8,7 +8,7 @@
 
 \hspace{0.5cm} Mỗi kịch bản mô phỏng bao gồm một mục tiêu di chuyển trong phạm vi 400 m xung quanh người quan sát đặt tại HCMUT (10,7626$^\circ$N, 106,6602$^\circ$E), kéo dài 120 giây ở tần số 10 Hz (1.200 bước thời gian). Mô hình nhiễu cảm biến sử dụng thông số như Bảng \ref{tab:noise-week4}.
 
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \caption{Thông số nhiễu cảm biến trong mô phỏng}
 \label{tab:noise-week4}
@@ -30,7 +30,7 @@ Ba loại mục tiêu được mô phỏng tương ứng với ba trường hợ
 
 \hspace{0.5cm} Bảng \ref{tab:rmse-week4} tổng hợp RMSE ngang (horizontal) theo từng kịch bản. Chỉ tiêu yêu cầu của đề tài là RMSE $<$ 5 m trong phạm vi 500 m.
 
-\begin{table}[h!]
+\begin{table}[ht!]
 \centering
 \caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (seed = 42)}
 \label{tab:rmse-week4}
@@ -84,14 +84,14 @@ Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-ba
 
 \subsubsection{Phân tích kết quả}
 
-\hspace{0.5cm} Điểm đáng chú ý là alpha-beta filter đạt RMSE thấp hơn Kalman filter ở cả ba kịch bản. Điều này có thể giải thích qua đặc điểm của bài toán: mô phỏng sử dụng mô hình Constant Velocity (CV), tức là gia tốc bằng không, trong khi alpha-beta filter được thiết kế tối ưu chính xác cho điều kiện này. Với tham số $\alpha = 0{,}4$ theo điều kiện Benedict-Bordner:
+\hspace{0.5cm} Alpha-beta filter đạt RMSE thấp hơn Kalman filter ở cả ba kịch bản. Nguyên nhân là mô phỏng sử dụng mô hình vận tốc không đổi (CV), gia tốc bằng không, trong khi alpha-beta filter được thiết kế tối ưu cho điều kiện này. Với $\alpha = 0{,}4$ theo điều kiện critically damped của Benedict-Bordner:
 \begin{equation}
-\beta = \frac{\alpha^2}{2 - \alpha} \approx 0{,}13,
+\beta = (2 - \alpha) - 2\sqrt{1 - \alpha} \approx 0{,}051,
 \end{equation}
 
-bộ lọc cân bằng tốt giữa đáp ứng với nhiễu đo lường và độ trơn của ước lượng.
+Bộ lọc cân bằng tốt giữa đáp ứng với nhiễu đo lường và độ trơn của ước lượng.
 
-Kalman filter, ngược lại, cần giai đoạn hội tụ ban đầu khi ma trận hiệp phương sai $\mathbf{P}$ còn lớn. Ngoài ra, tham số $\sigma_a$ trong ma trận nhiễu process $\mathbf{Q}$ (mô hình DWNA) được đặt thủ công và chưa được tối ưu theo từng loại mục tiêu.
+Kalman filter cần giai đoạn hội tụ ban đầu khi ma trận hiệp phương sai $\mathbf{P}$ còn lớn. Ngoài ra, tham số $\sigma_a$ trong ma trận nhiễu quá trình $\mathbf{Q}$ theo mô hình DWNA được đặt thủ công và chưa tối ưu theo từng loại mục tiêu.
 
 Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alpha-beta:
 
@@ -101,7 +101,7 @@ Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alp
     \item \textbf{Adaptive measurement noise:} Ma trận $\mathbf{R}_k$ được cập nhật động từ $\sigma_{pos}$ của sensor fusion. Khi mục tiêu vượt ngưỡng cross-over $\approx 794$ m - nơi sai số IMU chiếm ưu thế so với GPS - $\mathbf{R}_k$ tự động tăng, giảm ảnh hưởng của đo lường nhiễu cao.
 \end{itemize}
 
-\subsection{Phân tích sai số sensor fusion theo khoảng cách}
+\subsection{Phân tích sai số hợp nhất cảm biến theo khoảng cách}
 
 \hspace{0.5cm} Mô hình RSS (Root Sum of Squares) mô tả sự lan truyền sai số từ cảm biến đến tọa độ mục tiêu:
 \begin{equation}
@@ -109,14 +109,9 @@ Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alp
 \label{eq:rss-fusion}
 \end{equation}
 
-trong đó $R$ là khoảng cách từ người quan sát đến mục tiêu. Hai số hạng đầu là hằng số theo $R$; số hạng thứ ba tỉ lệ với $R^2$.
+trong đó $R$ là khoảng cách từ người quan sát đến mục tiêu. Hai số hạng đầu là hằng số theo $R$; số hạng thứ ba tỉ lệ với $R^2$. Ngưỡng cross-over được phân tích chi tiết tại tuần 3 cho thấy $R_{cross} \approx 794$ m. Dưới ngưỡng này, sai số GPS chiếm ưu thế; trên ngưỡng này, sai số góc IMU chiếm ưu thế.
 
-Đặc điểm này dẫn đến sự chuyển tiếp theo khoảng cách: ở gần, GPS chiếm ưu thế sai số ($\sigma_{pos} \approx \sigma_{gps} = 5{,}0$ m); ở xa, sai số góc IMU chiếm ưu thế và tăng nhanh theo $R$. Ngưỡng cross-over xảy ra khi:
-\begin{equation}
-R_{cross} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{el}}} \approx \frac{5{,}0}{0{,}00630} \approx 794 \text{ m}.
-\end{equation}
-
-Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ cho thấy rõ vùng GPS-dominated và IMU-dominated.
+Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ và vùng ảnh hưởng của từng loại cảm biến.
 
 \begin{figure}[h!]
 \centering
@@ -132,10 +127,6 @@ Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ ch
     grid style={dashed, gray!40},
     legend style={at={(0.38,0.97)}, anchor=north, font=\small},
 ]
-% sigma_pos = sqrt(25 + 0.25 + R^2*(sin^2(0.00524)+sin^2(0.00349)))
-% sin(0.3deg)=0.005236, sin(0.2deg)=0.003491
-% k = 0.005236^2 + 0.003491^2 = 0.00002742+0.00001219 = 0.000039605
-% sigma_pos = sqrt(25.25 + 0.0000396*R^2)
 \addplot[blue, thick, domain=0:1200, samples=200]
     {sqrt(25.25 + 0.0000396*x*x)};
 \addplot[red, dashed, thick, domain=0:1200]
@@ -153,4 +144,4 @@ Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ ch
 \label{fig:sigma-vs-range}
 \end{figure}
 
-Phân tích này định hướng trực tiếp cho việc lựa chọn cảm biến: cải thiện IMU (giảm $\sigma_{az}$, $\sigma_{el}$) mang lại lợi ích đáng kể hơn cải thiện GPS ở khoảng cách xa.
+Phân tích này định hướng trực tiếp cho việc lựa chọn cảm biến: cải thiện IMU bằng cách giảm $\sigma_{az}$ và $\sigma_{el}$ mang lại lợi ích đáng kể hơn cải thiện GPS ở khoảng cách xa.

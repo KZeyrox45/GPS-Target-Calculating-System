@@ -16,14 +16,13 @@ sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent.parent))
 
 from app.simulation.target_simulator import (
     PedestrianTrajectory, MotorcycleTrajectory, DroneTrajectory,
-    SimulationConfig,
 )
 from app.simulation.boundary import SimulationBoundary
 from app.simulation.sensor_noise import SensorNoiseModel
 from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
 from app.algorithms.alpha_beta_filter import AlphaBetaFilter
 from app.algorithms.sensor_fusion import fuse_sensors
-from app.algorithms.geodetics import enu_to_lla
+
 
 
 def run_scenario(

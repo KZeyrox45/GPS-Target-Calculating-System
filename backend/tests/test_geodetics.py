@@ -5,7 +5,8 @@ test_geodetics.py - Unit tests for geodetic conversion functions
 import math
 import numpy as np
 import pytest
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.geodetics import (
@@ -137,3 +138,43 @@ class TestPolarToENU:
         assert enu[2] == pytest.approx(expected_up, rel=1e-5)
         total_h = math.sqrt(enu[0]**2 + enu[1]**2)
         assert total_h == pytest.approx(expected_horizontal, rel=1e-5)
+
+
+class TestPolarToEnuNegativeElevation:
+    """
+    Negative elevation: target is below the observer (e.g., observer on a hilltop
+    looking down at a ground target).  These four cases verify the edge
+    condition identified in Week 6.
+    """
+
+    def test_zero_elevation_up_is_zero(self):
+        """Elevation exactly 0° → Up component must be zero."""
+        enu = polar_to_enu(0.0, 0.0, 100.0)
+        assert enu[2] == pytest.approx(0.0, abs=1e-9)
+
+    def test_negative_elevation_up_is_negative(self):
+        """Elevation -15° (observer higher than target) → Up component < 0."""
+        enu = polar_to_enu(0.0, -15.0, 100.0)
+        expected_up = 100.0 * math.sin(math.radians(-15.0))  # ≈ -25.88 m
+        assert enu[2] == pytest.approx(expected_up, rel=1e-5)
+        assert enu[2] < 0.0
+
+    def test_negative_elevation_horizontal_still_positive(self):
+        """Negative elevation must not affect horizontal projected distance."""
+        enu = polar_to_enu(0.0, -30.0, 100.0)
+        # Horizontal = R * cos(el) which is still positive for any |el| < 90°
+        horiz = math.sqrt(enu[0]**2 + enu[1]**2)
+        expected_horiz = 100.0 * math.cos(math.radians(-30.0))  # ≈ 86.60 m
+        assert horiz == pytest.approx(expected_horiz, rel=1e-5)
+        assert horiz > 0.0
+
+    def test_steep_negative_elevation_symmetry(self):
+        """polar_to_enu(-45°) should be the mirror of polar_to_enu(+45°) in Up."""
+        enu_pos = polar_to_enu(0.0, +45.0, 100.0)
+        enu_neg = polar_to_enu(0.0, -45.0, 100.0)
+        # Up components must be equal in magnitude but opposite in sign
+        assert enu_neg[2] == pytest.approx(-enu_pos[2], rel=1e-5)
+        # Horizontal distances must be identical
+        horiz_pos = math.sqrt(enu_pos[0]**2 + enu_pos[1]**2)
+        horiz_neg = math.sqrt(enu_neg[0]**2 + enu_neg[1]**2)
+        assert horiz_neg == pytest.approx(horiz_pos, rel=1e-5)

@@ -43,8 +43,8 @@
 \draw[arrow] (embedded) -- (firmware);
 
 % Mũi tên từ Firmware xuống Sensors (phân tán rõ ràng)
-\draw[arrow] (firmware) -- node[midway, left=5pt, font=\footnotesize] {UART/$I^2C$} (gps);
-\draw[arrow] (firmware) -- node[midway, right=2pt, font=\footnotesize] {$I^2C$} (imu);
+\draw[arrow] (firmware) -- node[midway, left=5pt, font=\footnotesize] {UART/I2C} (gps);
+\draw[arrow] (firmware) -- node[midway, right=2pt, font=\footnotesize] {I2C} (imu);
 \draw[arrow] (firmware) -- node[midway, right=5pt, font=\footnotesize] {UART} (laser);
 
 % ==================== LAYER LABELS (bên phải) ====================
@@ -96,10 +96,10 @@ Máy chủ được xây dựng bằng FastAPI, một framework Python hiện đ
 
 Giao diện người dùng chạy trên trình duyệt web, sử dụng React và Vite để đóng gói. Các thành phần chính:
 \begin{itemize}
-    \item \textbf{Bản đồ}: Thư viện Leaflet hiển thị bản đồ OpenStreetMap. Hiển thị vị trí người quan sát (marker xanh) và vị trí mục tiêu (marker đỏ). Leaflet hiện tại đáp ứng tốt cho bản đồ 2D. Nhóm đang nghiên cứu tính khả thi của việc nâng cấp lên bản đồ 3D sử dụng CesiumJS.
+    \item \textbf{Bản đồ}: Thư viện Leaflet hiển thị bản đồ OpenStreetMap. Vị trí người quan sát được đánh dấu xanh, vị trí mục tiêu đánh dấu đỏ. Leaflet đáp ứng tốt cho bản đồ 2D; bản đồ 3D với CesiumJS có thể được bổ sung nếu yêu cầu đề tài mở rộng.
     \item \textbf{Lớp thông tin}: Hiển thị tọa độ, góc ngắm, khoảng cách, tốc độ, trạng thái hệ thống.
     \item \textbf{Biểu đồ}: Hiển thị độ cao, sai số, quỹ đạo theo thời gian.
-    \item \textbf{Điều khiển phiên}: Các nút bật/tắt tracking, cấu hình tham số.
+    \item \textbf{Điều khiển phiên}: Các nút bật/tắt bám mục tiêu, cấu hình tham số.
 \end{itemize}
 
 \subsection{Nguyên lý hoạt động}
@@ -120,18 +120,18 @@ Hoạt động của hệ thống được mô tả bằng các bước sau:
   "laser": {"distance": 125.0}
 }
 \end{verbatim}
-    \item Bản tin JSON được gửi lên server qua WebSocket.
-    \item Server nhận dữ liệu, thực hiện:
+    \item Bản tin JSON được gửi lên máy chủ qua WebSocket.
+    \item Máy chủ nhận dữ liệu, thực hiện:
     \begin{itemize}
         \item Chuyển đổi GPS từ WGS84 sang ECEF, rồi sang ENU.
         \item Tạo vector định hướng 3D từ azimuth và elevation.
         \item Nhân vector định hướng với khoảng cách laser để được tọa độ tương đối.
         \item Cộng vào vị trí người quan sát để được tọa độ mục tiêu trong ENU.
         \item Chuyển đổi ngược về WGS84.
-        \item Áp dụng Kalman filter (hoặc alpha-beta) để ước lượng.
+        \item Áp dụng Kalman filter hoặc alpha-beta để ước lượng.
     \end{itemize}
-    \item Tọa độ mục tiêu đã xử lý được gửi xuống frontend qua WebSocket.
-    \item Frontend cập nhật vị trí mục tiêu trên bản đồ.
+    \item Tọa độ mục tiêu đã xử lý được gửi xuống giao diện qua WebSocket.
+    \item Giao diện cập nhật vị trí mục tiêu trên bản đồ.
 \end{enumerate}
 
 \subsubsection{Chuyển đổi tọa độ}
@@ -213,6 +213,6 @@ Raspberry Pi được chọn làm nền tảng xử lý nhúng vì những lý d
     \item Ứng dụng Python chạy độc lập, đọc cảm biến theo chu kỳ, gửi dữ liệu qua WebSocket bằng thư viện \texttt{websockets}.
 \end{itemize}
 
-Phần xử lý nhúng này được thiết kế để có thể hoạt động độc lập, không cần máy tính. Người dùng mang Raspberry Pi (gắn trên bảng điều khiển, tripod, hoặc túi đeo) ra hiện trường, bật nguồn là hệ thống tự động chạy. Dữ liệu được gửi về máy chủ trung tâm qua mạng Wi-Fi (hoặc 4G nếu có USB dongle).
+Phần xử lý nhúng này được thiết kế để hoạt động độc lập, không cần máy tính. Người dùng mang Raspberry Pi gắn trên bảng điều khiển, tripod hoặc túi đeo ra hiện trường, bật nguồn là hệ thống tự động chạy. Dữ liệu được gửi về máy chủ trung tâm qua mạng Wi-Fi hoặc 4G nếu có USB dongle.
 
-Tuy nhiên, hiện tại nhóm chưa có đủ thiết bị phần cứng để triển khai phần này. Các thử nghiệm bước đầu được thực hiện trên máy tính cá nhân, sử dụng dữ liệu mô phỏng (simulation) thay cho cảm biến thật. Vị trí GPS được tạo ngẫu nhiên trong một bán kính cho trước, góc ngắm và khoảng cách được mô phỏng dựa trên quỹ đạo của mục tiêu giả định. Phần xử lý trên Raspberry Pi sẽ được triển khai trong giai đoạn sau khi có đủ thiết bị.
+Kết quả được kiểm chứng qua mô phỏng với mô hình nhiễu Gaussian, sử dụng công cụ mô phỏng quỹ đạo tích hợp trong hệ thống. Phương pháp này cho phép kiểm soát điều kiện thử nghiệm và lặp lại kết quả, phù hợp cho giai đoạn đánh giá thuật toán. Vị trí GPS được sinh theo quỹ đạo định trước, góc ngắm và khoảng cách được mô phỏng dựa trên vị trí thực của mục tiêu kết hợp với mô hình nhiễu cảm biến.

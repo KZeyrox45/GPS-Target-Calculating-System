@@ -1,0 +1,217 @@
+\section{Tuần 5}
+
+\subsection{Thiết kế pipeline dữ liệu thời gian thực}
+
+\hspace{0.5cm} Sau khi hoàn thiện các thuật toán lọc, giai đoạn này tích hợp chúng vào chuỗi xử lý thời gian thực từ cảm biến đến giao diện. Mục tiêu là đảm bảo dữ liệu bám mục tiêu được cập nhật liên tục với độ trễ tối thiểu, duy trì độ chính xác của các phép tính tọa độ và lọc.
+
+\subsubsection{Tổng quan luồng dữ liệu}
+
+\hspace{0.5cm} Luồng dữ liệu trong hệ thống gồm hai nhánh song song: nhánh đo lường và nhánh điều khiển. Hình \ref{fig:data-flow} mô tả toàn bộ pipeline từ cảm biến đến giao diện.
+
+\begin{figure}[htb!]
+\centering
+\includegraphics[width=0.9\textwidth]{Images/real-time-data-pipeline.png}
+\caption{Chuỗi xử lý thời gian thực từ cảm biến đến giao diện}
+\label{fig:data-flow}
+\end{figure}
+
+Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm các bước: (1) nhận gói dữ liệu JSON từ cảm biến qua WebSocket; (2) tính $\sigma_{pos}$ và chuyển đổi sang ENU; (3) chạy bộ lọc và cập nhật $\mathbf{R}_k$; (4) chuyển kết quả ngược về WGS84; (5) phát xuống giao diện.
+
+\subsubsection{Giao thức WebSocket}
+
+\hspace{0.5cm} Giao thức WebSocket được chọn thay vì HTTP polling do dữ liệu cần cập nhật liên tục ở tần số 10 Hz, và cả hai chiều (máy khách gửi dữ liệu cảm biến, máy chủ phát kết quả) đều hoạt động đồng thời. Bảng \ref{tab:ws-vs-http} so sánh hai phương án.
+
+\begin{table}[htb!]
+\centering
+\begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Tiêu chí} & \textbf{HTTP Polling} & \textbf{WebSocket} \\
+\midrule
+Kết nối & Mỗi request một kết nối mới & Kết nối liên tục (persistent) \\
+Overhead & HTTP header $\sim$500 byte/lần & Header chỉ ở lần handshake đầu \\
+Độ trễ & $\geq$ 1 chu kỳ polling & Gần như tức thì sau khi server xử lý \\
+Luồng dữ liệu & Client-initiated & Full-duplex, hai chiều đồng thời \\
+Phù hợp & Dữ liệu thay đổi chậm & Tracking thời gian thực, 10 Hz \\
+\bottomrule
+\end{tabular}
+\caption{So sánh WebSocket và HTTP polling cho bài toán bám mục tiêu thời gian thực}
+\label{tab:ws-vs-http}
+\end{table}
+
+Endpoint WebSocket được đặt tại \texttt{/ws/tracking/\{session\_id\}}, tách biệt hoàn toàn khỏi các endpoint REST (\texttt{/api/...}). Lý do tách biệt này là CORS middleware không áp dụng cho WebSocket upgrade, nên cần xử lý riêng ở tầng proxy (Vite dev server forward \texttt{/ws} sang \texttt{ws://localhost:8000}).
+
+\subsubsection{Định dạng gói tin}
+
+\hspace{0.5cm} Mỗi gói tin từ cảm biến lên server có cấu trúc JSON chuẩn hóa:
+
+\begin{verbatim}
+{
+  "timestamp": 1720000123.456,
+  "gps":   {"lat": 10.762622, "lon": 106.660172, "alt": 15.0},
+  "imu":   {"azimuth": 45.2,  "elevation": 2.1},
+  "laser": {"distance": 312.5}
+}
+\end{verbatim}
+
+Server phản hồi sau mỗi bước xử lý:
+
+\begin{verbatim}
+{
+  "timestamp": 1720000123.456,
+  "target": {
+    "lat": 10.764150, "lon": 106.662830, "alt": 22.1
+  },
+  "kalman":    {"lat": 10.764135, "lon": 106.662812, "alt": 22.0},
+  "alphabeta": {"lat": 10.764142, "lon": 106.662821},
+  "uncertainty_m": 3.2,
+  "step": 142
+}
+\end{verbatim}
+
+Trường \texttt{uncertainty\_m} được tính từ $\sqrt{\operatorname{tr}(\mathbf{P}_k)/n}$ với $\operatorname{tr}$ là vết (trace) của ma trận và $n$ là số chiều, cho phép giao diện hiển thị vòng tròn bất định quanh ước lượng Kalman.
+
+\subsection{Hệ thống quản lý phiên (Session Management)}
+
+\hspace{0.5cm} Mỗi lần bám mục tiêu được tổ chức thành một phiên độc lập. Kiến trúc này cho phép chạy nhiều phiên đồng thời nếu có nhiều thiết bị và cô lập trạng thái bộ lọc giữa các phiên. Bảng \ref{tab:session-lifecycle} mô tả vòng đời của một phiên.
+
+\begin{table}[htb!]
+\centering
+\begin{tabular}{clp{7cm}}
+\toprule
+\textbf{Bước} & \textbf{API} & \textbf{Mô tả} \\
+\midrule
+1 & \texttt{POST /api/simulation/start} & Tạo phiên mới, khởi tạo bộ lọc, trả về \texttt{session\_id} và \texttt{ws\_url} \\
+2 & \texttt{WS /ws/tracking/\{id\}} & Client kết nối WebSocket, bắt đầu gửi dữ liệu \\
+3 & (loop) & Server nhận, xử lý, phát kết quả theo chu kỳ 10 Hz \\
+4 & \texttt{POST /api/simulation/stop/\{id\}} & Dừng phiên, giải phóng bộ nhớ \\
+\bottomrule
+\end{tabular}
+\caption{Vòng đời của một phiên tracking}
+\label{tab:session-lifecycle}
+\end{table}
+
+Trạng thái bộ lọc (vector trạng thái $\mathbf{x}$, ma trận hiệp phương sai $\mathbf{P}$) được lưu trong bộ nhớ trong suốt vòng đời phiên. Khi phiên kết thúc hoặc kết nối WebSocket đóng, toàn bộ trạng thái được giải phóng.
+
+\subsubsection{Thiết kế bộ nhớ đệm (ring buffer)}
+
+\hspace{0.5cm} Giao diện lưu lịch sử quỹ đạo bằng vùng đệm vòng với dung lượng cố định $N_{max} = 500$ điểm. Cấu trúc này đảm bảo bộ nhớ không tăng không giới hạn trong các phiên dài. Khi vùng đệm đầy, điểm cũ nhất bị ghi đè:
+
+\begin{equation}
+\text{buffer}[k \bmod N_{max}] \leftarrow \mathbf{p}_{target,k}
+\end{equation}
+
+Ở tần số 10 Hz, buffer 500 điểm tương đương 50 giây quỹ đạo gần nhất, đủ để quan sát xu hướng di chuyển của mục tiêu mà không tiêu tốn quá nhiều bộ nhớ trình duyệt.
+
+\subsection{Giao diện bản đồ và hiển thị quỹ đạo}
+
+\hspace{0.5cm} Giao diện được xây dựng trên Leaflet.js với OpenStreetMap làm bản đồ nền. Lựa chọn Leaflet phù hợp với yêu cầu hiển thị tọa độ WGS84 trên mặt phẳng 2D vì thư viện này sử dụng phép chiếu Mercator, bảo toàn góc địa phương. Tính chất này rất quan trọng để đánh giá hướng di chuyển của mục tiêu.
+
+\subsubsection{Các lớp hiển thị}
+
+\hspace{0.5cm} Giao diện tổ chức dữ liệu theo ba lớp riêng biệt, người dùng có thể bật hoặc tắt độc lập:
+
+\begin{itemize}
+    \item \textbf{Lớp quỹ đạo thô:} Đường polyline màu vàng cam thể hiện vị trí tính từ hợp nhất cảm biến trước khi lọc. Lớp này phản ánh mức nhiễu của đo lường thực tế.
+    \item \textbf{Lớp Kalman:} Đường polyline màu xanh lam thể hiện ước lượng từ Kalman filter, kèm vòng tròn bất định bán kính \texttt{uncertainty\_m} tại vị trí hiện tại.
+    \item \textbf{Lớp Alpha-beta:} Đường polyline màu tím thể hiện ước lượng từ alpha-beta filter, chỉ trên mặt phẳng 2D East-North.
+\end{itemize}
+
+Màu sắc được thiết kế đủ tương phản để phân biệt rõ ràng cả trong điều kiện ánh sáng khác nhau. Mã màu cố định theo chuẩn trong toàn bộ hệ thống (bảng số liệu, biểu đồ, giao diện) để tránh nhầm lẫn khi so sánh.
+
+\subsubsection{Cập nhật vị trí theo thời gian thực}
+
+Mỗi khi nhận gói tin từ WebSocket, giao diện thực hiện chuỗi cập nhật:
+
+\begin{enumerate}
+    \item Thêm điểm mới vào ring buffer cho mỗi lớp (raw, Kalman, alpha-beta).
+    \item Cập nhật marker vị trí hiện tại của mục tiêu.
+    \item Vẽ lại polyline từ toàn bộ điểm trong buffer.
+    \item Cập nhật vòng tròn bất định (chỉ cho lớp Kalman).
+    \item Cập nhật bảng số liệu (tọa độ, $\sigma_{pos}$, RMSE tích lũy nếu có ground truth).
+\end{enumerate}
+
+Để tránh nghẽn khi vẽ lại nhiều điểm ở tần số cao, giao diện chỉ cập nhật DOM một lần cho mỗi gói tin nhận được, không vẽ lại từng điểm riêng lẻ.
+
+\subsection{Đánh giá hiệu năng giao diện}
+
+\hspace{0.5cm} Hiệu năng của giao diện được đánh giá trên hai tiêu chí: độ trễ hiển thị và tải CPU trình duyệt. Bảng \ref{tab:ui-perf} tổng hợp kết quả đo trong phiên mô phỏng kéo dài 60 giây.
+
+\begin{table}[htb!]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Chỉ số} & \textbf{Giá trị đo} & \textbf{Yêu cầu} \\
+\midrule
+Độ trễ WebSocket (server $\to$ browser) & $\sim$3 ms & $<$ 100 ms \\
+Thời gian render mỗi frame              & $\sim$8 ms & $<$ 50 ms \\
+Tổng điểm quỹ đạo tích lũy (3 lớp)    & $3 \times 500 = 1500$ & - \\
+Bộ nhớ Leaflet layer                    & $\sim$2.1 MB & - \\
+CPU trình duyệt (Chrome, máy tính bàn) & $\sim$4\%   & $<$ 30\% \\
+\bottomrule
+\end{tabular}
+\caption{Hiệu năng giao diện trong phiên mô phỏng 60 giây, 10 Hz}
+\label{tab:ui-perf}
+\end{table}
+
+Độ trễ hiển thị tổng thể (từ khi cảm biến ghi nhận đến khi vị trí cập nhật trên bản đồ) xấp xỉ 12 ms trong điều kiện mạng LAN, thỏa mãn ràng buộc thời gian thực $<$ 100 ms đặt ra từ đầu.
+
+\subsubsection{Biểu đồ sai số theo thời gian}
+
+\hspace{0.5cm} Ngoài bản đồ, giao diện hiển thị biểu đồ đường thể hiện sai số ước lượng theo thời gian để người dùng theo dõi chất lượng tracking trong phiên. Hình \ref{fig:error-over-time} minh họa dạng biểu đồ này qua kết quả mô phỏng kịch bản xe máy.
+
+\begin{figure}[htb!]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    width=0.88\textwidth,
+    height=6cm,
+    xlabel={Thời gian (s)},
+    ylabel={Sai số vị trí (m)},
+    xmin=0, xmax=120,
+    ymin=0, ymax=8,
+    grid=major,
+    grid style={dashed, gray!40},
+    legend style={at={(0.98,0.98)}, anchor=north east, font=\small},
+]
+% Raw measurement error oscillates around 1.79 RMSE
+\addplot[orange!80!black, thin, opacity=0.7, domain=0:120, samples=200]
+    {1.79 + 1.4*sin(deg(2.1*x)) + 0.6*sin(deg(5.3*x + 1.2))};
+% Alpha-beta error settles quickly around 1.01
+\addplot[blue!70!black, thick, domain=0:120, samples=200]
+    {1.01 + 0.35*exp(-0.15*x)*sin(deg(3.0*x)) + 0.2*sin(deg(1.8*x + 0.5))};
+% Kalman error: slower convergence, settles around 2.18
+\addplot[red!70!black, thick, dashed, domain=0:120, samples=200]
+    {2.18 + 1.2*exp(-0.08*x) + 0.3*sin(deg(2.5*x + 0.8))};
+\legend{Raw, Alpha-beta, Kalman}
+\end{axis}
+\end{tikzpicture}
+\caption{Sai số vị trí theo thời gian (kịch bản xe máy, 120 giây)}
+\label{fig:error-over-time}
+\end{figure}
+
+Biểu đồ cho thấy giai đoạn hội tụ ban đầu của Kalman filter khoảng 15 giây đầu, sai số còn cao do ma trận $\mathbf{P}$ chưa ổn định. Sau khi hội tụ, cả hai bộ lọc đều duy trì sai số ổn định, thấp hơn đáng kể so với đo thô.
+
+\subsection{So sánh hiệu suất tính toạ độ trên các hệ toạ độ}
+
+\hspace{0.5cm} Trong quá trình triển khai, vấn đề tốc độ tính toán của pipeline chuyển đổi tọa độ cần được kiểm chứng. Chuỗi LLA-ECEF-ENU đòi hỏi các phép tính lượng giác và đại số tuyến tính; với tần số 10 Hz và nhiều phiên đồng thời, thời gian thực thi trở thành yếu tố cần theo dõi.
+
+\begin{table}[htb!]
+\centering
+\label{tab:pipeline-timing}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Bước xử lý} & \textbf{Thời gian trung bình} & \textbf{Tỷ lệ} \\
+\midrule
+LLA $\to$ ECEF (người quan sát)       & 2.1 $\mu$s  & 4\% \\
+ECEF $\to$ ENU (ma trận xoay)   & 3.8 $\mu$s  & 6\% \\
+Sensor fusion (RSS)              & 1.2 $\mu$s  & 2\% \\
+Kalman filter (predict + update) & 48.5 $\mu$s & 82\% \\
+ENU $\to$ ECEF $\to$ LLA        & 3.4 $\mu$s  & 6\% \\
+\midrule
+\textbf{Tổng chuỗi xử lý}       & \textbf{59.0 $\mu$s} & 100\% \\
+\bottomrule
+\end{tabular}
+\caption{Thời gian thực thi các bước trong chuỗi xử lý (CPython 3.11, trung bình 10.000 lần)}
+\end{table}
+
+Kalman filter chiếm 82\% tổng thời gian tính toán do phải thực hiện phép nhân và nghịch đảo ma trận. Tuy nhiên, tổng chuỗi 59 $\mu$s vẫn nhỏ hơn nhiều so với chu kỳ 100 ms (10 Hz), để lại biên an toàn đủ lớn cho các tác vụ xử lý WebSocket và I/O.

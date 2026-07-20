@@ -11,12 +11,12 @@ import time
 import asyncio
 import numpy as np
 from typing import AsyncGenerator
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from ..algorithms.geodetics import enu_to_lla, polar_to_enu, lla_to_enu, calculate_bearing, haversine_distance
+from ..algorithms.geodetics import enu_to_lla
 from ..algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
 from ..algorithms.alpha_beta_filter import AlphaBetaFilter
-from ..algorithms.sensor_fusion import fuse_sensors, GPSSpec, IMUSpec, LaserSpec
+from ..algorithms.sensor_fusion import fuse_sensors
 from .sensor_noise import SensorNoiseModel
 from .boundary import SimulationBoundary
 
@@ -391,10 +391,37 @@ class SimulationEngine:
         self._ab_sq_errors: list[float] = []
         self._raw_sq_errors: list[float] = []
 
+        # Frame buffer for CSV export (all frames, bounded by duration)
+        self._frames: list[dict] = []
+
         self._running = False
 
     def stop(self) -> None:
         self._running = False
+
+    def get_stats(self) -> dict:
+        """Return RMSE summary and step count for the current session."""
+        n = len(self._kalman_sq_errors)
+        if n == 0:
+            return {
+                "steps": 0,
+                "kalman_rmse_m": None,
+                "alpha_beta_rmse_m": None,
+                "raw_rmse_m": None,
+                "duration_s": 0.0,
+                "target_type": self.config.target_type,
+            }
+        kf_rmse  = math.sqrt(sum(self._kalman_sq_errors) / n)
+        ab_rmse  = math.sqrt(sum(self._ab_sq_errors)     / n)
+        raw_rmse = math.sqrt(sum(self._raw_sq_errors)    / n)
+        return {
+            "steps": n,
+            "kalman_rmse_m":     round(kf_rmse,  4),
+            "alpha_beta_rmse_m": round(ab_rmse,  4),
+            "raw_rmse_m":        round(raw_rmse, 4),
+            "duration_s":        round(n / self.config.update_rate_hz, 2),
+            "target_type":       self.config.target_type,
+        }
 
     async def run(self) -> AsyncGenerator[TrackingFrame, None]:
         """Async generator: yields one TrackingFrame per tick."""
@@ -442,8 +469,6 @@ class SimulationEngine:
                 obs_lat, obs_lon, obs_alt,
                 noisy_az, noisy_el, noisy_rng
             )
-            raw_enu = np.array([fused.east, fused.north, fused.up])
-
             # 5. Run tracking filters
             # --- Adaptive R: pass fused sigma_pos_m so Kalman trusts clean
             #     measurements more and noisy ones less automatically.
@@ -539,6 +564,9 @@ class SimulationEngine:
             )
 
             yield frame
+
+            # Store frame for export (bounded by max simulation steps)
+            self._frames.append(frame.to_dict())
 
             # 9. Maintain real-time rate
             elapsed = time.perf_counter() - t_start

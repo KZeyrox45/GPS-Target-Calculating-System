@@ -21,11 +21,11 @@ from app.simulation.target_simulator import (
     MotorcycleTrajectory,
     DroneTrajectory,
 )
+from app.simulation.boundary import SimulationBoundary
+from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
 
 # Expose _TURN_ANGLES_RAD for type-check tests
 _TURN_ANGLES_RAD = MotorcycleTrajectory._TURN_ANGLES_RAD
-from app.simulation.boundary import SimulationBoundary
-from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
 
 
 # -------------------------------------

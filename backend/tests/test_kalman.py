@@ -11,7 +11,8 @@ Tests verify:
 import math
 import numpy as np
 import pytest
-import sys, os
+import sys
+import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.kalman_filter import KalmanFilter
@@ -144,8 +145,8 @@ class TestKalmanConvergence:
         Thesis requirement: positional error < 5m at range < 1km.
         Simulate target at ~500m range (East=500, North=0).
         """
-        # At 500m, azimuth noise 0.3° → lateral error ≈ 500 * sin(0.3°) ≈ 2.6m
-        # GPS noise ≈ 5m, laser noise ≈ 0.5m → RSS ≈ 5.7m per measurement
+        # At 500m, azimuth noise 0.3 degree -> lateral error ≈ 500 * sin(0.3°) ≈ 2.6m
+        # GPS noise ≈ 5m, laser noise ≈ 0.5m -> RSS ≈ 5.7m per measurement
         # Kalman filter should reduce this significantly over time
         rng = np.random.default_rng(99)
         kf = KalmanFilter(dt=0.1, sigma_pos_m=6.0, target_type="pedestrian")

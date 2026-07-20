@@ -70,7 +70,7 @@ export function useWebSocket() {
     ws.onerror = (err) => {
       console.error('[WS] Error:', err);
     };
-  }, [setConnected, setFrame, appendHistories, appendMetrics, setFps, setIsRunning, setSimulationEnded, startFpsCounter, stopFpsCounter]);
+  }, [setConnected, setFrame, appendHistories, appendMetrics, setIsRunning, setSimulationEnded, startFpsCounter, stopFpsCounter]);
 
   const disconnect = useCallback(() => {
     clearTimeout(reconnectTimer.current);

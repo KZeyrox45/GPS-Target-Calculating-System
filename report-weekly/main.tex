@@ -1,8 +1,9 @@
 \documentclass[a4paper]{article}
 
 % ========== ENCODING & LANGUAGE ==========
+\usepackage[utf8]{inputenc}
 \usepackage{vntex}
-\usepackage{mathptmx}[ptm]
+\usepackage{mathptmx}
 
 % ========== MATH PACKAGES ==========
 \usepackage{amsmath}
@@ -13,8 +14,9 @@
 
 % ========== GRAPHICS & FIGURES ==========
 \usepackage{graphicx}  % Replaces both graphics and epsfig
+\graphicspath{{figures/}{Images/}}
 \usepackage{tikz}
-\usetikzlibrary{arrows,snakes,backgrounds,calc}
+\usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,calc,positioning}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage[framemethod=tikz]{mdframed}
@@ -81,7 +83,6 @@
 \def\thesislayout{	% A4: 210 × 297
 	\geometry{
 		a4paper,
-		total={160mm,240mm},
 		left=30mm,
 		top=22mm,
 		right=20mm,
@@ -91,9 +92,10 @@
 \def\thesisheadlayout{	% A4: 210 × 297
 	\geometry{
 		a4paper,
-		total={160mm,240mm},
 		left=30mm,
 		top=10mm,
+		right=20mm,
+		bottom=20mm,
 	}
 }
 \thesislayout
@@ -234,6 +236,7 @@
 % ========== BEGIN DOCUMENT ==========
 \begin{document}
 
+\hypersetup{pageanchor=false}
 \begin{titlepage}
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture, overlay]
@@ -263,6 +266,7 @@
 \vspace{0.3cm}
 
 \begin{center}
+\resizebox{0.95\textwidth}{!}{%
 \begin{tabular}{c}
 \multicolumn{1}{c}{\textbf{{\LARGE BÁO CÁO TUẦN}}}\\
 \\[0.3cm]
@@ -275,7 +279,8 @@
 \textbf{\Large với đa cảm biến Laser-IMU-GNSS}\\
 \\[0.5cm]
 \Large NGÀNH: Kỹ Thuật Máy Tính
-\end{tabular}
+\end{tabular}%
+}
 \end{center}
 
 \vspace{0.5cm}
@@ -296,6 +301,7 @@
 \end{center}
 \end{titlepage}
 
+\hypersetup{pageanchor=true}
 \newpage
 \tableofcontents
 \newpage
@@ -307,5 +313,9 @@
 \input{Contents/week-3}
 \newpage
 \input{Contents/week-4}
+\newpage
+\input{Contents/week-5}
+\newpage
+\input{Contents/week-6}
 
 \end{document}

@@ -9,7 +9,7 @@ POST /api/calculate
 import math
 from fastapi import APIRouter
 from ..models.schemas import StaticCalcRequest, StaticCalcResponse
-from ..algorithms.geodetics import haversine_destination, calculate_bearing, haversine_distance, enu_to_lla, polar_to_enu
+from ..algorithms.geodetics import calculate_bearing, haversine_distance, enu_to_lla, polar_to_enu
 
 router = APIRouter()
 
@@ -22,8 +22,6 @@ def calculate_static_target(req: StaticCalcRequest):
     Uses polar_to_enu + enu_to_lla for full 3-D computation including elevation.
     Falls back to Haversine (flat-Earth) when elevation_deg == 0.
     """
-    import numpy as np
-
     # Convert polar -> ENU -> LLA
     enu = polar_to_enu(req.azimuth_deg, req.elevation_deg, req.distance_m)
     target_lat, target_lon, target_alt = enu_to_lla(
