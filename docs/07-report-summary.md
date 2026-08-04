@@ -1,147 +1,205 @@
-# Report Content Explanation (Weeks 1-6)
+# Nội dung báo cáo (Tuần 1-8)
 
-## Week 1: Introduction & Problem Statement
+## Tuần 1: Giới thiệu và bài toán
 
-### Content
-- **Problem**: Track moving targets using Laser-IMU-GNSS sensor fusion
-- **Phase 1 recap**: Single-point static calculator (Haversine-based)
-- **Phase 2 expansion**: Real-time tracking with filtering and WebSocket
+### Nội dung
+- **Bài toán**: Theo dõi mục tiêu di chuyển bằng hợp nhất cảm biến Laser-IMU-GNSS
+- **Giai đoạn 1**: Máy tính điểm đơn tĩnh (dựa trên Haversine)
+- **Mở rộng giai đoạn 2**: Theo dõi thời gian thực với lọc và WebSocket
 
-### Key Concepts Introduced
-- 4-layer architecture (Sensor → Embedded → Server → Frontend)
-- Sensor characteristics: GPS (2-5m accuracy, 1-10 Hz), IMU (100-1000 Hz, drifts), Laser (±1-2 cm, LOS only)
-- Body frame coordinate system and rotation matrix
-- Kalman filter basics (state vector, F matrix)
-- Alpha-beta filter basics (α, β parameters)
+### Khái niệm giới thiệu
+- Kiến trúc 4 tầng (Cảm biến → Nhúng → Server → Frontend)
+- Đặc điểm cảm biến: GPS (độ chính xác 2-5m, 1-10 Hz), IMU (100-1000 Hz, bị drift), Laser (±1-2 cm, chỉLOS)
+- Hệ tọa độ khung thiết bị và ma trận xoay
+- Cơ sở Kalman filter (vector trạng thái, ma trận F)
+- Cơ sở alpha-beta filter (tham số α, β)
 
-### Figures
-- Use-case diagram (`Images/use-case-diagram.png`)
+### Hình ảnh
+- Sơ đồ use-case (`Images/use-case-diagram.png`)
 
-## Week 2: System Architecture
+## Tuần 2: Kiến trúc hệ thống
 
-### Content
-- Detailed 4-layer architecture with component descriptions
-- Data flow from sensor to frontend
-- Raspberry Pi embedded design (UART/I2C/SPI connections)
-- FastAPI server design (REST + WebSocket)
-- React frontend design (Leaflet maps)
+### Nội dung
+- Kiến trúc 4 tầng chi tiết với mô tả thành phần
+- Luồng dữ liệu từ cảm biến đến frontend
+- Thiết kế nhúng Raspberry Pi (kết nối UART/I2C/SPI)
+- Thiết kế server FastAPI (REST + WebSocket)
+- Thiết kế frontend React (bản đồ Leaflet)
 
-### Key Concepts
-- WebSocket vs HTTP polling (full-duplex, persistent connection)
-- Session lifecycle (start → WS loop → stop)
-- Class diagram of software components
+### Khái niệm
+- WebSocket so với HTTP polling (full-duplex, kết nối liên tục)
+- Vòng đời phiên (bắt đầu → vòng lặp WS → dừng)
+- Sơ đồ lớp của các thành phần phần mềm
 
-### Figures
-- Architecture diagram (TikZ)
-- Class diagram (`Images/class-diagram.png`)
-- Activity diagrams (processing + tracking)
+### Hình ảnh
+- Sơ đồ kiến trúc (TikZ)
+- Sơ đồ lớp (`Images/class-diagram.png`)
+- Sơ đồ hoạt động (xử lý + theo dõi)
 
-## Week 3: Coordinate Pipeline & Error Analysis
+## Tuần 3: Pipeline tọa độ và phân tích sai số
 
-### Content
-- **Coordinate conversion pipeline**: WGS84 → ECEF → ENU → target → WGS84
-- **Error propagation**: RSS formula for σ_pos
-- **Sensor noise parameters** (1-sigma values)
-- **Cross-over range calculation** (794 m)
-- **Kalman filter structure**: F, Q (DWNA), adaptive R
-- **Alpha-beta filter**: Benedict-Bordner critically damped formula
+### Nội dung
+- **Pipeline chuyển đổi tọa độ**: WGS84 → ECEF → ENU → mục tiêu → WGS84
+- **Lan truyền sai số**: Công thức RSS cho σ_pos
+- **Thông số nhiễu cảm biến** (giá trị 1-sigma)
+- **Tính khoảng cách giao nhau** (794 m)
+- **Cấu trúc Kalman filter**: F, Q (DWNA), adaptive R
+- **Alpha-beta filter**: Công thức critically damped Benedict-Bordner
 
-### Key Formulas
+### Công thức chính
 - RSS: `σ_pos² = σ_gps² + (R·sin(σ_az))² + σ_range² + (R·sin(σ_el))²`
-- Cross-over: `R_cross = σ_gps / √(sin²(σ_az) + sin²(σ_el))`
+- Giao nhau: `R_cross = σ_gps / √(sin²(σ_az) + sin²(σ_el))`
 - Beta: `β = (2-α) - 2√(1-α)`
 
-### Tables
-- Sensor noise parameters
-- σ_a values per target type
-- Kalman vs Alpha-beta comparison
+### Bảng
+- Thông số nhiễu cảm biến
+- Giá trị σ_a theo loại mục tiêu
+- So sánh Kalman với alpha-beta
 
-### Figures
-- Coordinate flow diagram (`Images/coord-flow.png`)
-- Error propagation chart (`Images/error-prop.png`)
-- Kalman detail diagram (`Images/kalman-detail.png`)
+### Hình ảnh
+- Sơ đồ luồng tọa độ (`Images/coord-flow.png`)
+- Biểu đồ lan truyền sai số (`Images/error-prop.png`)
+- Sơ đồ chi tiết Kalman (`Images/kalman-detail.png`)
 
-## Week 4: Simulation Results
+## Tuần 4: Kết quả mô phỏng
 
-### Content
-- **Simulation setup**: 400m boundary, 120s, 10 Hz, seed=42
-- **RMSE results**: All 3 scenarios pass <5m spec
-- **Alpha-beta outperforms Kalman** in this CV simulation (expected)
-- **Kalman advantages**: Uncertainty estimate (P matrix), adaptive R
-- **Error vs distance analysis**: σ_pos(R) curve
+### Nội dung
+- **Thiết lập mô phỏng**: Biên 400m, 120s, 10 Hz, giá trị khởi tạo cố định để tái tạo
+- **Kết quả RMSE**: Cả 3 kịch bản đạt yêu cầu <5m
+- **Alpha-beta tốt hơn Kalman** trong mô phỏng CV này (dự kiến)
+- **Ưu điểm Kalman**: Ước lượng bất định (ma trận P), adaptive R
+- **Phân tích sai số theo khoảng cách**: Đường cong σ_pos(R)
 
-### Key Results
-| Scenario | Raw | Alpha-Beta | Kalman |
+### Kết quả chính
+| Kịch bản | Thô | Alpha-Beta | Kalman |
 |----------|-----|-----------|--------|
-| Pedestrian | 0.46 m | 0.24 m | 0.84 m |
-| Motorcycle | 1.79 m | 1.01 m | 2.18 m |
-| Drone | 1.28 m | 0.73 m | 2.33 m |
+| Người đi bộ | 0,46 m | 0,24 m | 0,84 m |
+| Xe máy | 1,79 m | 1,01 m | 2,18 m |
+| Drone | 1,28 m | 0,73 m | 2,33 m |
 
-### Figures
-- RMSE bar chart (TikZ/pgfplots)
-- Sigma vs range curve (TikZ/pgfplots)
+### Hình ảnh
+- Biểu đồ cột RMSE (`figures/rmse_bar_comparison.png`)
+- Đường cong sigma theo khoảng cách (`figures/error_vs_range.png`)
 
-## Week 5: Real-Time Pipeline & UI
+## Tuần 5: Pipeline thời gian thực và Giao diện
 
-### Content
-- **Real-time data flow**: Sensor → WS → Server → Filter → WS → Frontend
-- **WebSocket protocol**: JSON message formats (upstream + downstream)
-- **Session management**: In-memory, ring buffer N_max=500
-- **UI performance**: ~3ms WS latency, ~8ms render, ~4% CPU
-- **Layer control**: 3 trajectory layers (raw/kalman/alphabeta) + uncertainty circle
-- **Pipeline timing**: 59 µs total, Kalman dominates at 82%
+### Nội dung
+- **Luồng dữ liệu thời gian thực**: Cảm biến → WS → Server → Lọc → WS → Frontend
+- **Giao thức WebSocket**: Định dạng JSON (lên + xuống)
+- **Quản lý phiên**: Trong bộ nhớ, vòng đệm N_max=500
+- **Hiệu suất UI**: ~3ms độ trễ WS, ~8ms render, ~4% CPU
+- **Điều khiển lớp**: 3 lớp quỹ đạo (thô/kalman/alphabeta) + vòng tròn bất định
+- **Thời gian pipeline**: Tổng 59 µs, Kalman chiếm phần lớn
 
-### Key Numbers
-- WebSocket latency: ~3 ms (server → browser)
-- Render time: ~8 ms/frame
-- Total trajectory points: 3 × 500 = 1500
-- Leaflet memory: ~2.1 MB
-- CPU usage: ~4%
+### Số liệu chính
+- Độ trễ WebSocket: ~3 ms (server → trình duyệt)
+- Thời gian render: ~8 ms/khung
+- Tổng điểm quỹ đạo: 3 × 500 = 1500
+- Bộ nhớ Leaflet: ~2,1 MB
+- Sử dụng CPU: ~4%
 
-### Tables
-- WebSocket vs HTTP comparison
-- Session lifecycle
-- UI performance metrics
-- Pipeline timing breakdown
+### Bảng
+- So sánh WebSocket với HTTP
+- Vòng đời phiên
+- Chỉ số hiệu suất UI
+- Phân tích thời gian pipeline
 
-### Figures
-- Real-time data pipeline (`Images/real-time-data-pipeline.png`)
-- Error over time (TikZ/pgfplots)
+### Hình ảnh
+- Pipeline dữ liệu thời gian thực (`Images/real-time-data-pipeline.png`)
+- Sai số theo thời gian (`figures/error_timeseries.png`)
 
-## Week 6: Data Export & Post-Session Analysis
+## Tuần 6: Xuất dữ liệu và Phân tích sau phiên
 
-### Content
-- **CSV export**: StreamingResponse, 19 columns, ~120 KB per session
-- **RMSE convergence curve**: Shows filter initialization phase
-- **Error decomposition by axis**: East vs North symmetry
-- **Error histogram**: Alpha-beta concentrated near 0, Kalman wider (convergence tail)
-- **Negative elevation handling**: Mathematical proof + verification table
+### Nội dung
+- **Xuất CSV**: StreamingResponse, 19 cột, ~120 KB mỗi phiên
+- **Đường cong hội tụ RMSE**: Cho thấy giai đoạn khởi tạo bộ lọc
+- **Phân tích sai số theo trục**: Đối xứng Đông-Bắc
+- **Histogram sai số**: Alpha-beta tập trung gần 0, Kalman rộng hơn (đuôi hội tụ)
+- **Xử lý elevation âm**: Bằng chứng toán học + bảng xác thực
 
-### Key Insights
-- Kalman convergence takes ~50-100 timesteps (5-10 seconds)
-- Alpha-beta: 93% of errors within 0-0.4 m
-- Kalman: wider distribution due to initial P matrix instability
-- polar_to_enu() handles negative elevation correctly without branching
+### Kết quả quan trọng
+- Hội tụ Kalman mất khoảng 50-100 bước thời gian (5-10 giây)
+- Alpha-beta: 93% sai số trong khoảng 0-0,4 m
+- Kalman: phân phối rộng hơn do bất định ma trận P ban đầu
+- Chuyển đổi cực sang ENU xử lý elevation âm đúng cách mà không cần phân nhánh
 
-### Tables
-- CSV schema (19 columns)
-- Error by axis (σ_E, σ_N)
-- Negative elevation test results
+### Bảng
+- Schema CSV (19 cột)
+- Sai số theo trục (σ_E, σ_N)
+- Kết quả kiểm tra elevation âm
 
-### Figures
-- RMSE convergence (TikZ/pgfplots)
-- Error histogram (TikZ/pgfplots)
+### Hình ảnh
+- Hội tụ RMSE (`figures/rmse_convergence.png`)
+- Histogram sai số (`figures/error_histogram_pedestrian.png`)
 
-## Overall Report Structure
+## Tuần 7: Phân tích thống kê và Độ nhạy tham số
+
+### Nội dung
+- **Phân tích nhiều giá trị khởi tạo**: 10 giá trị khởi tạo (từ 1 đến 10), cùng cấu hình
+- **Thống kê RMSE**: Trung bình, độ lệch chuẩn, nhỏ nhất, lớn nhất cho cả 3 kịch bản × 3 phương pháp
+- **Cả 9 trường hợp đạt yêu cầu <5m** ở mọi giá trị khởi tạo
+- **Phân tích độ nhạy α**: α=0,2, 0,4, 0,7 với Benedict-Bordner β
+- **So sánh bộ lọc**: Ưu nhược điểm Kalman so với alpha-beta
+
+### Kết quả chính (Trung bình ± Độ lệch chuẩn nhiều giá trị khởi tạo)
+| Kịch bản | Alpha-Beta | Kalman |
+|----------|-----------|--------|
+| Người đi bộ | 0,24 ± 0,03 m | 0,96 ± 0,22 m |
+| Xe máy | 1,09 ± 0,20 m | 2,24 ± 0,37 m |
+| Drone | 0,77 ± 0,03 m | 2,58 ± 0,27 m |
+
+### Độ nhạy α
+| α | β | RMSE (m) | Ghi chú |
+|---|---|----------|---------|
+| 0,2 | 0,011 | 0,21 | Lọc mạnh, chậm bám khi đổi hướng |
+| 0,4 | 0,051 | 0,24 | Cân bằng tối ưu (mặc định) |
+| 0,7 | 0,205 | 0,34 | Bám nhanh, nhạy với nhiễu |
+
+### Hình ảnh
+- Biểu đồ cột RMSE nhiều giá trị khởi tạo với thanh lỗi (`figures/multi_seed_rmse_spec.png`)
+- Biểu đồ độ nhạy α (`figures/alpha_sensitivity.png`)
+
+## Tuần 8: Kiểm tra hồi quy và Tổng kết
+
+### Nội dung
+- **Kiểm tra hồi quy**: 125 test đạt tất cả, 0 lỗi
+- **Đánh giá kiến trúc**: Các tầng tính toán, giao tiếp, giao diện được xác nhận
+- **Danh sách endpoint**: 5 REST + 1 WebSocket
+- **Chuẩn bị demo**: Hướng dẫn demo từng bước cho đánh giá giữa kỳ
+- **Còn lại**: Viết báo cáo, trường hợp đặc biệt, triển khai RPi
+
+### Tóm tắt kiểm thử
+| Hạng mục | Số test | Nội dung |
+|----------|---------|----------|
+| Bộ lọc alpha-beta | 10 | Khởi tạo, bước tính, reset |
+| Chuyển đổi tọa độ | 14 | Haversine, bearing, ECEF/ENU khứ hồi |
+| Kalman filter | 15 | Khởi tạo, predict, update, hội tụ |
+| Hợp nhất cảm biến | 6 | Hướng, sigma, đầu ra LLA |
+| Mô phỏng giai đoạn 2 | 49 | Quỹ đạo, biên, Kalman3D |
+| Endpoint thống kê và xuất | 15 | Stats engine, endpoint |
+| **Tổng** | **125** | **Đạt tất cả** |
+
+### Hạng mục còn lại
+| Hạng mục | Tuần | Mô tả |
+|----------|------|-------|
+| Báo cáo phần lý thuyết | 11 | Kalman 3D, adaptive R, tham chiếu |
+| Báo cáo phần thực nghiệm | 12 | Kết quả đầy đủ, figures, screenshots |
+| Trường hợp đặc biệt: khoảng cách về 0 | 10 | Xử lý khi mục tiêu trở về observer |
+| Kết luận và hướng phát triển | 13 | Đóng góp, hạn chế, hướng mở |
+| Review và proofread | 14 | Format, mục lục, tham chiếu |
+
+## Cấu trúc báo cáo tổng thể
 
 ```
 main.tex (master)
-├── week-1.tex  — Introduction, problem statement, theory
-├── week-2.tex  — Architecture, data flow, Raspberry Pi
-├── week-3.tex  — Coordinate pipeline, error analysis, filters
-├── week-4.tex  — Simulation results, RMSE evaluation
-├── week-5.tex  — Real-time pipeline, WebSocket, UI
-└── week-6.tex  — Data export, post-analysis, edge cases
+├── week-1.tex  — Giới thiệu, bài toán, lý thuyết
+├── week-2.tex  — Kiến trúc, luồng dữ liệu, Raspberry Pi
+├── week-3.tex  — Pipeline tọa độ, phân tích sai số, bộ lọc
+├── week-4.tex  — Kết quả mô phỏng, đánh giá RMSE
+├── week-5.tex  — Pipeline thời gian thực, WebSocket, UI
+├── week-6.tex  — Xuất dữ liệu, phân tích sau, trường hợp đặc biệt
+├── week-7.tex  — Phân tích thống kê, độ nhạy tham số
+└── week-8.tex  — Kiểm tra hồi quy, tổng kết, chuẩn bị demo
 ```
 
-Compiler: pdfLaTeX (Overleaf). BibTeX for references. 3-pass compilation for cross-references.
+Compiler: pdfLaTeX (tương thích Overleaf). BibTeX cho tham chiếu. 3 lần biên dịch để ổn định tham chiếu chéo.

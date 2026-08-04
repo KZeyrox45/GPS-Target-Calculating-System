@@ -8,7 +8,7 @@
 
 \hspace{0.5cm} Mỗi bước thời gian trong phiên mô phỏng tạo ra một bộ dữ liệu đầy đủ gồm: vị trí thực, đo lường thô từ cảm biến, ước lượng Kalman và ước lượng alpha-beta. Các trường dữ liệu được tổ chức theo Bảng \ref{tab:csv-schema}.
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
 \caption{Cấu trúc cột trong file CSV xuất ra}
 \label{tab:csv-schema}
@@ -47,9 +47,9 @@ Kalman & \texttt{uncertainty\_m} & Bán kính bất định $\sqrt{\operatorname
 
 \subsubsection{Endpoint xuất dữ liệu}
 
-\hspace{0.5cm} Hệ thống cung cấp endpoint \texttt{GET /api/simulation/export/\{session\_id\}} trả về file CSV với định dạng trên. Endpoint này sử dụng \texttt{StreamingResponse} để phát dữ liệu trực tiếp mà không cần lưu file trung gian lên đĩa, phù hợp với kiến trúc in-memory của phiên làm việc.
+\hspace{0.5cm} Hệ thống cung cấp endpoint xuất dữ liệu trả về file CSV với định dạng trên. Endpoint này sử dụng phương thức phát trực tiếp để gửi dữ liệu mà không cần lưu file trung gian lên đĩa, phù hợp với kiến trúc làm việc trong bộ nhớ của phiên làm việc.
 
-Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của \texttt{SimulationEngine} trong suốt vòng đời phiên. Với cấu hình mặc định 120 giây ở 10 Hz, tổng số khung tối đa là 1.200 hàng, tương đương xấp xỉ 120 KB dữ liệu CSV. Đây là mức dung lượng chấp nhận được cho phân tích sau phiên.
+Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của bộ xử lý mô phỏng trong suốt vòng đời phiên. Với cấu hình mặc định 120 giây ở 10 Hz, tổng số khung tối đa là 1.200 hàng, tương đương xấp xỉ 120 KB dữ liệu CSV. Đây là mức dung lượng chấp nhận được cho phân tích sau phiên.
 
 \subsection{Phân tích dữ liệu sau phiên}
 
@@ -57,13 +57,13 @@ Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của 
 
 \subsubsection{Đường cong hội tụ RMSE}
 
-\hspace{0.5cm} Hình \ref{fig:rmse-convergence} biểu diễn diễn biến RMSE tích lũy $\text{RMSE}_k$ theo bước thời gian $k$ cho kịch bản xe máy (seed = 42). Định nghĩa:
+\hspace{0.5cm} Hình \ref{fig:rmse-convergence} biểu diễn diễn biến RMSE tích lũy $\text{RMSE}_k$ theo bước thời gian $k$ cho kịch bản xe máy. Định nghĩa:
 
 \begin{equation}
 \text{RMSE}_k = \sqrt{\frac{1}{k} \sum_{i=1}^{k} \left[(e_i - \hat{e}_i)^2 + (n_i - \hat{n}_i)^2\right]}
 \end{equation}
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -105,9 +105,9 @@ Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của 
 
 \hspace{0.5cm} Phân tách sai số theo từng trục không gian cho thấy thông tin bổ sung về đặc điểm lỗi của bộ lọc. Bảng \ref{tab:error-axis} trình bày sai số trung phương trên từng trục cho kịch bản người đi bộ.
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
-\caption{Sai số trung phương theo từng trục không gian (kịch bản người đi bộ, seed = 42)}
+\caption{Sai số trung phương theo từng trục không gian (kịch bản người đi bộ, giá trị khởi tạo = 42)}
 \label{tab:error-axis}
 \begin{tabular}{lccc}
 \toprule
@@ -126,7 +126,7 @@ Sai số phân bố tương đương giữa hai trục East và North trong cả
 
 \hspace{0.5cm} Ngoài RMSE, phân phối xác suất của sai số vị trí cung cấp thêm thông tin về đặc tính thống kê của bộ lọc. Hình \ref{fig:error-hist} biểu diễn histogram sai số tức thời $\varepsilon_k$ của Kalman filter và alpha-beta filter qua kịch bản người đi bộ (1.200 mẫu).
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -165,7 +165,7 @@ Phân phối của alpha-beta filter tập trung gần gốc (hơn 93\% mẫu n�
 
 \hspace{0.5cm} Một trường hợp cần kiểm chứng là khi mục tiêu ở dưới vị trí người quan sát (elevation âm). Tình huống này xảy ra khi người quan sát đứng trên cao như đỉnh đồi hoặc tầng thượng tòa nhà và nhìn xuống mục tiêu.
 
-Hàm \texttt{polar\_to\_enu()} chuyển đổi theo công thức:
+Phép chuyển đổi tọa độ từ polar (azimuth, elevation, khoảng cách) sang ENU được thực hiện theo công thức:
 
 \begin{align}
 d_{horiz} &= R \cos(\theta_{el}) \\
@@ -178,9 +178,9 @@ Khi $\theta_{el} < 0$: $\cos(\theta_{el}) > 0$ (khoảng cách ngang vẫn dươ
 
 Bảng \ref{tab:elevation-edge} xác minh hành vi ở các góc elevation đặc trưng.
 
-\begin{table}[h!]
+\begin{table}[htbp]
 \centering
-\caption{Kết quả \texttt{polar\_to\_enu()} với $R = 100$ m, $\psi_{az} = 0^\circ$ (hướng Bắc), các góc elevation khác nhau}
+\caption{Kết quả chuyển đổi polar sang ENU với $R = 100$ m, $\psi_{az} = 0^\circ$ (hướng Bắc), các góc elevation khác nhau}
 \label{tab:elevation-edge}
 \begin{tabular}{ccccl}
 \toprule
@@ -194,4 +194,4 @@ $-45^\circ$ & 0.00  & 70.71  & $-$70.71 & Góc ngắm xuống dốc \\
 \end{tabular}
 \end{table}
 
-Kết quả cho thấy chuỗi chuyển đổi tọa độ hoạt động đúng ở cả hai phía của mặt phẳng ngang. Thành phần Up âm được chuyển đổi chính xác qua các bước ECEF và LLA, cho phép hệ thống tính đúng độ cao mục tiêu ngay cả khi quan sát từ điểm cao.
+Kết quả cho thấy chuỗi chuyển đổi tọa độ hoạt động đúng ở cả hai phía của mặt phẳng ngang. Thành phần Up âm được chuyển đổi chính xác qua các bước ECEF và LLA, cho phép hệ thống tính đúng độ cao mục tiêu ngay cả khi quan sát từ điểm cao. Về mặt triển khai, phép chuyển đổi này không yêu cầu điều kiện rẽ nhánh (if-else) cho elevation âm, vì các hàm lượng giác $\cos(\theta_{el})$ và $\sin(\theta_{el})$ xử lý tự nhiên cả hai trường hợp.

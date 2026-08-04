@@ -1,7 +1,7 @@
 """
 test_simulation_phase2.py - Phase 2 Simulation Tests
 ======================================================
-New tests added during the Week 3 fixes.  Tests cover:
+Tests cover:
 
   1. PedestrianTrajectory - pause phases, bounded speed
   2. MotorcycleTrajectory - straight/turn state machine, speed range

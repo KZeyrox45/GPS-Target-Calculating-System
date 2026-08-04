@@ -1,86 +1,86 @@
-# Simulation Engine
+# Mô phỏng
 
-## Overview
+## Tổng quan
 
-The simulation engine generates synthetic sensor data for algorithm validation. It creates realistic trajectories, adds sensor noise, fuses measurements, and runs filters — all without requiring physical hardware.
+Động cơ mô phỏng tạo dữ liệu cảm biến tổng hợp để xác thực thuật toán. Nó tạo quỹ đạo thực tế, thêm nhiễu cảm biến, hợp nhất phép đo, và chạy bộ lọc — tất cả mà không cần phần cứng vật lý.
 
-## Trajectory Types
+## Các loại quỹ đạo
 
-### Pedestrian
-- **Speed**: 0.8 – 1.5 m/s (random walk)
-- **Heading**: Gradual drift with random perturbations
-- **Altitude**: Fixed at 0 (2D tracking)
-- **State machine**: Walking | Paused (random rest stops)
-- **Boundary**: Clamped at radius boundary
+### Người đi bộ
+- **Tốc độ**: 0,8 - 1,5 m/s (random walk)
+- **Hướng**: Drift dần với nhiễu ngẫu nhiên
+- **Độ cao**: Cố định 0 (theo dõi 2D)
+- **Máy trạng thái**: Đi bộ | Tạm dừng (nghỉ ngẫu nhiên)
+- **Ranh giới**: Bị chặn tại bán kính biên
 
-### Motorcycle
-- **Speed**: 5 – 15 m/s
-- **State machine**: Cruise | Turn | Decelerate
-- **Turning**: Arc geometry with configurable turn angle
-- **Altitude**: Fixed at 0 (2D tracking)
-- **Boundary**: Reflects off boundary (heading reverses radially)
+### Xe máy
+- **Tốc độ**: 5 - 15 m/s
+- **Máy trạng thái**: Điều khiển | Rẽ | Giảm tốc
+- **Rẽ**: Hình học cung với góc rẽ có thể cấu hình
+- **Độ cao**: Cố định 0 (theo dõi 2D)
+- **Ranh giới**: Phản xạ tại ranh giới (hướng ngược lại theo bán kính)
 
 ### Drone
-- **Speed**: Variable (sinusoidal + circular components)
-- **Altitude**: Varies (sinusoidal, 50–200 m)
-- **Axes**: Full 3D (East, North, Up)
-- **State machine**: Cruise | Ascend | Descend
-- **Boundary**: Horizontal constrained, altitude unconstrained
+- **Tốc độ**: Thay đổi (thành phần sinusoidal + hình tròn)
+- **Độ cao**: Thay đổi (sinusoidal, 50-200 m)
+- **Trục**: Đầy đủ 3D (Đông, Bắc, Lên)
+- **Máy trạng thái**: Đi tăng | Tăng | Giảm
+- **Ranh giới**: Ngang bị ràng buộc, độ cao tự do
 
-## Sensor Noise Model
+## Mô hình nhiễu cảm biến
 
-Gaussian noise added to each measurement:
+Nhiễu Gaussian được thêm vào mỗi phép đo:
 
-| Sensor | Noise (1σ) | Distribution |
-|--------|-----------|-------------|
-| GPS lat/lon | 5.0 m | Gaussian |
-| GPS alt | 5.0 m | Gaussian |
-| IMU azimuth | 0.3° | Gaussian |
-| IMU elevation | 0.2° | Gaussian |
-| Laser distance | 0.5 m | Gaussian |
+| Cảm biến | Nhiễu (1σ) | Phân phối |
+|----------|-----------|-----------|
+| GPS vĩ độ/kinh độ | 5,0 m | Gaussian |
+| GPS độ cao | 5,0 m | Gaussian |
+| IMU azimuth | 0,3° | Gaussian |
+| IMU elevation | 0,2° | Gaussian |
+| Khoảng cách laser | 0,5 m | Gaussian |
 
-Uses `np.random.default_rng(seed)` for reproducible results.
+Sử dụng `np.random.default_rng(seed)` để tái tạo kết quả.
 
-## Simulation Flow
+## Luồng mô phỏng
 
 ```
-For each timestep k (0 to N-1):
-  1. Generate ground truth position from trajectory
-  2. Calculate observer→target geometry
-  3. Generate noisy sensor readings:
-     - GPS: observer_lla + noise
-     - IMU: true_azimuth + noise, true_elevation + noise
-     - Laser: true_distance + noise
-  4. Fuse sensors (RSS) → σ_pos
-  5. Convert to ENU coordinates
-  6. Run Kalman filter (predict + update with adaptive R)
-  7. Run Alpha-Beta filter
-  8. Compute errors vs ground truth
-  9. Store frame in ring buffer
+Với mỗi bước thời gian k (từ 0 đến N-1):
+  1. Tạo vị trí ground truth từ quỹ đạo
+  2. Tính hình học observer → mục tiêu
+  3. Tạo phép đo cảm biến có nhiễu:
+     - GPS: observer_lla + nhiễu
+     - IMU: true_azimuth + nhiễu, true_elevation + nhiễu
+     - Laser: true_distance + nhiễu
+  4. Hợp nhất cảm biến (RSS) → σ_pos
+  5. Chuyển sang tọa độ ENU
+  6. Chạy Kalman filter (dự báo + cập nhật với adaptive R)
+  7. Chạy Alpha-Beta filter
+  8. Tính sai số so với ground truth
+  9. Lưu khung vào vòng đệm
 ```
 
-## Boundary Constraint
+## Ranh giới
 
-- Circular boundary centered at observer origin
-- radius_m ∈ [100, 1000] (Pydantic constraint)
-- Pedestrian: position clamped to boundary
-- Motorcycle: heading reflected off boundary
-- Drone: horizontal constrained, altitude free
+- Ranh giới hình tròn tâm tại observer
+- Bán kính ∈ [100, 1000] m (ràng buộc Pydantic)
+- Người đi bộ: vị trí bị chặn tại ranh giới
+- Xe máy: hướng phản xạ tại ranh giới
+- Drone: ngang bị ràng buộc, độ cao tự do
 
-## RMSE Calculation
+## Tính RMSE
 
 ```
 RMSE_k = sqrt( (1/k) * Σ[(e_i - ê_i)² + (n_i - n̂_i)²] )
 ```
 
-- Horizontal RMSE only (East + North)
-- Drone includes Up in state but RMSE is horizontal
-- Final RMSE reported after all N timesteps
+- Chỉ RMSE nằm ngang (Đông + Bắc)
+- Drone bao gồm trục Lên trong trạng thái nhưng RMSE chỉ nằm ngang
+- RMSE cuối cùng được báo cáo sau tất cả N bước thời gian
 
-## Verified Results (seed=42, 120s, 10Hz, 400m boundary)
+## Kết quả đã xác thực (giá trị khởi tạo=42, 120s, 10Hz, bán kính 400m)
 
-| Scenario | Raw | Alpha-Beta | Kalman | Spec (<5m) |
-|----------|-----|-----------|--------|-----------|
-| Pedestrian | 0.46 m | 0.24 m | 0.84 m | PASS |
-| Motorcycle | 1.79 m | 1.01 m | 2.18 m | PASS |
-| Drone | 1.28 m | 0.73 m | 2.33 m | PASS |
+| Kịch bản | Thô | Alpha-Beta | Kalman | Yêu cầu (<5m) |
+|----------|-----|-----------|--------|---------------|
+| Người đi bộ | 0,46 m | 0,24 m | 0,84 m | ĐẠT |
+| Xe máy | 1,79 m | 1,01 m | 2,18 m | ĐẠT |
+| Drone | 1,28 m | 0,73 m | 2,33 m | ĐẠT |

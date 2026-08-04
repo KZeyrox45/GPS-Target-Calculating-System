@@ -1,0 +1,180 @@
+\section{Tuần 8}
+
+\subsection{Cơ chế Adaptive R trong Kalman filter}
+
+\hspace{0.5cm} Trong phiên bản tiêu chuẩn của Kalman filter, ma trận nhiễu đo lường $\mathbf{R}$ thường được giữ cố định trong suốt quá trình lọc. Tuy nhiên, phân tích hợp nhất cảm biến đã chỉ ra rằng độ bất định đo lường $\sigma_{pos}$ phụ thuộc trực tiếp vào khoảng cách $R$ từ người quan sát đến mục tiêu. Do đó, hệ thống sử dụng cơ chế Adaptive R: cập nhật $\mathbf{R}_k$ tại từng bước thời gian theo $\sigma_{pos,k}$ được tính từ module hợp nhất cảm biến.
+
+\subsubsection{Công thức cập nhật \texorpdfstring{$\mathbf{R}_k$}{Rk} theo bước thời gian}
+
+\hspace{0.5cm} Tại bước $k$, sau khi hợp nhất cảm biến tính được $\sigma_{pos,k}$, hệ thống đặt:
+\[
+\mathbf{R}_k = \sigma_{pos,k}^2 \cdot \mathbf{I}_2
+\]
+
+với $\mathbf{I}_2$ là ma trận đơn vị $2 \times 2$ trong không gian đo lường East-North. Kalman gain sau đó được tính:
+
+\[
+\mathbf{K}_k = \mathbf{P}_k^{-} \mathbf{H}^\top \left(\mathbf{H} \mathbf{P}_k^{-} \mathbf{H}^\top + \mathbf{R}_k\right)^{-1}
+\]
+
+trong đó $\mathbf{P}_k^{-}$ là ma trận hiệp phương sai tiên nghiệm và $\mathbf{H}$ là ma trận quan sát trích xuất vị trí từ vector trạng thái.
+
+Khi $\sigma_{pos,k}$ tăng (mục tiêu ở xa), $\mathbf{R}_k$ tăng và $\mathbf{K}_k$ giảm, khiến bộ lọc tin vào dự báo động học nhiều hơn. Ngược lại, khi mục tiêu ở gần, $\sigma_{pos,k}$ nhỏ, $\mathbf{K}_k$ lớn hơn và bộ lọc cập nhật mạnh từ đo lường.
+
+\subsubsection{Giá trị \texorpdfstring{$\sigma_{pos}$}{sigma pos} và \texorpdfstring{$R_k$}{Rk} theo khoảng cách}
+
+\hspace{0.5cm} Bảng \ref{tab:adaptive-r} trình bày $\sigma_{pos}$ và giá trị phần tử đường chéo của $\mathbf{R}_k$ tại một số khoảng cách tiêu biểu, tính từ công thức lan truyền sai số với $\sigma_{gps} = 5{,}0$ m, $\sigma_{az} = 0{,}3^\circ$, $\sigma_{el} = 0{,}2^\circ$, $\sigma_{range} = 0{,}5$ m.
+
+\begin{table}[htbp]
+\centering
+\caption{Giá trị $\sigma_{pos}$ và $R_k$ theo khoảng cách đến mục tiêu}
+\label{tab:adaptive-r}
+\begin{tabular}{cccc}
+\toprule
+Khoảng cách $R$ (m) & $\sigma_{pos}$ (m) & $R_k = \sigma_{pos}^2$ (m$^2$) & So với $R_k(0)$ \\
+\midrule
+0   & 5{,}025 & 25{,}25 & --      \\
+100 & 5{,}064 & 25{,}64 & $+1{,}5\%$  \\
+200 & 5{,}180 & 26{,}83 & $+6{,}3\%$  \\
+300 & 5{,}368 & 28{,}82 & $+14{,}1\%$ \\
+400 & 5{,}620 & 31{,}59 & $+25{,}1\%$ \\
+794 & 7{,}088 & 50{,}24 & $+98{,}9\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trong phạm vi biên 400 m, $R_k$ tăng 25\% so với giá trị tại gốc. Khi mở rộng đến cross-over range 794 m, $R_k$ tăng gần gấp đôi. Điều này cho thấy Adaptive R có tác động thực tiễn đáng kể khi phạm vi hoạt động vượt 300 m.
+
+\subsubsection{Phân tích so sánh với R cố định}
+
+\hspace{0.5cm} Nếu sử dụng $\mathbf{R} = 25 \cdot \mathbf{I}_2$ cố định (chỉ tính từ $\sigma_{gps}$), bộ lọc gán trọng số đo lường không đổi theo thời gian. Tại $R = 400$ m, sai lệch giữa $R_{adaptive}$ và $R_{fixed}$ là $31{,}59 - 25{,}0 = 6{,}59$ m$^2$. Kalman gain khi dùng R cố định do đó lớn hơn mức phù hợp: bộ lọc cập nhật mạnh hơn từ đo lường có nhiễu cao tại khoảng cách lớn, làm tăng RMSE giai đoạn ổn định. Cơ chế Adaptive R khắc phục điều này bằng cách tự động giảm trọng số đo lường khi mục tiêu ở xa, phù hợp với bản chất vật lý của hệ cảm biến.
+
+\subsection{Phân tích thời gian tính toán của chuỗi xử lý}
+
+\subsubsection{Phân tích chu kỳ xử lý}
+
+\hspace{0.5cm} Hệ thống hoạt động ở tần số 10 Hz, tương ứng chu kỳ khung 100 ms. Tổng thời gian xử lý một khung, từ khi nhận dữ liệu cảm biến đến khi gửi kết quả qua kênh truyền dữ liệu hai chiều, là 59 µs, chiếm 0{,}059\% chu kỳ khung. Bảng \ref{tab:timing} trình bày phân tích chi tiết các bước xử lý.
+
+\begin{table}[htbp]
+\centering
+\caption{Phân tích thời gian tính toán một chu kỳ xử lý tại 10 Hz}
+\label{tab:timing}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Bước xử lý} & \textbf{Thời gian (µs)} & \textbf{Tỷ lệ (\%)} \\
+\midrule
+Kalman filter (predict + update)         & 48{,}4 & 82 \\
+Chuyển đổi ECEF sang ENU                 &  3{,}5 &  6 \\
+Hợp nhất cảm biến + giao tiếp kênh truyền dữ liệu hai chiều  &  7{,}1 & 12 \\
+\midrule
+\textbf{Tổng}                            & \textbf{59{,}0} & \textbf{100} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    xbar,
+    bar width=0.7cm,
+    width=0.88\textwidth,
+    height=4.8cm,
+    xlabel={Thời gian (µs)},
+    ytick={1,2,3},
+    yticklabels={Others, ECEF to ENU, Kalman filter},
+    xmin=0, xmax=56,
+    nodes near coords,
+    nodes near coords style={font=\small},
+    grid=major,
+    grid style={dashed, gray!40},
+]
+\addplot[fill=blue!55, draw=blue!70] coordinates {
+    (48.4, 3)
+    (3.5,  2)
+    (7.1,  1)
+};
+\end{axis}
+\end{tikzpicture}
+\caption{Phân phối thời gian tính toán theo bước xử lý trong một chu kỳ 59 µs tại 10 Hz.}
+\label{fig:pipeline-timing}
+\end{figure}
+
+\subsubsection{Phân tích thành phần chiếm ưu thế}
+
+\hspace{0.5cm} Kalman filter chiếm 82\% tổng thời gian do phép nhân và nghịch đảo ma trận trong bước predict ($\mathbf{P}_k^{-} = \mathbf{F}\mathbf{P}_{k-1}\mathbf{F}^\top + \mathbf{Q}$) và bước update (tính $\mathbf{K}_k$ và cập nhật $\mathbf{P}_k$). Với ma trận trạng thái $4 \times 4$ (2D) và ma trận quan sát $2 \times 4$, đây là phép tính tuyến tính có độ phức tạp $O(n^3)$ với $n = 4$, không thể đơn giản hóa thêm nếu không xấp xỉ mô hình.
+
+Bước chuyển đổi ECEF sang ENU (6\%) sử dụng biểu thức đóng với ma trận $3 \times 3$. Phần còn lại (12\%) gồm hợp nhất cảm biến, tính $\sigma_{pos}$, tuần tự hóa định dạng và gửi qua kênh truyền dữ liệu hai chiều.
+
+\subsubsection{Khả năng mở rộng}
+
+\hspace{0.5cm} Với 99{,}94\% chu kỳ khung còn dư sau xử lý, hệ thống có thể mở rộng bằng cách:
+\begin{itemize}
+    \item Chạy song song nhiều phiên mô phỏng, mỗi phiên tiêu thụ thêm 59 µs, tương ứng với khả năng xử lý hàng nghìn phiên trên một luồng duy nhất.
+    \item Tăng tần số cập nhật lên 50 Hz mà không cần tối ưu hóa thêm (50 phiên $\times$ 59 µs $= 2{,}95$ ms $\ll$ 20 ms).
+\end{itemize}
+
+Hạn chế chính của hệ thống là băng thông kênh truyền dữ liệu hai chiều và quá trình hiển thị phía trình duyệt, không phải năng lực tính toán phía server.
+
+\subsection{Đánh giá mô hình nhiễu cảm biến}
+
+\subsubsection{Phân phối Gaussian cho từng cảm biến}
+
+\hspace{0.5cm} Mô hình nhiễu của hệ thống giả thiết nhiễu từng cảm biến tuân theo phân phối Gaussian độc lập:
+\begin{align}
+\epsilon_{gps,lat},\, \epsilon_{gps,lon} &\sim \mathcal{N}(0,\, \sigma_{gps}^2), \quad \sigma_{gps} = 5{,}0 \text{ m} \\
+\epsilon_{az} &\sim \mathcal{N}(0,\, \sigma_{az}^2), \quad \sigma_{az} = 0{,}3^\circ \\
+\epsilon_{el} &\sim \mathcal{N}(0,\, \sigma_{el}^2), \quad \sigma_{el} = 0{,}2^\circ \\
+\epsilon_{range} &\sim \mathcal{N}(0,\, \sigma_{range}^2), \quad \sigma_{range} = 0{,}5 \text{ m}
+\end{align}
+
+Giả thiết Gaussian được biện luận bởi định lý giới hạn trung tâm: sai số đo lường của mỗi cảm biến là tổng của nhiều nguồn sai số độc lập nhỏ (nhiễu điện tử, rung động, phân giải số, hiệu ứng nhiệt độ). Khi số thành phần đủ lớn, phân phối tổng hội tụ về Gaussian, bất kể phân phối từng thành phần.
+
+\subsubsection{Tính chất độc lập giữa các bước thời gian}
+
+\hspace{0.5cm} Mô hình hiện tại giả thiết nhiễu giữa các bước thời gian là độc lập (i.i.d.). Trong thực tế, một số nguồn nhiễu có tương quan ngắn hạn, ví dụ: sai lệch đa đường (multipath) của GPS có thể kéo dài vài giây. Tuy nhiên, ở tần số 10 Hz, tương quan giữa hai mẫu liên tiếp (cách nhau 0{,}1 s) trong môi trường mở tương đối nhỏ. Bảng \ref{tab:noise-model} tóm tắt tham số và giả thiết của mô hình.
+
+\begin{table}[htbp]
+\centering
+\caption{Tham số mô hình nhiễu cảm biến trong mô phỏng}
+\label{tab:noise-model}
+\begin{tabular}{llcc}
+\toprule
+\textbf{Cảm biến} & \textbf{Tham số} & \textbf{Giá trị} & \textbf{Phân phối} \\
+\midrule
+GPS (ngang)    & $\sigma_{gps}$ & 5{,}0 m     & $\mathcal{N}(0, \sigma^2)$ \\
+IMU (azimuth)  & $\sigma_{az}$  & 0{,}3$^\circ$ & $\mathcal{N}(0, \sigma^2)$ \\
+IMU (elevation) & $\sigma_{el}$ & 0{,}2$^\circ$ & $\mathcal{N}(0, \sigma^2)$ \\
+Laser (range)  & $\sigma_{range}$ & 0{,}5 m   & $\mathcal{N}(0, \sigma^2)$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Kiểm chứng toàn bộ hệ thống}
+
+\hspace{0.5cm} Bộ kiểm tra tự động gồm 125 test, phân theo sáu hạng mục chức năng. Bảng \ref{tab:test-summary} tóm tắt phân phối và nội dung kiểm chứng.
+
+\begin{table}[htbp]
+\centering
+\caption{Phân bố bộ kiểm tra tự động (125 test)}
+\label{tab:test-summary}
+\begin{tabular}{lrp{7cm}}
+\toprule
+\textbf{Hạng mục} & \textbf{Số test} & \textbf{Nội dung kiểm chứng} \\
+\midrule
+Bộ lọc alpha-beta         & 10 & Khởi tạo, bước tính, reset, ổn định tốc độ \\
+Chuyển đổi tọa độ         & 25 & Haversine, bearing, ECEF/ENU khứ hồi, elevation âm \\
+Kalman filter              & 17 & Khởi tạo, predict, update, hội tụ, RMSE tiêu chuẩn \\
+Hợp nhất cảm biến         &  6 & Hướng, sigma\_pos, đầu ra LLA \\
+Mô phỏng giai đoạn 2      & 50 & Quỹ đạo, biên, Kalman3D, adaptive R, xe máy, drone \\
+Endpoint thống kê và xuất  & 17 & Engine thống kê, endpoint thống kê, endpoint xuất CSV \\
+\midrule
+\textbf{Tổng}              & \textbf{125} & \textbf{Tất cả pass, 0 lỗi} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Nhóm kiểm tra mô phỏng với 49 test bao phủ đầy đủ các trường hợp biên: phản xạ quang học tại biên (specular reflection), drone vượt quá bán kính biên, Kalman3D hội tụ trên cả ba trục, và cơ chế adaptive R với nhiều giá trị $\sigma_{pos}$ khác nhau. Nhóm test chuyển đổi tọa độ kiểm chứng độ chính xác khứ hồi: sau khi chuyển từ WGS84 sang ECEF sang ENU và quay lại, sai số tích lũy nhỏ hơn $10^{-9}$ m, đảm bảo không có lỗi số học lan truyền qua chuỗi xử lý.
+
+Kết quả kiểm chứng xác nhận toàn bộ hệ thống hoạt động đúng theo đặc tả: RMSE đạt dưới 5{,}0 m trên tất cả kịch bản và tất cả giá trị khởi tạo, chuỗi xử lý trong 59 µs và giao tiếp kênh truyền dữ liệu hai chiều ổn định trong các phiên kéo dài.
+

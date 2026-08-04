@@ -1,104 +1,104 @@
-# Testing & Verification
+# Kiểm thử và xác thực
 
-## Test Suite
+## Bộ kiểm thử
 
-**Location**: `backend/tests/`
+**Vị trí**: `backend/tests/`
 **Framework**: pytest + pytest-asyncio
-**Count**: 125 tests (all passing)
-**Run**:
+**Số lượng**: 125 test (đạt tất cả)
+**Chạy**:
 ```bash
 cd backend
 uv run pytest tests/ -v
 ```
 
-## Test Files
+## Các file test
 
-| File | Tests | Coverage |
-|------|-------|----------|
-| `test_alpha_beta.py` | 10 | Alpha-beta filter: init, step, reset, speed |
-| `test_geodetics.py` | 14 | Haversine, bearing, ECEF/ENU roundtrips, negative elevation |
-| `test_kalman.py` | 15 | Kalman filter: init, predict, update, convergence, RMSE spec |
-| `test_sensor_fusion.py` | 6 | fuse_sensors: direction, sigma, LLA output |
-| `test_simulation_phase2.py` | 49 | Trajectories, boundary, Kalman3D, adaptive R, motorcycle crash, drone |
-| `test_stats_endpoint.py` | 15 | Stats engine, stats endpoint, export endpoint |
-| `benchmark_rmse.py` | (script) | Authoritative RMSE baseline for report numbers |
+| Hạng mục | Số test | Nội dung |
+|----------|---------|----------|
+| Bộ lọc alpha-beta | 10 | Khởi tạo, bước tính, reset, tốc độ |
+| Chuyển đổi tọa độ | 14 | Haversine, bearing, ECEF/ENU khứ hồi, elevation âm |
+| Kalman filter | 15 | Khởi tạo, predict, update, hội tụ, RMSE tiêu chuẩn |
+| Hợp nhất cảm biến | 6 | Hướng, sigma, đầu ra LLA |
+| Mô phỏng giai đoạn 2 | 49 | Quỹ đạo, biên, Kalman3D, adaptive R, motorcycle, drone |
+| Endpoint thống kê và xuất | 15 | Stats engine, stats endpoint, export endpoint |
+| Benchmark RMSE | (script) | RMSE cơ sở có thẩm quyền cho số liệu báo cáo |
 
-## Key Test Categories
+## Các hạng mục test chính
 
-### Algorithm Correctness
-- Kalman convergence for all 3 target types
-- Alpha-beta smoothing behavior
-- Sensor fusion sigma increases with range
-- ECEF/ENU roundtrip accuracy
+### Đúng đắn thuật toán
+- Hội tụ Kalman cho cả 3 loại mục tiêu
+- Hành vi làm mượt alpha-beta
+- Sigma hợp nhất cảm biến tăng theo khoảng cách
+- Độ chính xác khứ hồi ECEF/ENU
 
-### Boundary Constraints
-- Pedestrian stays within boundary
-- Motorcycle reflects correctly
-- Drone horizontal constrained, altitude free
-- Invalid radius raises validation error
+### Ranh giới
+- Người đi bộ ở trong ranh giới
+- Xe máy phản xạ đúng
+- Drone ngang bị ràng buộc, độ cao tự do
+- Bán kính không hợp lệ gây lỗi xác thực
 
-### Edge Cases
-- Negative elevation (observer looking down)
-- Zero distance (target at observer position)
-- First-step initialization of filters
-- Motorcycle turn angles (regression: no crash)
+### Trường hợp đặc biệt
+- Elevation âm (observer nhìn xuống)
+- Khoảng cách bằng 0 (mục tiêu tại vị trí observer)
+- Khởi tạo bước đầu tiên của bộ lọc
+- Góc rẽ xe máy (kiểm tra hồi quy: không crash)
 
 ### API Endpoints
-- Stats returns 404 for unknown session
-- Stats returns 200 for active session
-- Export returns CSV with correct header/row count
-- Export returns 204 when no frames
+- Stats trả 404 cho phiên không tồn tại
+- Stats trả 200 cho phiên hoạt động
+- Export trả CSV với header/số hàng đúng
+- Export trả 204 khi không có khung
 
-## Reproducibility
+## Tái tạo
 
-All tests use fixed RNG seeds via `np.random.default_rng(seed)`. The `seed` field in the API request controls reproducibility. Default seed in tests: 42.
+Tất cả test dùng giá trị khởi tạo RNG cố định qua `np.random.default_rng(seed)`. Trường `seed` trong request API kiểm soát tính tái tạo. Giá trị khởi tạo mặc định trong test: 42.
 
-## Scripts (Non-Test Verification)
+## Script (Xác thực không phải test)
 
 ### benchmark_rmse.py
 ```bash
 cd backend
 uv run python tests/benchmark_rmse.py
 ```
-Authoritative RMSE numbers for the thesis report. Uses actual simulation engine, no server needed.
+Số RMSE có thẩm quyền cho báo cáo. Dùng động cơ mô phỏng thực tế, không cần server.
 
-### generate_figures.py
+### statistical_analysis.py
 ```bash
 cd backend
-uv run python scripts/generate_figures.py
+uv run python tests/statistical_analysis.py
 ```
-Generates all report PNG figures into `report-weekly/figures/` and `report-weekly/Images/`.
+Phân tích nhiều giá trị khởi tạo (từ 1 đến 10), cho phép tính trung bình ± độ lệch chuẩn. Dùng để xác nhận tính ổn định thống kê.
 
 ### ws_smoke.py
 ```bash
 cd backend
 uv run python scripts/ws_smoke.py
 ```
-Full REST→WS pipeline smoke test. **Requires backend already running on :8000.**
+Kiểm tra toàn bộ pipeline REST→WS. **Yêu cầu backend đã chạy trên cổng 8000.**
 
-## Linting
+## Kiểm tra code
 
 ### Python (Ruff)
 ```bash
 cd backend
 uv run ruff check .
 ```
-Default rules: 115 errors → 7 remaining (all E402 in scripts, intentional due to `sys.path.insert` before imports).
+Quy tắc mặc định: 0 lỗi còn lại.
 
 ### JavaScript (ESLint)
 ```bash
 cd frontend
 npm run lint
 ```
-Result: 0 warnings.
+Kết quả: 0 cảnh báo.
 
-## Frontend Build
+## Build Frontend
 ```bash
 cd frontend
 npm run build
 ```
-Output: `frontend/dist/`. Build succeeds with expected chunk size warning.
+Đầu ra: `frontend/dist/`. Build thành công với cảnh báo kích thước chunk bình thường.
 
 ## CI/CD
 
-None configured. No pre-commit hooks. No GitHub Actions.
+Không có. Không có pre-commit hooks. Không có GitHub Actions.

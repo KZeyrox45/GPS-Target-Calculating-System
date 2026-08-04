@@ -144,7 +144,7 @@ class TestPolarToEnuNegativeElevation:
     """
     Negative elevation: target is below the observer (e.g., observer on a hilltop
     looking down at a ground target).  These four cases verify the edge
-    condition identified in Week 6.
+    condition where elevation angle is zero or negative.
     """
 
     def test_zero_elevation_up_is_zero(self):

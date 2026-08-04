@@ -2,11 +2,11 @@
 
 \subsection{Đánh giá hiệu suất bộ lọc qua mô phỏng}
 
-\hspace{0.5cm} Để đánh giá định lượng hiệu suất của các bộ lọc, nhóm triển khai kịch bản mô phỏng Monte Carlo không thời gian thực. Phương pháp này cho phép kiểm soát hoàn toàn điều kiện thử nghiệm và lặp lại được kết quả, phù hợp cho giai đoạn đánh giá thuật toán trước khi có dữ liệu cảm biến thực địa.
+\hspace{0.5cm} Để đánh giá định lượng hiệu suất của các bộ lọc, nhóm triển khai kịch bản mô phỏng không thời gian thực. Phương pháp này cho phép kiểm soát hoàn toàn điều kiện thử nghiệm và lặp lại được kết quả, phù hợp cho giai đoạn đánh giá thuật toán trước khi có dữ liệu cảm biến thực địa.
 
 \subsubsection{Thiết lập kịch bản mô phỏng}
 
-\hspace{0.5cm} Mỗi kịch bản mô phỏng bao gồm một mục tiêu di chuyển trong phạm vi 400 m xung quanh người quan sát đặt tại HCMUT (10,7626$^\circ$N, 106,6602$^\circ$E), kéo dài 120 giây ở tần số 10 Hz (1.200 bước thời gian). Mô hình nhiễu cảm biến sử dụng thông số như Bảng \ref{tab:noise-week4}.
+\hspace{0.5cm} Mỗi kịch bản mô phỏng bao gồm một mục tiêu di chuyển trong phạm vi 400 m xung quanh người quan sát đặt tại tọa độ tham chiếu (10,7626$^\circ$N, 106,6602$^\circ$E), kéo dài 120 giây ở tần số 10 Hz (1.200 bước thời gian). Để đảm bảo tính tái lập, mỗi lần chạy mô phỏng sử dụng một giá trị khởi tạo ngẫu nhiên (random seed) cố định, xác định trước chuỗi số ngẫu nhiên được sinh ra cho quỹ đạo và nhiễu cảm biến. Việc sử dụng giá trị khởi tạo cố định cho phép tái tạo chính xác cùng một kịch bản trên nhiều máy tính khác nhau, phục vụ việc so sánh kết quả giữa các phương pháp. Mô hình nhiễu cảm biến sử dụng thông số như Bảng \ref{tab:noise-week4}.
 
 \begin{table}[ht!]
 \centering
@@ -32,7 +32,7 @@ Ba loại mục tiêu được mô phỏng tương ứng với ba trường hợ
 
 \begin{table}[ht!]
 \centering
-\caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (seed = 42)}
+\caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (giá trị khởi tạo = 42)}
 \label{tab:rmse-week4}
 \begin{tabular}{lcccc}
 \toprule
@@ -47,7 +47,9 @@ Drone       & 1,28 m & \textbf{0,73 m} & 2,33 m & $<$ 5 m \checkmark \\
 
 Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan.
 
-\begin{figure}[h!]
+\newpage
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[
@@ -84,21 +86,21 @@ Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-ba
 
 \subsubsection{Phân tích kết quả}
 
-\hspace{0.5cm} Alpha-beta filter đạt RMSE thấp hơn Kalman filter ở cả ba kịch bản. Nguyên nhân là mô phỏng sử dụng mô hình vận tốc không đổi (CV), gia tốc bằng không, trong khi alpha-beta filter được thiết kế tối ưu cho điều kiện này. Với $\alpha = 0{,}4$ theo điều kiện critically damped của Benedict-Bordner:
+\hspace{0.5cm} Alpha-beta filter đạt RMSE thấp hơn Kalman filter ở cả ba kịch bản. Nguyên nhân là mô phỏng sử dụng mô hình vận tốc không đổi (CV), gia tốc bằng không, trong khi alpha-beta filter được thiết kế tối ưu cho điều kiện này. Với $\alpha = 0{,}4$, áp dụng điều kiện critically damped theo công thức Benedict-Bordner:
 \begin{equation}
 \beta = (2 - \alpha) - 2\sqrt{1 - \alpha} \approx 0{,}051,
 \end{equation}
 
 Bộ lọc cân bằng tốt giữa đáp ứng với nhiễu đo lường và độ trơn của ước lượng.
 
-Kalman filter cần giai đoạn hội tụ ban đầu khi ma trận hiệp phương sai $\mathbf{P}$ còn lớn. Ngoài ra, tham số $\sigma_a$ trong ma trận nhiễu quá trình $\mathbf{Q}$ theo mô hình DWNA được đặt thủ công và chưa tối ưu theo từng loại mục tiêu.
+Kalman filter cần giai đoạn hội tụ ban đầu khi ma trận hiệp phương sai $\mathbf{P}$ còn lớn, dẫn đến Kalman gain $K_k$ có giá trị lớn và bộ lọc ưu tiên đo lường có nhiễu cao. Ngoài ra, tham số $\sigma_a$ trong ma trận nhiễu quá trình $\mathbf{Q}$ theo mô hình DWNA được đặt thủ công và chưa tối ưu theo từng loại mục tiêu.
 
 Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alpha-beta:
 
 \begin{itemize}
     \item \textbf{Ước lượng độ bất định:} Ma trận $\mathbf{P}_k$ cung cấp ellipse tin cậy tại mỗi bước thời gian, phản ánh mức độ tin tưởng vào ước lượng vị trí. Thông tin này cần thiết khi kết hợp kết quả tracking với các hệ thống chỉ huy.
 
-    \item \textbf{Adaptive measurement noise:} Ma trận $\mathbf{R}_k$ được cập nhật động từ $\sigma_{pos}$ của sensor fusion. Khi mục tiêu vượt ngưỡng cross-over $\approx 794$ m - nơi sai số IMU chiếm ưu thế so với GPS - $\mathbf{R}_k$ tự động tăng, giảm ảnh hưởng của đo lường nhiễu cao.
+    \item \textbf{Adaptive measurement noise:} Ma trận $\mathbf{R}_k$ được cập nhật động từ $\sigma_{pos}$ của sensor fusion (hợp nhất cảm biến). Khi mục tiêu vượt ngưỡng cross-over $\approx 794$ m - nơi sai số IMU chiếm ưu thế so với GPS - $\mathbf{R}_k$ tự động tăng, giảm ảnh hưởng của đo lường nhiễu cao.
 \end{itemize}
 
 \subsection{Phân tích sai số hợp nhất cảm biến theo khoảng cách}
@@ -109,11 +111,13 @@ Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alp
 \label{eq:rss-fusion}
 \end{equation}
 
-trong đó $R$ là khoảng cách từ người quan sát đến mục tiêu. Hai số hạng đầu là hằng số theo $R$; số hạng thứ ba tỉ lệ với $R^2$. Ngưỡng cross-over được phân tích chi tiết tại tuần 3 cho thấy $R_{cross} \approx 794$ m. Dưới ngưỡng này, sai số GPS chiếm ưu thế; trên ngưỡng này, sai số góc IMU chiếm ưu thế.
+trong đó $R$ là khoảng cách từ người quan sát đến mục tiêu. Hai số hạng đầu là hằng số theo $R$; số hạng thứ ba tỉ lệ với $R^2$. Ngưỡng cross-over (khoảng cách mà sai số GPS và IMU bằng nhau) xảy ra tại $R_{cross} \approx 794$ m. Dưới ngưỡng này, sai số GPS chiếm ưu thế; trên ngưỡng này, sai số góc IMU chiếm ưu thế.
 
 Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ và vùng ảnh hưởng của từng loại cảm biến.
 
-\begin{figure}[h!]
+\newpage
+
+\begin{figure}[htbp]
 \centering
 \begin{tikzpicture}
 \begin{axis}[

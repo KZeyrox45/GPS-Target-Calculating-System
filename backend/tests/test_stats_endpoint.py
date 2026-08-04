@@ -1,7 +1,7 @@
 """
 test_stats_endpoint.py - Tests for SimulationEngine.get_stats() and stats REST endpoint
 ========================================================================================
-Tests added in Week 5 (Luong A) to verify the /api/simulation/stats/{session_id} endpoint
+Verifies the /api/simulation/stats/{session_id} endpoint
 and the underlying get_stats() method of SimulationEngine.
 """
 

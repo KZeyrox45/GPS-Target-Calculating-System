@@ -1,29 +1,29 @@
 # Frontend (React 19 + Vite)
 
-## Setup
+## Thiết lập
 
 ```bash
 cd frontend
-npm install          # First time
-npm run dev          # Dev server on :5173
-npm run build        # Production build
-npm run lint         # ESLint check
+npm install          # Lần đầu
+npm run dev          # Server dev trên cổng 5173
+npm run build        # Build production
+npm run lint         # Kiểm tra ESLint
 ```
 
-## Project Structure
+## Cấu trúc dự án
 
 ```
 frontend/
 ├── src/
-│   ├── main.jsx                 # Entry point
-│   ├── App.jsx                  # Router setup
-│   ├── App.css                  # Global styles
-│   ├── index.css                # Reset + base styles
+│   ├── main.jsx                 # Điểm vào
+│   ├── App.jsx                  # Cài đặt router
+│   ├── App.css                  # Style toàn cục
+│   ├── index.css                # Reset + style cơ bản
 │   ├── pages/
-│   │   ├── HomePage.jsx         # Landing page
-│   │   ├── TrackingPage.jsx     # Real-time tracking view
-│   │   ├── StaticCalcPage.jsx   # Phase 1 calculator
-│   │   └── ComparisonPage.jsx   # Filter comparison
+│   │   ├── HomePage.jsx         # Trang chủ
+│   │   ├── TrackingPage.jsx     # Giao diện theo dõi thời gian thực
+│   │   ├── StaticCalcPage.jsx   # Máy tính giai đoạn 1
+│   │   └── ComparisonPage.jsx   # So sánh bộ lọc
 │   ├── components/
 │   │   ├── charts/
 │   │   │   ├── AltitudeChart.jsx
@@ -41,49 +41,49 @@ frontend/
 │   ├── store/
 │   │   └── trackingStore.js    # Zustand store
 │   └── hooks/
-│       └── useWebSocket.js     # WebSocket connection hook
-├── vite.config.js              # Proxy config + build
-├── eslint.config.js            # Flat config ESLint
+│       └── useWebSocket.js     # Hook kết nối WebSocket
+├── vite.config.js              # Cấu hình proxy + build
+├── eslint.config.js            # ESLint flat config
 ├── package.json
 └── index.html
 ```
 
 ## Tech Stack
 
-| Library | Purpose |
-|---------|---------|
-| React 19 | UI framework |
-| Vite 8 | Build tool + dev server |
-| Zustand | State management (lightweight) |
-| Leaflet | Map rendering (OpenStreetMap) |
-| Recharts | Charts (altitude, error metrics) |
-| React Router | Page routing |
+| Thư viện | Mục đích |
+|----------|----------|
+| React 19 | Framework UI |
+| Vite 8 | Công cụ build + server dev |
+| Zustand | Quản lý trạng thái (nhẹ) |
+| Leaflet | Hiển thị bản đồ (OpenStreetMap) |
+| Recharts | Biểu đồ (độ cao, sai số) |
+| React Router | Định tuyến trang |
 
-## Key Components
+## Các thành phần chính
 
 ### TrackingMap (Leaflet)
-- OpenStreetMap tile layer
-- Observer marker (green)
-- Target markers (red for raw, blue for Kalman, purple for alpha-beta)
-- Trajectory polylines (3 layers, independently toggleable)
-- Uncertainty circle around Kalman estimate
+- Lớp tile OpenStreetMap
+- Marker observer (xanh lá)
+- Marker mục tiêu (đỏ cho thô, xanh lam cho Kalman, tím cho alpha-beta)
+- Polyline quỹ đạo (3 lớp, có thể tắt/bật độc lập)
+- Vòng tròn bất định xung quanh ước lượng Kalman
 
-### useWebSocket Hook
-- Connects to `/ws/tracking/{session_id}` (proxied through Vite to ws://localhost:8000)
-- Parses incoming JSON, updates Zustand store
-- Handles reconnection and cleanup
+### Hook useWebSocket
+- Kết nối đến `/ws/tracking/{session_id}` (qua Vite proxy đến ws://localhost:8000)
+- Parse JSON đầu vào, cập nhật Zustand store
+- Xử lý kết nối lại và dọn dẹp
 
 ### trackingStore (Zustand)
-- Ring buffer: `MAX_HISTORY = 500` points per layer
-- State: observer position, target positions (raw/kalman/alphabeta), uncertainty, FPS
-- Actions: addFrame, clearHistory, setFps
+- Vòng đệm: `MAX_HISTORY = 500` điểm mỗi lớp
+- Trạng thái: vị trí observer, vị trí mục tiêu (thô/kalman/alphabeta), bất định, FPS
+- Hành động: addFrame, clearHistory, setFps
 
 ### LayerControl
-- Toggle visibility of raw/kalman/alphabeta layers
-- Toggle uncertainty circle
-- Toggle observer marker
+- Bật/tắt hiển thị lớp thô/kalman/alphabeta
+- Bật/tắt vòng tròn bất định
+- Bật/tắt marker observer
 
-## Vite Proxy Config
+## Cấu hình Vite Proxy
 
 ```js
 // vite.config.js
@@ -100,20 +100,20 @@ export default defineConfig({
 })
 ```
 
-## Linting
+## Kiểm tra code
 
 - ESLint flat config (`eslint.config.js`)
-- `no-unused-vars` ignores names starting with uppercase/underscore
-- Run: `npm run lint`
+- `no-unused-vars` bỏ qua tên bắt đầu bằng chữ hoa/dấu gạch dưới
+- Chạy: `npm run lint`
 
 ## Build
 
 ```bash
-npm run build  # Output: frontend/dist/
+npm run build  # Đầu ra: frontend/dist/
 ```
 
-Build warning about chunk size (588 kB) is expected due to Leaflet + Recharts.
+Cảnh báo về kích thước chunk (588 kB) là bình thường do Leaflet + Recharts.
 
-## All .jsx (NOT TypeScript)
+## Tất cả đều là .jsx (KHÔNG phải TypeScript)
 
-Despite `@types/react` being a dev dependency, the project uses plain JSX with no TypeScript compilation. No `tsconfig.json` exists.
+Mặc dù `@types/react` là dev dependency, dự án dùng JSX thuần không có TypeScript compilation. Không có `tsconfig.json`.

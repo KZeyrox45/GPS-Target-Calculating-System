@@ -10,7 +10,7 @@ Kiến trúc hệ thống được mở rộng theo các hướng sau:
 \begin{itemize}[label={}]
     \item (i) Tích hợp thêm cảm biến IMU để đo hướng và góc nghiêng.
     \item (ii) Áp dụng thuật toán lọc Kalman và alpha-beta để xử lý chuỗi thời gian.
-    \item (iii) Xây dựng hệ thống truyền thông thời gian thực bằng WebSocket.
+    \item (iii) Xây dựng hệ thống truyền thông thời gian thực bằng WebSocket (kênh truyền dữ liệu hai chiều).
     \item (iv) Xây dựng giao diện bản đồ tương tác trên nền web.
 \end{itemize}
 \hspace{0.5cm} Hệ thống được thiết kế để triển khai trên Raspberry Pi nhằm xử lý tại thiết bị di động trước khi gửi lên máy chủ trung tâm. Phần này thuộc triển khai phần cứng và được kiểm chứng qua mô phỏng trong giai đoạn hiện tại.
@@ -28,7 +28,7 @@ Kiến trúc hệ thống được mở rộng theo các hướng sau:
     \item Hiển thị lộ trình di chuyển của mục tiêu trên bản đồ số.
 \end{itemize}
 
-\hspace{-0.5cm} Các ràng buộc chính của bài toán:
+Các ràng buộc chính của bài toán:
 
 \begin{itemize}
     \item Thời gian xử lý phải đảm bảo tính thời gian thực (độ trễ nhỏ hơn 100 ms).
@@ -40,7 +40,7 @@ Kiến trúc hệ thống được mở rộng theo các hướng sau:
 
 \subsection{Tổng quan hệ thống}
 
-Hệ thống được đề xuất gồm bốn tầng chính:
+\hspace{0.5cm} Hệ thống được đề xuất gồm bốn tầng chính:
 
 \subsubsection{Tầng cảm biến (Sensor Layer)}
 
@@ -53,17 +53,17 @@ Hệ thống được đề xuất gồm bốn tầng chính:
 
 \subsubsection{Tầng xử lý nhúng (Embedded Layer)}
 
-\hspace{0.5cm} Để có thể nhận và xử lý dữ liệu thực tế từ các thiết bị phần cứng, Raspberry Pi (hoặc vi điều khiển tương tự) đóng vai trò là bộ phận đọc cảm biến và xử lý sơ bộ. Raspberry Pi nhận dữ liệu từ các cảm biến qua giao tiếp \textbf{UART/I2C/SPI}, đóng gói thành định dạng JSON, và gửi lên máy chủ thông qua WebSocket. Lớp này cũng có thể thực hiện các phép tính sơ bộ như chuẩn hóa dữ liệu, lọc nhiễu đơn giản, và kiểm tra lỗi trước khi gửi đi.
+\hspace{0.5cm} Để có thể nhận và xử lý dữ liệu thực tế từ các thiết bị phần cứng, Raspberry Pi (hoặc vi điều khiển tương tự) đóng vai trò là bộ phận đọc cảm biến và xử lý sơ bộ. Raspberry Pi nhận dữ liệu từ các cảm biến qua giao tiếp \textbf{UART/I2C/SPI}, đóng gói thành định dạng JSON, và gửi lên máy chủ thông qua kênh truyền dữ liệu hai chiều. Lớp này cũng có thể thực hiện các phép tính sơ bộ như chuẩn hóa dữ liệu, lọc nhiễu đơn giản, và kiểm tra lỗi trước khi gửi đi.
 
 \subsubsection{Tầng máy chủ (Server Layer)}
 
-\hspace{0.5cm} Máy chủ được xây dựng bằng FastAPI (Python), cung cấp các API REST để quản lý phiên (session) và endpoint WebSocket để nhận dữ liệu cảm biến thời gian thực. Tầng này đảm nhiệm:
+\hspace{0.5cm} Máy chủ được xây dựng bằng FastAPI (Python), cung cấp các API REST để quản lý phiên (session) và kênh truyền dữ liệu hai chiều để nhận dữ liệu cảm biến thời gian thực. Tầng này đảm nhiệm:
 \begin{itemize}
     \item Tiếp nhận dữ liệu từ Raspberry Pi.
     \item Chuyển đổi tọa độ giữa các hệ quy chiếu (WGS84, ECEF, ENU).
     \item Tính toán tọa độ mục tiêu từ vector định hướng và khoảng cách.
     \item Áp dụng Kalman filter hoặc alpha-beta filter để ước lượng vị trí và tốc độ.
-    \item Phát dữ liệu đã xử lý xuống frontend qua WebSocket.
+    \item Phát dữ liệu đã xử lý xuống giao diện qua kênh truyền dữ liệu hai chiều.
 \end{itemize}
 
 \subsubsection{Tầng giao diện (Frontend Layer)}
@@ -120,7 +120,7 @@ Minh họa bộ lọc bằng mô hình đơn giản nhất: mô hình vận tố
 \end{aligned}
 \end{equation}
 
-Với mục tiêu drone cần theo dõi cả trục Up, vector trạng thái mở rộng thành 6 chiều $\begin{bmatrix} e & n & u & \dot{e} & \dot{n} & \dot{u} \end{bmatrix}^T$ và ma trận $\mathbf{F}$ mở rộng tương ứng thành $6\times 6$ (\texttt{KalmanFilter3D}).
+Với mục tiêu drone cần theo dõi cả trục Up, vector trạng thái mở rộng thành 6 chiều $\begin{bmatrix} e & n & u & \dot{e} & \dot{n} & \dot{u} \end{bmatrix}^T$ và ma trận $\mathbf{F}$ mở rộng tương ứng thành $6\times 6$ (bộ lọc 3D).
 
 \subsubsection{Alpha-beta filter}
 
@@ -138,7 +138,7 @@ x_{k} &= x_{k}^{p} + \alpha (z_{k} - x_{k}^{p}) \quad \text{(Cập nhật vị t
 
 \hspace{0.5cm} Hình \ref{fig:usecase} mô tả sơ đồ use-case của hệ thống. Người quan sát có thể khởi tạo phiên bám, cấu hình tham số, xem lộ trình hoặc dừng phiên. Hệ thống tự động cập nhật dữ liệu cảm biến, tính toán tọa độ và hiển thị trên bản đồ. Khi mất tín hiệu, hệ thống đưa ra cảnh báo.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.7\textwidth]{Images/use-case-diagram.png}
 \caption{Sơ đồ use-case của hệ thống tracking mục tiêu}

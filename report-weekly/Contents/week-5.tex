@@ -1,12 +1,12 @@
 \section{Tuần 5}
 
-\subsection{Thiết kế pipeline dữ liệu thời gian thực}
+\subsection{Thiết kế chuỗi xử lý dữ liệu thời gian thực}
 
 \hspace{0.5cm} Sau khi hoàn thiện các thuật toán lọc, giai đoạn này tích hợp chúng vào chuỗi xử lý thời gian thực từ cảm biến đến giao diện. Mục tiêu là đảm bảo dữ liệu bám mục tiêu được cập nhật liên tục với độ trễ tối thiểu, duy trì độ chính xác của các phép tính tọa độ và lọc.
 
 \subsubsection{Tổng quan luồng dữ liệu}
 
-\hspace{0.5cm} Luồng dữ liệu trong hệ thống gồm hai nhánh song song: nhánh đo lường và nhánh điều khiển. Hình \ref{fig:data-flow} mô tả toàn bộ pipeline từ cảm biến đến giao diện.
+\hspace{0.5cm} Luồng dữ liệu trong hệ thống gồm hai nhánh song song: nhánh đo lường và nhánh điều khiển. Hình \ref{fig:data-flow} mô tả toàn bộ chuỗi xử lý từ cảm biến đến giao diện.
 
 \begin{figure}[htb!]
 \centering
@@ -15,17 +15,17 @@
 \label{fig:data-flow}
 \end{figure}
 
-Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm các bước: (1) nhận gói dữ liệu JSON từ cảm biến qua WebSocket; (2) tính $\sigma_{pos}$ và chuyển đổi sang ENU; (3) chạy bộ lọc và cập nhật $\mathbf{R}_k$; (4) chuyển kết quả ngược về WGS84; (5) phát xuống giao diện.
+Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm các bước: (1) nhận gói dữ liệu JSON từ cảm biến qua kênh truyền dữ liệu hai chiều; (2) tính $\sigma_{pos}$ và chuyển đổi sang ENU; (3) chạy bộ lọc và cập nhật $\mathbf{R}_k$; (4) chuyển kết quả ngược về WGS84; (5) phát xuống giao diện.
 
-\subsubsection{Giao thức WebSocket}
+\subsubsection{Giao thức kênh truyền dữ liệu hai chiều}
 
-\hspace{0.5cm} Giao thức WebSocket được chọn thay vì HTTP polling do dữ liệu cần cập nhật liên tục ở tần số 10 Hz, và cả hai chiều (máy khách gửi dữ liệu cảm biến, máy chủ phát kết quả) đều hoạt động đồng thời. Bảng \ref{tab:ws-vs-http} so sánh hai phương án.
+\hspace{0.5cm} Kênh truyền dữ liệu hai chiều được chọn thay vì HTTP polling do dữ liệu cần cập nhật liên tục ở tần số 10 Hz, và cả hai chiều (máy khách gửi dữ liệu cảm biến, máy chủ phát kết quả) đều hoạt động đồng thời. Bảng \ref{tab:ws-vs-http} so sánh hai phương án.
 
 \begin{table}[htb!]
 \centering
 \begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
 \toprule
-\textbf{Tiêu chí} & \textbf{HTTP Polling} & \textbf{WebSocket} \\
+\textbf{Tiêu chí} & \textbf{HTTP Polling} & \textbf{Kênh truyền hai chiều} \\
 \midrule
 Kết nối & Mỗi request một kết nối mới & Kết nối liên tục (persistent) \\
 Overhead & HTTP header $\sim$500 byte/lần & Header chỉ ở lần handshake đầu \\
@@ -34,11 +34,11 @@ Luồng dữ liệu & Client-initiated & Full-duplex, hai chiều đồng thời
 Phù hợp & Dữ liệu thay đổi chậm & Tracking thời gian thực, 10 Hz \\
 \bottomrule
 \end{tabular}
-\caption{So sánh WebSocket và HTTP polling cho bài toán bám mục tiêu thời gian thực}
+\caption{So sánh kênh truyền dữ liệu hai chiều và HTTP polling cho bài toán bám mục tiêu thời gian thực}
 \label{tab:ws-vs-http}
 \end{table}
 
-Endpoint WebSocket được đặt tại \texttt{/ws/tracking/\{session\_id\}}, tách biệt hoàn toàn khỏi các endpoint REST (\texttt{/api/...}). Lý do tách biệt này là CORS middleware không áp dụng cho WebSocket upgrade, nên cần xử lý riêng ở tầng proxy (Vite dev server forward \texttt{/ws} sang \texttt{ws://localhost:8000}).
+Kênh truyền dữ liệu hai chiều được đặt tại đường dẫn riêng, tách biệt hoàn toàn khỏi các endpoint REST. Lý do tách biệt này là chính sách chia sẻ nguồn gốc chéo không áp dụng cho quá trình nâng cấp kết nối lên kênh truyền dữ liệu hai chiều, nên cần xử lý riêng ở tầng proxy.
 
 \subsubsection{Định dạng gói tin}
 
@@ -68,7 +68,7 @@ Server phản hồi sau mỗi bước xử lý:
 }
 \end{verbatim}
 
-Trường \texttt{uncertainty\_m} được tính từ $\sqrt{\operatorname{tr}(\mathbf{P}_k)/n}$ với $\operatorname{tr}$ là vết (trace) của ma trận và $n$ là số chiều, cho phép giao diện hiển thị vòng tròn bất định quanh ước lượng Kalman.
+Trường độ bất định được tính từ $\sqrt{\operatorname{tr}(\mathbf{P}_k)/n}$ với $\operatorname{tr}$ là vết (trace) của ma trận và $n$ là số chiều, cho phép giao diện hiển thị vòng tròn bất định quanh ước lượng Kalman. Giá trị này phản ánh mức độ tin tưởng của bộ lọc vào ước lượng vị trí tại mỗi bước thời gian.
 
 \subsection{Hệ thống quản lý phiên (Session Management)}
 
@@ -78,23 +78,23 @@ Trường \texttt{uncertainty\_m} được tính từ $\sqrt{\operatorname{tr}(\
 \centering
 \begin{tabular}{clp{7cm}}
 \toprule
-\textbf{Bước} & \textbf{API} & \textbf{Mô tả} \\
+\textbf{Bước} & \textbf{Thao tác} & \textbf{Mô tả} \\
 \midrule
-1 & \texttt{POST /api/simulation/start} & Tạo phiên mới, khởi tạo bộ lọc, trả về \texttt{session\_id} và \texttt{ws\_url} \\
-2 & \texttt{WS /ws/tracking/\{id\}} & Client kết nối WebSocket, bắt đầu gửi dữ liệu \\
-3 & (loop) & Server nhận, xử lý, phát kết quả theo chu kỳ 10 Hz \\
-4 & \texttt{POST /api/simulation/stop/\{id\}} & Dừng phiên, giải phóng bộ nhớ \\
+1 & Tạo phiên & Tạo phiên mới, khởi tạo bộ lọc, trả về mã phiên và đường dẫn kết nối \\
+2 & Kết nối & Máy khách kết nối kênh truyền dữ liệu hai chiều, bắt đầu gửi dữ liệu \\
+3 & Xử lý liên tục & Máy chủ nhận, xử lý, phát kết quả theo chu kỳ 10 Hz \\
+4 & Dừng phiên & Dừng phiên, giải phóng bộ nhớ \\
 \bottomrule
 \end{tabular}
 \caption{Vòng đời của một phiên tracking}
 \label{tab:session-lifecycle}
 \end{table}
 
-Trạng thái bộ lọc (vector trạng thái $\mathbf{x}$, ma trận hiệp phương sai $\mathbf{P}$) được lưu trong bộ nhớ trong suốt vòng đời phiên. Khi phiên kết thúc hoặc kết nối WebSocket đóng, toàn bộ trạng thái được giải phóng.
+Trạng thái bộ lọc (vector trạng thái $\mathbf{x}$, ma trận hiệp phương sai $\mathbf{P}$) được lưu trong bộ nhớ trong suốt vòng đời phiên. Khi phiên kết thúc hoặc kênh truyền dữ liệu hai chiều đóng, toàn bộ trạng thái được giải phóng.
 
 \subsubsection{Thiết kế bộ nhớ đệm (ring buffer)}
 
-\hspace{0.5cm} Giao diện lưu lịch sử quỹ đạo bằng vùng đệm vòng với dung lượng cố định $N_{max} = 500$ điểm. Cấu trúc này đảm bảo bộ nhớ không tăng không giới hạn trong các phiên dài. Khi vùng đệm đầy, điểm cũ nhất bị ghi đè:
+\hspace{0.5cm} Giao diện lưu lịch sử quỹ đạo bằng vùng đệm vòng (ring buffer) với dung lượng cố định $N_{max} = 500$ điểm. Cấu trúc bộ nhớ này đảm bảo dung lượng không tăng không giới hạn trong các phiên làm việc kéo dài. Khi vùng đệm đầy, điểm dữ liệu cũ nhất bị ghi đè bởi điểm mới nhất:
 
 \begin{equation}
 \text{buffer}[k \bmod N_{max}] \leftarrow \mathbf{p}_{target,k}
@@ -104,7 +104,7 @@ Trạng thái bộ lọc (vector trạng thái $\mathbf{x}$, ma trận hiệp ph
 
 \subsection{Giao diện bản đồ và hiển thị quỹ đạo}
 
-\hspace{0.5cm} Giao diện được xây dựng trên Leaflet.js với OpenStreetMap làm bản đồ nền. Lựa chọn Leaflet phù hợp với yêu cầu hiển thị tọa độ WGS84 trên mặt phẳng 2D vì thư viện này sử dụng phép chiếu Mercator, bảo toàn góc địa phương. Tính chất này rất quan trọng để đánh giá hướng di chuyển của mục tiêu.
+\hspace{0.5cm} Giao diện được xây dựng trên Leaflet.js với OpenStreetMap làm bản đồ nền. Leaflet sử dụng phép chiếu Mercator, bảo toàn góc địa phương trên mặt phẳng. Tính chất này rất quan trọng để đánh giá hướng di chuyển của mục tiêu trên bản đồ.
 
 \subsubsection{Các lớp hiển thị}
 
@@ -120,17 +120,17 @@ Màu sắc được thiết kế đủ tương phản để phân biệt rõ rà
 
 \subsubsection{Cập nhật vị trí theo thời gian thực}
 
-Mỗi khi nhận gói tin từ WebSocket, giao diện thực hiện chuỗi cập nhật:
+\hspace{0.5cm} Mỗi khi nhận gói tin từ kênh truyền dữ liệu hai chiều, giao diện thực hiện chuỗi cập nhật:
 
 \begin{enumerate}
     \item Thêm điểm mới vào ring buffer cho mỗi lớp (raw, Kalman, alpha-beta).
     \item Cập nhật marker vị trí hiện tại của mục tiêu.
     \item Vẽ lại polyline từ toàn bộ điểm trong buffer.
     \item Cập nhật vòng tròn bất định (chỉ cho lớp Kalman).
-    \item Cập nhật bảng số liệu (tọa độ, $\sigma_{pos}$, RMSE tích lũy nếu có ground truth).
+    \item Cập nhật bảng số liệu (tọa độ, $\sigma_{pos}$, RMSE tích lũy nếu có giá trị thực).
 \end{enumerate}
 
-Để tránh nghẽn khi vẽ lại nhiều điểm ở tần số cao, giao diện chỉ cập nhật DOM một lần cho mỗi gói tin nhận được, không vẽ lại từng điểm riêng lẻ.
+Để tránh nghẽn khi vẽ lại nhiều điểm ở tần số cao, giao diện chỉ cập nhật giao diện một lần cho mỗi gói tin nhận được, không vẽ lại từng điểm riêng lẻ.
 
 \subsection{Đánh giá hiệu năng giao diện}
 
@@ -142,8 +142,8 @@ Mỗi khi nhận gói tin từ WebSocket, giao diện thực hiện chuỗi cậ
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị đo} & \textbf{Yêu cầu} \\
 \midrule
-Độ trễ WebSocket (server $\to$ browser) & $\sim$3 ms & $<$ 100 ms \\
-Thời gian render mỗi frame              & $\sim$8 ms & $<$ 50 ms \\
+Độ trễ kênh truyền (server $\to$ browser) & $\sim$3 ms & $<$ 100 ms \\
+Thời gian hiển thị mỗi frame              & $\sim$8 ms & $<$ 50 ms \\
 Tổng điểm quỹ đạo tích lũy (3 lớp)    & $3 \times 500 = 1500$ & - \\
 Bộ nhớ Leaflet layer                    & $\sim$2.1 MB & - \\
 CPU trình duyệt (Chrome, máy tính bàn) & $\sim$4\%   & $<$ 30\% \\
@@ -193,7 +193,7 @@ Biểu đồ cho thấy giai đoạn hội tụ ban đầu của Kalman filter k
 
 \subsection{So sánh hiệu suất tính toạ độ trên các hệ toạ độ}
 
-\hspace{0.5cm} Trong quá trình triển khai, vấn đề tốc độ tính toán của pipeline chuyển đổi tọa độ cần được kiểm chứng. Chuỗi LLA-ECEF-ENU đòi hỏi các phép tính lượng giác và đại số tuyến tính; với tần số 10 Hz và nhiều phiên đồng thời, thời gian thực thi trở thành yếu tố cần theo dõi.
+\hspace{0.5cm} Trong quá trình triển khai, vấn đề tốc độ tính toán của chuỗi xử lý chuyển đổi tọa độ cần được kiểm chứng. Chuỗi LLA-ECEF-ENU đòi hỏi các phép tính lượng giác và đại số tuyến tính; với tần số 10 Hz và nhiều phiên đồng thời, thời gian thực thi trở thành yếu tố cần theo dõi.
 
 \begin{table}[htb!]
 \centering
@@ -214,4 +214,4 @@ ENU $\to$ ECEF $\to$ LLA        & 3.4 $\mu$s  & 6\% \\
 \caption{Thời gian thực thi các bước trong chuỗi xử lý (CPython 3.11, trung bình 10.000 lần)}
 \end{table}
 
-Kalman filter chiếm 82\% tổng thời gian tính toán do phải thực hiện phép nhân và nghịch đảo ma trận. Tuy nhiên, tổng chuỗi 59 $\mu$s vẫn nhỏ hơn nhiều so với chu kỳ 100 ms (10 Hz), để lại biên an toàn đủ lớn cho các tác vụ xử lý WebSocket và I/O.
+Kalman filter chiếm 82\% tổng thời gian tính toán do phải thực hiện phép nhân và nghịch đảo ma trận. Tuy nhiên, tổng chuỗi 59 $\mu$s vẫn nhỏ hơn nhiều so với chu kỳ 100 ms (10 Hz), để lại biên an toàn đủ lớn cho các tác vụ xử lý kênh truyền dữ liệu hai chiều và nhập/xuất.

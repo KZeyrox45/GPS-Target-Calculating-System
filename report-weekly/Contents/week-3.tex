@@ -1,6 +1,6 @@
 \section{Tuần 3}
 
-\subsection{Pipeline chuyển đổi tọa độ LLA–ECEF–ENU}
+\subsection{Pipeline chuyển đổi tọa độ LLA-ECEF-ENU}
 
 \hspace{0.5cm} Giai đoạn 1 sử dụng công thức Haversine để tính trực tiếp tọa độ mục tiêu trên mặt cầu. Cách này đơn giản và đủ chính xác cho bài toán tĩnh. Giai đoạn 2 cần một chuỗi chuyển đổi linh hoạt hơn vì ba lý do:
 
@@ -38,16 +38,16 @@ Bước (2) sử dụng ma trận xoay từ ECEF sang ENU:
 
 Với $\phi$ là vĩ độ, $\lambda$ là kinh độ. Ma trận này chuyển vector sai lệch ECEF $\Delta\mathbf{p}_{ecef}$ thành vector ENU.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.85\textwidth]{Images/coord-flow.png}
-\caption{Chuỗi chuyển đổi tọa độ LLA–ECEF–ENU}
+\caption{Chuỗi chuyển đổi tọa độ LLA-ECEF-ENU}
 \label{fig:coord-flow}
 \end{figure}
 
 \subsection{Phân tích sai số tổng hợp (Error Propagation)}
 
-\hspace{0.5cm} Phân tích định lượng cách sai số từ mỗi cảm biến lan truyền đến kết quả cuối cùng sử dụng công thức RSS bậc nhất:
+\hspace{0.5cm} Phân tích định lượng cách sai số từ mỗi cảm biến lan truyền đến kết quả cuối cùng sử dụng phương pháp RSS (Root Sum of Squares) bậc nhất. Phương pháp này giả định rằng các sai số từ các cảm biến là độc lập với nhau, tổng phương sai vị trí bằng tổng cộng phương sai của từng thành phần:
 
 \begin{equation}
 \sigma_{pos}^2 = \sigma_{gps}^2 + (R\sin\sigma_{az})^2 + \sigma_{range}^2 + (R\sin\sigma_{el})^2
@@ -80,6 +80,7 @@ Các thông số được khảo sát ở ba mức khoảng cách điển hình:
 \sigma_{elevation} &= 50 \cdot \sin(0.2^\circ) \approx 0.17 \text{ m} \\
 \sigma_{pos} &= \sqrt{5^2 + 0.26^2 + 0.5^2 + 0.17^2} \approx 5.0 \text{ m}
 \end{align*}
+
 GPS chiếm $\sim$98\% tổng sai số. Ở cự ly gần, chất lượng GPS là yếu tố quyết định.
 
 \paragraph{Khoảng cách 500 m (trung bình).}
@@ -88,6 +89,7 @@ GPS chiếm $\sim$98\% tổng sai số. Ở cự ly gần, chất lượng GPS l
 \sigma_{elevation} &= 500 \cdot \sin(0.2^\circ) \approx 1.75 \text{ m} \\
 \sigma_{pos} &= \sqrt{5^2 + 2.62^2 + 0.5^2 + 1.75^2} \approx 5.9 \text{ m}
 \end{align*}
+
 IMU đóng góp $\sim$28\%. Sai số bắt đầu bị chi phối bởi độ chính xác góc.
 
 \paragraph{Khoảng cách 1000 m (xa).}
@@ -96,20 +98,21 @@ IMU đóng góp $\sim$28\%. Sai số bắt đầu bị chi phối bởi độ ch
 \sigma_{elevation} &= 1000 \cdot \sin(0.2^\circ) \approx 3.49 \text{ m} \\
 \sigma_{pos} &= \sqrt{5^2 + 5.24^2 + 0.5^2 + 3.49^2} \approx 8.1 \text{ m}
 \end{align*}
+
 IMU đóng góp $\sim$61\%. Ở khoảng cách xa, sai số góc IMU là yếu tố chi phối.
 
-\hspace{-0.6cm} Hình \ref{fig:error-prop} trực quan hóa đóng góp của từng cảm biến ở ba mức khoảng cách.
+Hình \ref{fig:error-prop} trực quan hóa đóng góp của từng cảm biến ở ba mức khoảng cách.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{Images/error-prop.png}
 \caption{Đóng góp sai số theo khoảng cách}
 \label{fig:error-prop}
 \end{figure}
 
-\paragraph{Điểm giao nhau (cross-over range).}
+\paragraph{Điểm giao nhau (cross-over range)\\}
 
-Từ công thức RSS, có thể tính khoảng cách mà tại đó sai số GPS và sai số IMU bằng nhau:
+\hspace{0.2cm} Từ công thức RSS, có thể xác định khoảng cách mà tại đó đóng góp sai số từ GPS bằng đóng góp từ sai số góc IMU. Khoảng cách này gọi là điểm giao nhau (cross-over range), có ý nghĩa quan trọng trong việc lựa chọn thiết bị cảm biến:
 
 \begin{equation}
 R_{cross} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{el}}}
@@ -122,7 +125,7 @@ R_{cross} &= \frac{5{,}0}{\sqrt{\sin^2(0{,}3^\circ) + \sin^2(0{,}2^\circ)}} \\
           &= \frac{5{,}0}{\sqrt{0{,}00003964}} \\
           &\approx \frac{5{,}0}{0{,}006296} \approx 794 \text{ m}
 \end{align*}
-\hspace{0.5cm} Dưới ngưỡng này, sai số GPS chiếm ưu thế. Trên ngưỡng này, sai số IMU chiếm ưu thế. Điều này cho thấy nếu muốn cải thiện độ chính xác ở khoảng cách xa, cần ưu tiên nâng cấp IMU (cảm biến góc chính xác hơn) hơn là GPS.
+\hspace{0.5cm} Kết quả tính toán cho thấy điểm giao nhau nằm ở khoảng 794 m. Dưới ngưỡng này, sai số GPS chiếm ưu thế trong tổng sai số vị trí. Trên ngưỡng này, sai số góc từ IMU trở thành yếu tố chi phối. Kết quả này có ý nghĩa thực tế: nếu muốn cải thiện độ chính xác ở khoảng cách xa, cần ưu tiên nâng cấp IMU (cảm biến góc chính xác hơn) thay vì GPS.
 
 \subsection{Cấu trúc và hiệu chỉnh Kalman filter}
 
@@ -202,15 +205,15 @@ Với $\sigma_{pos,k}^2$ là kết quả từ công thức RSS ở mục \ref{ta
 
 \hspace{0.5cm} Kalman filter được áp dụng cho tất cả ba loại mục tiêu:
 \begin{itemize}
-    \item \textbf{Người đi bộ, xe máy}: Dùng KalmanFilter 2D (4 trạng thái). Độ cao từ sensor fusion không được lọc.
-    \item \textbf{Drone}: Dùng KalmanFilter3D (6 trạng thái). Độ cao được lọc cùng với East và North.
+    \item \textbf{Người đi bộ, xe máy}: Dùng bộ lọc 2D (4 trạng thái). Độ cao từ hợp nhất cảm biến không được lọc.
+    \item \textbf{Drone}: Dùng bộ lọc 3D (6 trạng thái). Độ cao được lọc cùng với East và North.
 \end{itemize}
 
-\textit{Lưu ý:} Alpha-beta filter trong đồ án chỉ xử lý 2D (East, North). Với drone, chỉ KalmanFilter3D mới theo dõi trục Up.
+\textit{Lưu ý:} Alpha-beta filter trong đồ án chỉ xử lý 2D (East, North). Với drone, chỉ bộ lọc 3D mới theo dõi trục Up.
 
 Hình \ref{fig:kalman-detail} mô tả chu trình dự báo và hiệu chỉnh.
 
-\begin{figure}[h!]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=0.8\textwidth]{Images/kalman-detail.png}
 \caption{Chu trình Kalman filter với F, H, Q, R}
