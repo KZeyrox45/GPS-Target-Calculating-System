@@ -173,15 +173,15 @@ CPU trình duyệt (Chrome, máy tính bàn) & $\sim$4\%   & $<$ 30\% \\
     grid style={dashed, gray!40},
     legend style={at={(0.98,0.98)}, anchor=north east, font=\small},
 ]
-% Raw measurement error oscillates around 1.79 RMSE
+% Raw measurement error oscillates around 2.04 RMSE
 \addplot[orange!80!black, thin, opacity=0.7, domain=0:120, samples=200]
-    {1.79 + 1.4*sin(deg(2.1*x)) + 0.6*sin(deg(5.3*x + 1.2))};
-% Alpha-beta error settles quickly around 1.01
+    {2.04 + 1.4*sin(deg(2.1*x)) + 0.6*sin(deg(5.3*x + 1.2))};
+% Alpha-beta error settles quickly around 1.11
 \addplot[blue!70!black, thick, domain=0:120, samples=200]
-    {1.01 + 0.35*exp(-0.15*x)*sin(deg(3.0*x)) + 0.2*sin(deg(1.8*x + 0.5))};
-% Kalman error: slower convergence, settles around 2.18
+    {1.11 + 0.35*exp(-0.15*x)*sin(deg(3.0*x)) + 0.2*sin(deg(1.8*x + 0.5))};
+% Kalman error: slower convergence, settles around 1.85
 \addplot[red!70!black, thick, dashed, domain=0:120, samples=200]
-    {2.18 + 1.2*exp(-0.08*x) + 0.3*sin(deg(2.5*x + 0.8))};
+    {1.85 + 1.2*exp(-0.08*x) + 0.3*sin(deg(2.5*x + 0.8))};
 \legend{Raw, Alpha-beta, Kalman}
 \end{axis}
 \end{tikzpicture}

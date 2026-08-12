@@ -6,6 +6,13 @@ import { create } from 'zustand';
 
 const MAX_HISTORY = 500;   // Maximum trajectory points kept in memory
 
+// Per-type default observer positions (HCM City)
+const TYPE_DEFAULTS = {
+  pedestrian: { observer_lat: 10.7726, observer_lon: 106.6983 },  // Ben Thanh Market area
+  motorcycle: { observer_lat: 10.7709, observer_lon: 106.7030 },  // Ham Nghi Blvd / Le Loi
+  drone:      { observer_lat: 10.7280, observer_lon: 106.7180 },  // District 7 / Phu My Hung
+};
+
 const useTrackingStore = create((set) => ({
   // --- Connection state ---
   connected: false,
@@ -75,8 +82,8 @@ const useTrackingStore = create((set) => ({
 
   // --- Simulation config (mirrors SimulationStartRequest) ---
   simConfig: {
-    observer_lat: 10.762622,
-    observer_lon: 106.660172,
+    observer_lat: 10.7743,
+    observer_lon: 106.7031,
     observer_alt: 10.0,
     target_type: 'pedestrian',
     algorithm: 'both',
@@ -85,9 +92,14 @@ const useTrackingStore = create((set) => ({
     alpha: 0.4,
     seed: null,
     boundary_radius_m: 400,
+    use_realistic_sim: false,
   },
   setSimConfig: (patch) => set((s) => ({
     simConfig: { ...s.simConfig, ...patch },
+  })),
+
+  setTargetType: (type) => set((s) => ({
+    simConfig: { ...s.simConfig, target_type: type, ...TYPE_DEFAULTS[type] },
   })),
 
   // --- Simulation running state ---
@@ -101,6 +113,7 @@ const useTrackingStore = create((set) => ({
   showRaw:         true,
   showKalman:      true,
   showAlphaBeta:   true,
+  showRoads: true,
   toggleLayer: (name) => set((s) => ({ [name]: !s[name] })),
 
   // --- FPS counter ---

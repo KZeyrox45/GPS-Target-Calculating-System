@@ -3,7 +3,7 @@ import useTrackingStore from '../../store/trackingStore';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 export default function SimulationPanel() {
-  const { simConfig, setSimConfig, isRunning, setIsRunning, setSessionId, reset, clearHistory, clearMetrics, setSimulationEnded } = useTrackingStore();
+  const { simConfig, setSimConfig, setTargetType, isRunning, setIsRunning, setSessionId, reset, clearHistory, clearMetrics, setSimulationEnded } = useTrackingStore();
   const { connect, disconnect } = useWebSocket();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -45,15 +45,13 @@ export default function SimulationPanel() {
   return (
     <div className="card">
       <div className="card-header">
-        <span className="card-title">🎮 Simulation Control</span>
+        <span className="card-title">SIM CTRL</span>
       </div>
 
       <div className="flex-col gap-2">
-        {/* Observer position */}
-        <p className="section-title">Vị trí quan sát viên</p>
-
+        <p className="section-title">Observer Position</p>
         <div className="form-group">
-          <label className="form-label">Vĩ độ (Lat)</label>
+          <label className="form-label">LAT</label>
           <input
             type="number" step="0.000001" className="form-input"
             value={simConfig.observer_lat}
@@ -62,7 +60,7 @@ export default function SimulationPanel() {
           />
         </div>
         <div className="form-group">
-          <label className="form-label">Kinh độ (Lon)</label>
+          <label className="form-label">LON</label>
           <input
             type="number" step="0.000001" className="form-input"
             value={simConfig.observer_lon}
@@ -73,25 +71,23 @@ export default function SimulationPanel() {
 
         <div className="divider" />
 
-        {/* Target configuration */}
-        <p className="section-title">Loại mục tiêu</p>
+        <p className="section-title">Target Type</p>
         <div className="form-group">
           <select
             className="form-select"
             value={simConfig.target_type}
-            onChange={(e) => setSimConfig({ target_type: e.target.value })}
+            onChange={(e) => setTargetType(e.target.value)}
             disabled={isRunning}
           >
-            <option value="pedestrian">🚶 Người đi bộ</option>
-            <option value="motorcycle">🏍️ Xe máy</option>
-            <option value="drone">🚁 Drone</option>
+            <option value="pedestrian">PEDESTRIAN</option>
+            <option value="motorcycle">MOTORCYCLE</option>
+            <option value="drone">DRONE</option>
           </select>
         </div>
 
         <div className="divider" />
 
-        {/* Algorithm */}
-        <p className="section-title">Thuật toán lọc</p>
+        <p className="section-title">Filter Algorithm</p>
         <div className="form-group">
           <select
             className="form-select"
@@ -99,16 +95,15 @@ export default function SimulationPanel() {
             onChange={(e) => setSimConfig({ algorithm: e.target.value })}
             disabled={isRunning}
           >
-            <option value="both">Kalman + α-β</option>
-            <option value="kalman">Kalman Filter only</option>
-            <option value="alpha_beta">α-β Filter only</option>
+            <option value="both">KF + AB</option>
+            <option value="kalman">KF ONLY</option>
+            <option value="alpha_beta">AB ONLY</option>
           </select>
         </div>
 
-        {/* Alpha param for alpha-beta */}
         {simConfig.algorithm !== 'kalman' && (
           <div className="form-group">
-            <label className="form-label">α value ({simConfig.alpha})</label>
+            <label className="form-label">ALPHA ({simConfig.alpha})</label>
             <input
               type="range" min="0.1" max="0.9" step="0.05"
               value={simConfig.alpha}
@@ -121,10 +116,9 @@ export default function SimulationPanel() {
 
         <div className="divider" />
 
-        {/* Timing */}
-        <p className="section-title">Thời gian</p>
+        <p className="section-title">Duration</p>
         <div className="form-group">
-          <label className="form-label">Thời lượng (giây)</label>
+          <label className="form-label">SECONDS</label>
           <input
             type="number" min="5" max="600" step="5" className="form-input"
             value={simConfig.duration_s}
@@ -135,18 +129,11 @@ export default function SimulationPanel() {
 
         <div className="divider" />
 
-        {/* Boundary radius */}
-        <p className="section-title">Vùng mô phỏng</p>
+        <p className="section-title">Boundary</p>
         <div className="form-group">
-          <label className="form-label">
-            Bán kính ranh giới ({simConfig.boundary_radius_m} m)
-          </label>
+          <label className="form-label">RADIUS ({simConfig.boundary_radius_m}m)</label>
           <input
-            type="number"
-            min="100"
-            max="1000"
-            step="50"
-            className="form-input"
+            type="number" min="100" max="1000" step="50" className="form-input"
             value={simConfig.boundary_radius_m}
             onChange={(e) => setSimConfig({ boundary_radius_m: parseFloat(e.target.value) })}
             disabled={isRunning}
@@ -155,21 +142,42 @@ export default function SimulationPanel() {
 
         <div className="divider" />
 
-        {/* Error message */}
+        <p className="section-title">Trajectory Source</p>
+        <div className="toggle-row">
+          <span className="toggle-label">Real-World Data</span>
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={simConfig.use_realistic_sim}
+              onChange={(e) => setSimConfig({ use_realistic_sim: e.target.checked })}
+              disabled={isRunning}
+            />
+            <span className="toggle-track" />
+          </label>
+        </div>
+        <p className="text-xs" style={{ color: 'var(--text-muted)', marginTop: '-0.1rem', paddingLeft: '0.1rem' }}>
+          {simConfig.use_realistic_sim
+            ? (simConfig.target_type === 'motorcycle'
+                ? 'Road network motorcycle trajectories'
+                : 'Geolife / AMIT dataset trajectories')
+            : 'Synthetic kinematic trajectories'}
+        </p>
+
+        <div className="divider" />
+
         {error && (
-          <p className="text-xs text-danger" style={{ padding: '0.3rem', background: 'rgba(239,68,68,0.1)', borderRadius: '6px' }}>
-            ⚠️ {error}
+          <p className="text-sm text-danger" style={{ padding: '0.4rem', background: 'rgba(239,68,68,0.1)', borderRadius: '3px' }}>
+            ERR: {error}
           </p>
         )}
 
-        {/* Start / Stop */}
         {isRunning ? (
           <button className="btn btn-danger btn-full" onClick={handleStop}>
-            ⏹ Dừng lại
+            HALT
           </button>
         ) : (
           <button className="btn btn-primary btn-full" onClick={handleStart} disabled={loading}>
-            {loading ? <><span className="spinner" /> Đang khởi động…</> : '▶ Bắt đầu mô phỏng'}
+            {loading ? <><span className="spinner" /> INIT...</> : 'ENGAGE'}
           </button>
         )}
       </div>

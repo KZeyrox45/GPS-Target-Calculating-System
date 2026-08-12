@@ -3,15 +3,19 @@ test_geodetics.py - Unit tests for geodetic conversion functions
 """
 
 import math
+
 import numpy as np
 import pytest
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.geodetics import (
-    haversine_destination, haversine_distance, calculate_bearing,
-    lla_to_ecef, ecef_to_lla, lla_to_enu, enu_to_lla, polar_to_enu,
+    calculate_bearing,
+    ecef_to_lla,
+    enu_to_lla,
+    haversine_destination,
+    haversine_distance,
+    lla_to_ecef,
+    lla_to_enu,
+    polar_to_enu,
 )
 
 # --- Known reference values (HCMC region) ---

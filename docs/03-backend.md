@@ -25,12 +25,13 @@ backend/
 │   │   └── __init__.py          # Schema Pydantic v2
 │   ├── routers/
 │   │   ├── simulation.py        # REST + WebSocket endpoints
-│   │   └── calculator.py        # Máy tính tĩnh giai đoạn 1
+│   │   └── calculator.py        # Máy tính tĩnh đơn điểm
 │   └── simulation/
 │       ├── target_simulator.py  # Tạo quỹ đạo (3 loại)
 │       ├── sensor_noise.py      # Mô hình nhiễu Gaussian
+│       ├── data_loaders.py      # Geolife, AMIT, RoadNetwork loaders
 │       └── boundary.py          # Ranh giới hình tròn
-├── tests/                       # 125 test
+├── tests/                       # 163 test
 ├── scripts/                     # Script tiện ích
 ├── pyproject.toml               # Deps + cấu hình (nguồn gốc)
 └── requirements.txt             # Chỉ tham khảo
@@ -45,7 +46,7 @@ backend/
 | GET | `/api/simulation/sessions` | Liệt kê phiên đang hoạt động |
 | GET | `/api/simulation/stats/{id}` | Thống kê RMSE/khung theo phiên |
 | GET | `/api/simulation/export/{id}` | StreamingResponse CSV |
-| POST | `/api/calculate` | Máy tính tĩnh giai đoạn 1 |
+| POST | `/api/calculate` | Máy tính tĩnh đơn điểm |
 
 ## WebSocket
 
@@ -109,6 +110,7 @@ backend/
 - NumPy, SciPy
 - Pydantic v2 (model_config = ConfigDict)
 - websockets
+- osmnx, networkx (road network for motorcycle trajectories)
 - pytest, pytest-asyncio (dev)
 - ruff (dev, linter)
 

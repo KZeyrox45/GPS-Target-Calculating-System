@@ -1,7 +1,8 @@
 """Pydantic schemas for API request/response bodies."""
 
-from pydantic import BaseModel, Field, ConfigDict
 from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class SimulationStartRequest(BaseModel):
@@ -21,6 +22,10 @@ class SimulationStartRequest(BaseModel):
         le=1000.0,
         description="Boundary radius (metres). Range: [100, 1000]."
     )
+    use_realistic_sim: bool = Field(
+        False,
+        description="Use real dataset trajectories (Geolife/AMIT/kinematic drone) instead of synthetic."
+    )
 
     model_config = ConfigDict(
         json_schema_extra={
@@ -35,6 +40,7 @@ class SimulationStartRequest(BaseModel):
                 "alpha": 0.4,
                 "seed": None,
                 "boundary_radius_m": 400.0,
+                "use_realistic_sim": False,
             }
         }
     )
@@ -47,7 +53,7 @@ class SimulationStartResponse(BaseModel):
 
 
 class StaticCalcRequest(BaseModel):
-    """Body for POST /api/calculate (Phase 1 single-point)"""
+    """Body for POST /api/calculate (static single-point)"""
     observer_lat: float = Field(..., ge=-90,  le=90)
     observer_lon: float = Field(..., ge=-180, le=180)
     observer_alt: float = Field(0.0, ge=0)

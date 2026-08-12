@@ -2,10 +2,8 @@
 test_sensor_fusion.py - Sensor fusion unit tests
 """
 import math
+
 import pytest
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.sensor_fusion import fuse_sensors
 

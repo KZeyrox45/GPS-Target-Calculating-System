@@ -4,8 +4,8 @@
 
 ### Nội dung
 - **Bài toán**: Theo dõi mục tiêu di chuyển bằng hợp nhất cảm biến Laser-IMU-GNSS
-- **Giai đoạn 1**: Máy tính điểm đơn tĩnh (dựa trên Haversine)
-- **Mở rộng giai đoạn 2**: Theo dõi thời gian thực với lọc và WebSocket
+- **Máy tính điểm đơn tĩnh** (dựa trên Haversine)
+- **Mở rộng**: Theo dõi thời gian thực với lọc và WebSocket
 
 ### Khái niệm giới thiệu
 - Kiến trúc 4 tầng (Cảm biến → Nhúng → Server → Frontend)
@@ -162,7 +162,7 @@
 ## Tuần 8: Kiểm tra hồi quy và Tổng kết
 
 ### Nội dung
-- **Kiểm tra hồi quy**: 125 test đạt tất cả, 0 lỗi
+- **Kiểm tra hồi quy**: 163 test đạt tất cả, 0 lỗi
 - **Đánh giá kiến trúc**: Các tầng tính toán, giao tiếp, giao diện được xác nhận
 - **Danh sách endpoint**: 5 REST + 1 WebSocket
 - **Chuẩn bị demo**: Hướng dẫn demo từng bước cho đánh giá giữa kỳ
@@ -172,12 +172,13 @@
 | Hạng mục | Số test | Nội dung |
 |----------|---------|----------|
 | Bộ lọc alpha-beta | 10 | Khởi tạo, bước tính, reset |
-| Chuyển đổi tọa độ | 14 | Haversine, bearing, ECEF/ENU khứ hồi |
-| Kalman filter | 15 | Khởi tạo, predict, update, hội tụ |
+| Chuyển đổi tọa độ | 25 | Haversine, bearing, ECEF/ENU khứ hồi |
+| Kalman filter | 17 | Khởi tạo, predict, update, hội tụ |
 | Hợp nhất cảm biến | 6 | Hướng, sigma, đầu ra LLA |
-| Mô phỏng giai đoạn 2 | 49 | Quỹ đạo, biên, Kalman3D |
-| Endpoint thống kê và xuất | 15 | Stats engine, endpoint |
-| **Tổng** | **125** | **Đạt tất cả** |
+| Mô phỏng simulation | 50 | Quỹ đạo, biên, Kalman3D |
+| Endpoint thống kê và xuất | 17 | Stats engine, endpoint |
+| Nạp dữ liệu thực tế | 38 | Geolife, AMIT, drone, routing |
+| **Tổng** | **163** | **Đạt tất cả** |
 
 ### Hạng mục còn lại
 | Hạng mục | Tuần | Mô tả |

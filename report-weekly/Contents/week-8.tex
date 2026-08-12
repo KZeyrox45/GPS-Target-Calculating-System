@@ -152,11 +152,11 @@ Laser (range)  & $\sigma_{range}$ & 0{,}5 m   & $\mathcal{N}(0, \sigma^2)$ \\
 
 \subsection{Kiểm chứng toàn bộ hệ thống}
 
-\hspace{0.5cm} Bộ kiểm tra tự động gồm 125 test, phân theo sáu hạng mục chức năng. Bảng \ref{tab:test-summary} tóm tắt phân phối và nội dung kiểm chứng.
+\hspace{0.5cm} Bộ kiểm tra tự động gồm 162 test, phân theo bảy hạng mục chức năng. Bảng \ref{tab:test-summary} tóm tắt phân phối và nội dung kiểm chứng.
 
 \begin{table}[htbp]
 \centering
-\caption{Phân bố bộ kiểm tra tự động (125 test)}
+\caption{Phân bố bộ kiểm tra tự động (162 test)}
 \label{tab:test-summary}
 \begin{tabular}{lrp{7cm}}
 \toprule
@@ -166,15 +166,16 @@ Bộ lọc alpha-beta         & 10 & Khởi tạo, bước tính, reset, ổn đ
 Chuyển đổi tọa độ         & 25 & Haversine, bearing, ECEF/ENU khứ hồi, elevation âm \\
 Kalman filter              & 17 & Khởi tạo, predict, update, hội tụ, RMSE tiêu chuẩn \\
 Hợp nhất cảm biến         &  6 & Hướng, sigma\_pos, đầu ra LLA \\
-Mô phỏng giai đoạn 2      & 50 & Quỹ đạo, biên, Kalman3D, adaptive R, xe máy, drone \\
+Mô phỏng        & 49 & Quỹ đạo, biên, Kalman3D, adaptive R, xe máy, drone \\
+Bộ tải dữ liệu            & 38 & Geolife đi bộ, AMIT xe máy, drone tuyến tính, tuyến định \\
 Endpoint thống kê và xuất  & 17 & Engine thống kê, endpoint thống kê, endpoint xuất CSV \\
 \midrule
-\textbf{Tổng}              & \textbf{125} & \textbf{Tất cả pass, 0 lỗi} \\
+\textbf{Tổng}              & \textbf{162} & \textbf{Tất cả pass, 0 lỗi} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Nhóm kiểm tra mô phỏng với 49 test bao phủ đầy đủ các trường hợp biên: phản xạ quang học tại biên (specular reflection), drone vượt quá bán kính biên, Kalman3D hội tụ trên cả ba trục, và cơ chế adaptive R với nhiều giá trị $\sigma_{pos}$ khác nhau. Nhóm test chuyển đổi tọa độ kiểm chứng độ chính xác khứ hồi: sau khi chuyển từ WGS84 sang ECEF sang ENU và quay lại, sai số tích lũy nhỏ hơn $10^{-9}$ m, đảm bảo không có lỗi số học lan truyền qua chuỗi xử lý.
+Nhóm kiểm tra mô phỏng với 50 test bao phủ đầy đủ các trường hợp biên: phản xạ quang học tại biên (specular reflection), drone vượt quá bán kính biên, Kalman3D hội tụ trên cả ba trục, và cơ chế adaptive R với nhiều giá trị $\sigma_{pos}$ khác nhau. Nhóm test tải dữ liệu với 38 test kiểm chứng bộ tải Geolife đi bộ, AMIT xe máy, drone tuyến tính, và logic tuyến định. Nhóm test chuyển đổi tọa độ kiểm chứng độ chính xác khứ hồi: sau khi chuyển từ WGS84 sang ECEF sang ENU và quay lại, sai số tích lũy nhỏ hơn $10^{-9}$ m, đảm bảo không có lỗi số học lan truyền qua chuỗi xử lý.
 
 Kết quả kiểm chứng xác nhận toàn bộ hệ thống hoạt động đúng theo đặc tả: RMSE đạt dưới 5{,}0 m trên tất cả kịch bản và tất cả giá trị khởi tạo, chuỗi xử lý trong 59 µs và giao tiếp kênh truyền dữ liệu hai chiều ổn định trong các phiên kéo dài.
 

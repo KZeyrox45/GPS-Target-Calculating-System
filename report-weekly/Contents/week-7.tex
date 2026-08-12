@@ -48,7 +48,7 @@ Tất cả 9 trường hợp (3 kịch bản $\times$ 3 phương pháp) đều �
 
 \subsubsection{Phân tích phương sai giữa các giá trị khởi tạo}
 
-\hspace{0.5cm} Kịch bản xe máy có độ lệch chuẩn lớn nhất (Kalman $\sigma = 0{,}37$ m, Raw $\sigma = 0{,}38$ m), phản ánh tính ngẫu nhiên cao trong quỹ đạo tăng tốc đột ngột theo cả hướng và tốc độ. Ngược lại, kịch bản drone cho độ ổn định cao nhất (Raw $\sigma = 0{,}08$ m, Alpha-beta $\sigma = 0{,}03$ m) vì nhiễu cảm biến phân phối đồng đều trên cả ba trục và quỹ đạo 3D mượt mà hơn so với xe máy.
+\hspace{0.5cm} Kịch bản xe máy có độ lệch chuẩn lớn nhất (Kalman $\sigma = 0{,}37$ m, đo thô $\sigma = 0{,}38$ m), phản ánh tính ngẫu nhiên cao trong quỹ đạo tăng tốc đột ngột theo cả hướng và tốc độ. Ngược lại, kịch bản drone cho độ ổn định cao nhất (đo thô $\sigma = 0{,}08$ m, Alpha-beta $\sigma = 0{,}03$ m) vì nhiễu cảm biến phân phối đồng đều trên cả ba trục và quỹ đạo 3D mượt mà hơn so với xe máy.
 
 Đối với kịch bản người đi bộ, Kalman filter thể hiện hệ số biến thiên (coefficient of variation) cao nhất so với hai kịch bản khác ($\sigma/\mu = 0{,}23$). Nguyên nhân là giai đoạn hội tụ ban đầu: ở một số lần thử, quỹ đạo ngắn hoặc khởi đầu gần biên khiến ma trận $\mathbf{P}$ chưa kịp ổn định trước khi kết thúc mô phỏng 120 giây. Alpha-beta filter không có vấn đề này vì tham số $\alpha$ và $\beta$ cố định, không có quá trình hội tụ.
 

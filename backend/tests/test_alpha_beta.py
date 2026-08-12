@@ -2,10 +2,8 @@
 test_alpha_beta.py - α-β Filter unit tests
 """
 import math
+
 import pytest
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.alpha_beta_filter import AlphaBetaFilter
 

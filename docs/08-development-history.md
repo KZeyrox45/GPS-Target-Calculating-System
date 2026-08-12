@@ -1,12 +1,12 @@
 # Lịch sử phát triển
 
-## Giai đoạn 1 (Má tính tĩnh)
+## Máy tính tĩnh
 - Máy tính điểm đơn JavaScript thuần
 - Tính mục tiêu Haversine + trigonometric
 - HTML/CSS tĩnh, không build
 - Lưu trữ trong `phase1/`
 
-## Giai đoạn 2 (Theo dõi thời gian thực)
+## Theo dõi thời gian thực
 
 ### Tuần 1: Lập kế hoạch
 - Xác định bài toán: theo dõi mục tiêu di chuyển
@@ -54,7 +54,7 @@
 - Xóa 8 f-string không có placeholder (F541)
 - Tách 6 multi-imports (E401)
 - Sửa 1 tên biến mơ hồ (E741)
-- Sửa thứ tự import (E402) trong test_simulation_phase2.py
+- Sửa thứ tự import (E402) trong test_simulation.py
 - Sửa ESLint: xóa `setFps` khỏi dependency useCallback
 
 ## Danh sách file
@@ -79,7 +79,7 @@ backend/tests/test_alpha_beta.py
 backend/tests/test_geodetics.py
 backend/tests/test_kalman.py
 backend/tests/test_sensor_fusion.py
-backend/tests/test_simulation_phase2.py
+backend/tests/test_simulation.py
 backend/tests/test_stats_endpoint.py
 backend/tests/benchmark_rmse.py
 backend/scripts/ws_smoke.py

@@ -36,7 +36,7 @@ Ba loại mục tiêu được mô phỏng tương ứng với ba trường hợ
 \label{tab:rmse-week4}
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Kịch bản} & \textbf{Raw (đo thô)} & \textbf{Alpha-beta} & \textbf{Kalman} & \textbf{Yêu cầu} \\
+\textbf{Kịch bản} & \textbf{Đo thô} & \textbf{Alpha-beta} & \textbf{Kalman} & \textbf{Yêu cầu} \\
 \midrule
 Người đi bộ & 0,46 m & \textbf{0,24 m} & 0,84 m & $<$ 5 m \checkmark \\
 Xe máy      & 1,79 m & \textbf{1,01 m} & 2,18 m & $<$ 5 m \checkmark \\
@@ -45,7 +45,7 @@ Drone       & 1,28 m & \textbf{0,73 m} & 2,33 m & $<$ 5 m \checkmark \\
 \end{tabular}
 \end{table}
 
-Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan.
+Cả ba kịch bản đều đạt yêu cầu bài toán. Ở đây, "đo thô" là vị trí tính trực tiếp từ hợp nhất cảm biến (kết hợp GPS, IMU, laser) có nhiễu, chưa qua bất kỳ bộ lọc nào. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan.
 
 \newpage
 
@@ -72,11 +72,11 @@ Cả ba kịch bản đều đạt yêu cầu bài toán. Hình \ref{fig:rmse-ba
     grid style={dashed, gray!40},
 ]
 \addplot+[fill=gray!50, draw=gray!70] coordinates {
-    (Người đi bộ, 0.46) (Xe máy, 1.79) (Drone, 1.28)};
+    (Người đi bộ, 0.45) (Xe máy, 2.04) (Drone, 1.44)};
 \addplot+[fill=blue!50, draw=blue!70] coordinates {
-    (Người đi bộ, 0.24) (Xe máy, 1.01) (Drone, 0.73)};
+    (Người đi bộ, 0.24) (Xe máy, 1.11) (Drone, 0.80)};
 \addplot+[fill=red!50, draw=red!70] coordinates {
-    (Người đi bộ, 0.84) (Xe máy, 2.18) (Drone, 2.33)};
+    (Người đi bộ, 0.70) (Xe máy, 1.85) (Drone, 1.82)};
 \legend{Đo thô, Alpha-beta, Kalman}
 \end{axis}
 \end{tikzpicture}

@@ -79,15 +79,15 @@ Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của 
     xtick={0,200,400,600,800,1000,1200},
     ytick={0,1,2,3,4,5},
 ]
-% Raw measurement RMSE: starts high, settles around 1.79
+% Raw measurement RMSE: starts high, settles around 2.04
 \addplot[orange!80!black, thin, domain=0:1200, samples=300]
-    {1.79 + 2.8*exp(-0.012*x)};
-% Alpha-beta: fast convergence around 1.01
+    {2.04 + 2.8*exp(-0.012*x)};
+% Alpha-beta: fast convergence around 1.11
 \addplot[blue!70!black, thick, domain=0:1200, samples=300]
-    {1.01 + 1.6*exp(-0.025*x)};
-% Kalman: slower convergence, settles around 2.18
+    {1.11 + 1.6*exp(-0.025*x)};
+% Kalman: slower convergence, settles around 1.85
 \addplot[red!70!black, thick, dashed, domain=0:1200, samples=300]
-    {2.18 + 1.9*exp(-0.010*x)};
+    {1.85 + 1.9*exp(-0.010*x)};
 % Spec line at 5m
 \addplot[black, dotted, thick, domain=0:1200]
     {5.0};
@@ -113,9 +113,9 @@ Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của 
 \toprule
 \textbf{Phương pháp} & $\sigma_E$ (m) & $\sigma_N$ (m) & $\text{RMSE}_{EN}$ (m) \\
 \midrule
-Đo thô     & 0.34 & 0.31 & 0.46 \\
+Đo thô     & 0.33 & 0.31 & 0.45 \\
 Alpha-beta & 0.18 & 0.16 & 0.24 \\
-Kalman     & 0.61 & 0.57 & 0.84 \\
+Kalman     & 0.50 & 0.49 & 0.70 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -146,7 +146,7 @@ Sai số phân bố tương đương giữa hai trục East và North trong cả
 % Alpha-beta: distribution concentrated near 0 (RMSE=0.24 m)
 \addplot+[fill=blue!40, draw=blue!60, opacity=0.7] coordinates {
     (0.1, 620) (0.3, 499) (0.5, 78) (0.7, 3)};
-% Kalman: wider distribution with convergence tail (RMSE=0.84 m)
+% Kalman: wider distribution with convergence tail (RMSE=0.70 m)
 \addplot+[fill=red!40, draw=red!60, opacity=0.7] coordinates {
     (0.1, 511) (0.3, 300) (0.5, 124) (0.7, 35) (0.9, 37)
     (1.1,  50) (1.3,  37) (1.5,  24) (1.7,   7) (1.9,  8)

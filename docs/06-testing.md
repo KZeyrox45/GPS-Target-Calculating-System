@@ -4,7 +4,7 @@
 
 **Vị trí**: `backend/tests/`
 **Framework**: pytest + pytest-asyncio
-**Số lượng**: 125 test (đạt tất cả)
+**Số lượng**: 163 test (đạt tất cả)
 **Chạy**:
 ```bash
 cd backend
@@ -19,7 +19,7 @@ uv run pytest tests/ -v
 | Chuyển đổi tọa độ | 14 | Haversine, bearing, ECEF/ENU khứ hồi, elevation âm |
 | Kalman filter | 15 | Khởi tạo, predict, update, hội tụ, RMSE tiêu chuẩn |
 | Hợp nhất cảm biến | 6 | Hướng, sigma, đầu ra LLA |
-| Mô phỏng giai đoạn 2 | 49 | Quỹ đạo, biên, Kalman3D, adaptive R, motorcycle, drone |
+| Mô phỏng simulation | 49 | Quỹ đạo, biên, Kalman3D, adaptive R, motorcycle, drone |
 | Endpoint thống kê và xuất | 15 | Stats engine, stats endpoint, export endpoint |
 | Benchmark RMSE | (script) | RMSE cơ sở có thẩm quyền cho số liệu báo cáo |
 

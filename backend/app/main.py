@@ -9,7 +9,7 @@ Routing layout
   /api/simulation/start   POST   - create session
   /api/simulation/stop/*  POST   - stop session
   /api/simulation/sessions GET   - list sessions
-  /api/calculate          POST   - Phase-1 static calculator
+  /api/calculate          POST   - static target calculator
   /ws/tracking/{id}       WS     - live tracking stream (proxied by Vite /ws)
   /health                 GET    - health check
   /docs                   GET    - Swagger UI
@@ -17,11 +17,13 @@ Routing layout
 
 import logging
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers.simulation import router as simulation_router, ws_router
-from .routers.calculator  import router as calculator_router
+from .routers.calculator import router as calculator_router
+from .routers.simulation import router as simulation_router
+from .routers.simulation import ws_router
 
 logging.basicConfig(
     level=logging.INFO,

@@ -1,0 +1,209 @@
+\section{Tuần 9}
+
+\subsection{Phân tích tập dữ liệu quỹ đạo thực tế}
+
+\hspace{0.5cm} Bộ dữ liệu quỹ đạo GPS người đi bộ Geolife (Microsoft Research Asia) gồm dữ liệu thu thập từ 182 người dùng tại Bắc Kinh, Trung Quốc, trong khoảng thời gian từ năm 2007 đến 2012. Trong số đó, 69 người dùng có nhãn phương tiện di chuyển (đi bộ, xe buýt, xe đạp, taxi, ô tô, xe máy). Mật độ lấy mẫu của tập dữ liệu chủ yếu là 1-5 giây hoặc 5-10 m mỗi điểm, phân phối gần nhất theo loại đi bộ (walk) là 1-2 giây. Định dạng dữ liệu gốc là chuỗi điểm GPS trong hệ tọa độ WGS-84 (vĩ độ, kinh độ, độ cao), ghi nhận thời gian tuyệt đối cho từng điểm.
+
+Khác với Geolife, tập dữ liệu AMIT (Asian Motorcycle Intersection Trajectory) được thu thập bằng thiết bị bay không người lái (UAV) quay video từ trên cao tại 6 giao lộ đô thị có đèn giao thông tại Đài Loan. Vị trí phương tiện được trích xuất thông qua biến đổi phối cảnh (homography projection) từ tọa độ ảnh sang hệ tọa độ phẳng địa phương (đơn vị mét). Đây là điểm khác biệt quan trọng: toạ độ AMIT không phải GPS mà là tọa độ mét trong hệ phẳng địa phương. Tần số lấy mẫu là 5 Hz (0,2 giây/khung). Tập dữ liệu phân loại phương tiện theo lớp, trong đó lớp xe máy có chiều dài xe 2,1-2,4 m, chiều rộng khoảng 1,0 m.
+
+\subsubsection{So sánh đặc điểm hai tập dữ liệu}
+
+\hspace{0.5cm} Bảng \ref{tab:dataset-comparison} so sánh các đặc tính kỹ thuật của hai tập dữ liệu được sử dụng.
+
+\begin{table}[htbp]
+\centering
+\caption{So sánh đặc tính hai tập dữ liệu quỹ đạo}
+\label{tab:dataset-comparison}
+\begin{tabular}{lll}
+\toprule
+\textbf{Đặc tính}             & \textbf{Geolife (người đi bộ)} & \textbf{AMIT (xe máy)} \\
+\midrule
+Nguồn dữ liệu     & GPS vệ tinh, WGS-84            & Camera UAV, chiếu phẳng \\
+Hệ tọa độ        & Vĩ độ, kinh độ (độ)            & Tọa độ phẳng địa phương (m) \\
+Tần số lấy mẫu   & 0,5-1 Hz (trung bình)          & 5 Hz \\
+Vị trí địa lý    & Bắc Kinh, Trung Quốc           & Đài Nam, Đài Bắc, Taoyuan,\\
+                  &                                & Kaohsiung, Zhubei \\
+Số đoạn có nhãn  & 6460 (walk: chiếm phần lớn)    & Nhiều giao lộ, mỗi lớp \\
+Thông tin thêm   & Phương tiện đa dạng            & Có tốc độ, gia tốc tức thời \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Tiền xử lý và chuẩn hóa quỹ đạo người đi bộ}
+
+\subsubsection{Trích xuất đoạn đi bộ có nhãn}
+
+\hspace{0.5cm} Đối với tập dữ liệu Geolife, 69 người dùng có tệp nhãn xác định khoảng thời gian ứng với từng phương tiện di chuyển. Chỉ các đoạn có nhãn ``walk'' (đi bộ) được đưa vào xử lý. Với mỗi đoạn đi bộ, tất cả điểm GPS trong khoảng thời gian tương ứng được trích xuất từ tệp quỹ đạo gốc.
+
+\subsubsection{Tiêu chí lọc chất lượng}
+
+\hspace{0.5cm} Không phải mọi đoạn đi bộ đều phù hợp để đưa vào mô phỏng. Ba tiêu chí lọc được áp dụng:
+
+\begin{enumerate}
+    \item \textbf{Thời gian}: Đoạn phải kéo dài từ 60 đến 180 giây. Đoạn ngắn hơn 60 giây không đủ dài để khảo sát hành vi dừng và rẽ; đoạn dài hơn 180 giây có thể bao gồm nhiều địa hình khác nhau, làm giảm tính đồng nhất của mẫu.
+    \item \textbf{Khoảng cách tối đa}: Mọi điểm trong đoạn phải nằm trong phạm vi 390 m so với trung tâm hình học của đoạn đó. Giới hạn này đảm bảo quỹ đạo nằm trong bán kính hoạt động của hệ thống theo dõi (400 m).
+    \item \textbf{Khoảng trống GPS}: Khoảng thời gian giữa hai điểm GPS liên tiếp không được vượt quá 3 giây. Ngưỡng 3 giây được chọn dựa trên nguyên tắc: khoảng lấy mẫu danh định của phân đoạn đi bộ mật độ cao trong Geolife là 1 giây; khoảng trống vượt quá 3 lần giá trị này (3 giây) chỉ ra một trong hai trường hợp: mất tín hiệu GPS tạm thời hoặc ranh giới giữa hai phương thức di chuyển. Trong cả hai trường hợp, nội suy 30 điểm liên tiếp (3 giây $\times$ 10 Hz) mà không có điểm GPS thực sẽ tạo ra vận tốc giả tạo không phản ánh hành vi thực.
+\end{enumerate}
+
+\subsubsection{Nội suy PCHIP lên 10 Hz}
+
+\hspace{0.5cm} Sau khi lọc, các điểm GPS (lấy mẫu không đều, 0,5-2 Hz) được chuyển sang hệ tọa độ ENU (East-North-Up) phẳng địa phương với gốc tại trung tâm hình học của đoạn. Nội suy lên 10 Hz sử dụng phương pháp PCHIP (Piecewise Cubic Hermite Interpolating Polynomial, đa thức nội suy Hermite từng phần).
+
+PCHIP được lựa chọn thay vì cubic spline tự nhiên vì tính chất bảo toàn hình dạng (shape-preserving): trong mỗi khoảng giữa hai điểm liên tiếp, PCHIP đảm bảo đơn điệu, nếu vận tốc thực gần bằng không (người đang dừng lại), PCHIP giữ vận tốc nội suy gần bằng không. Cubic spline tự nhiên ($C^2$ liên tục toàn cục) ngược lại có thể tạo ra đường cong vồng lên tại điểm dừng đột ngột do điều kiện $C^2$ buộc đạo hàm bậc hai phải liên tục qua điểm chuyển tiếp dừng-đi, sinh ra vận tốc giả tạo (overshoot) không có trong dữ liệu gốc.
+
+\begin{table}[htbp]
+\centering
+\caption{So sánh PCHIP và cubic spline tự nhiên trong nội suy quỹ đạo người đi bộ}
+\label{tab:pchip-vs-spline}
+\begin{tabular}{lll}
+\toprule
+\textbf{Đặc tính}       & \textbf{PCHIP}                     & \textbf{Cubic spline tự nhiên} \\
+\midrule
+Liên tục                & $C^1$ (đạo hàm bậc 1)              & $C^2$ (đạo hàm bậc 2) \\
+Bảo toàn hình dạng      & Có (đơn điệu trong từng khoảng)    & Không \\
+Tại điểm dừng            & Vận tốc nội suy $\approx 0$       & Có thể tạo overshoot vận tốc \\
+Hiện tượng Runge         & Không                              & Có thể xảy ra tại gradient lớn \\
+Phù hợp cho             & Dữ liệu GPS có dừng và tăng tốc    & Dữ liệu trơn, không có ngắt \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Sau khi lọc và nội suy, toàn bộ tập dữ liệu Geolife cung cấp 252 đoạn đi bộ hợp lệ với độ dài từ 600 đến 1800 điểm (tương ứng 60-180 giây tại 10 Hz).
+
+\subsection{Tiền xử lý quỹ đạo xe máy từ dữ liệu giao lộ}
+
+\subsubsection{Trích xuất vị trí tâm phương tiện}
+
+\hspace{0.5cm} Mỗi hàng trong tệp dữ liệu AMIT ghi nhận vị trí trục trước và trục sau của từng phương tiện tại một khung hình. Vị trí tâm phương tiện được tính là trung điểm giữa hai trục:
+\[
+x_c = \frac{x_{front} + x_{rear}}{2}, \quad y_c = \frac{y_{front} + y_{rear}}{2}
+\]
+
+Chỉ các phương tiện thuộc lớp xe máy được đưa vào xử lý. Các đoạn quỹ đạo ngắn hơn 30 khung (tương ứng 6 giây tại 5 Hz) bị loại bỏ do không đủ chiều dài để khảo sát hành vi rẽ và tăng tốc đặc trưng của xe máy tại giao lộ.
+
+\subsubsection{Nội suy tuyến tính lên 10 Hz}
+
+\hspace{0.5cm} Dữ liệu AMIT có tần số gốc 5 Hz. Nội suy tuyến tính được sử dụng để nâng lên 10 Hz bằng cách chèn một điểm giữa giữa mỗi cặp khung liên tiếp:
+\[
+x_{mid} = \frac{x_i + x_{i+1}}{2}, \quad y_{mid} = \frac{y_i + y_{i+1}}{2}
+\]
+
+Nội suy tuyến tính phù hợp cho bước nâng tần số 2 lần (từ 5 Hz lên 10 Hz) vì khoảng cách thời gian chèn chỉ là 0,1 giây, ngắn hơn nhiều so với hằng số thời gian động học của xe máy ở tốc độ đô thị. Trong khoảng thời gian 0,1 giây với tốc độ 5 m/s, xe máy di chuyển 0,5 m; đường cong thực tế khác với đường thẳng chưa đến 1 cm nên sai số nội suy tuyến tính là không đáng kể.
+
+\subsection{Mô hình động học máy bay không người lái}
+
+\subsubsection{Tham số từ dữ liệu thực nghiệm DJI Matrice 100}
+
+\hspace{0.5cm} Mô hình động học sử dụng các thông số từ máy bay không người lái DJI Matrice 100, dựa trên tập dữ liệu đo lường trong chuyến bay thực tế được công bố bởi Rodrigues et al. (Nature Scientific Data, 2021). Các thông số chính:
+
+\begin{table}[htbp]
+\centering
+\caption{Tham số động học DJI Matrice 100 sử dụng trong mô hình}
+\label{tab:drone-params}
+\begin{tabular}{llr}
+\toprule
+\textbf{Thông số}              & \textbf{Ký hiệu}     & \textbf{Giá trị} \\
+\midrule
+Tốc độ ngang tối đa            & $v_{max,h}$          & 15 m/s \\
+Tốc độ lên tối đa              & $v_{max,asc}$        & 5 m/s \\
+Tốc độ xuống tối đa            & $v_{max,des}$        & 4 m/s \\
+Gia tốc ngang tối đa           & $a_{max,h}$          & 4 m/s$^2$ \\
+Gia tốc theo trục đứng tối đa  & $a_{max,v}$          & 3 m/s$^2$ \\
+Dải độ cao hoạt động           & $[h_{min},\,h_{max}]$ & [10, 80] m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Cơ chế điều khiển theo điểm đích}
+
+\hspace{0.5cm} Mô hình điều khiển drone theo dạng điều khiển tỷ lệ (proportional): tại mỗi bước thời gian, vector gia tốc mong muốn hướng về điểm đích tiếp theo, sau đó bị giới hạn biên độ theo thông số của khung bay:
+\[
+\mathbf{a}_{des} = a_{max} \cdot \hat{\mathbf{d}}, \quad \hat{\mathbf{d}} = \frac{\mathbf{p}_{wp} - \mathbf{p}}{\|\mathbf{p}_{wp} - \mathbf{p}\|}
+\]
+
+Vận tốc được tích phân từ gia tốc và giới hạn theo vector tốc độ ngang tổng thể (không từng trục riêng biệt) để đảm bảo tốc độ tổng không vượt $v_{max,h}$:
+\[
+\|\mathbf{v}_h\|_2 \leq v_{max,h}
+\]
+
+So với mô hình trước đây sử dụng dao động hình sin cho độ cao, mô hình động học mới tái hiện chu kỳ tăng tốc, hành trình, giảm tốc (accelerate-cruise-decelerate) khi tiếp cận điểm đích, phù hợp với dữ liệu thực nghiệm.
+
+\subsection{Tích hợp chế độ mô phỏng và kiểm chứng}
+
+\subsubsection{Cơ chế chuyển đổi chế độ}
+
+\hspace{0.5cm} Hệ thống cung cấp hai chế độ mô phỏng được chọn tại thời điểm khởi tạo phiên:
+
+\begin{itemize}
+    \item \textbf{Chế độ tổng hợp} (mặc định): Sử dụng các bộ tạo quỹ đạo ngẫu nhiên có tham số hoá đã được kiểm chứng từ các tuần trước. Phù hợp để kiểm chứng thuật toán với hạt giống ngẫu nhiên cố định.
+    \item \textbf{Chế độ thực tế}: Tải quỹ đạo từ tập dữ liệu Geolife (người đi bộ), AMIT (xe máy) hoặc mô hình động học DJI Matrice 100 (drone). Nếu tập dữ liệu không tìm thấy, hệ thống tự động chuyển về chế độ tổng hợp mà không báo lỗi.
+\end{itemize}
+
+Đối với quỹ đạo từ tập dữ liệu, cơ chế phản xạ biên (boundary reflection) áp dụng trong chế độ tổng hợp bị vô hiệu hoá. Lý do: các đoạn dữ liệu đã được lọc với giới hạn độ lệch 390 m tính từ trung tâm hình học, bảo đảm quỹ đạo nằm trong bán kính hoạt động; việc áp dụng phản xạ biên sẽ làm biến dạng quỹ đạo thực tế ban đầu.
+
+\subsubsection{Kết quả tải dữ liệu}
+
+\hspace{0.5cm} Sau khi áp dụng toàn bộ tiêu chí lọc, hệ thống tải được số lượng đoạn quỹ đạo hợp lệ như trình bày trong Bảng \ref{tab:dataset-loaded}.
+
+\begin{table}[htbp]
+\centering
+\caption{Số lượng đoạn quỹ đạo hợp lệ sau lọc}
+\label{tab:dataset-loaded}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Tập dữ liệu} & \textbf{Đoạn ban đầu} & \textbf{Đoạn hợp lệ} & \textbf{Tỷ lệ chấp nhận} \\
+\midrule
+Geolife (walk)    & 6.460 nhãn  & 252 đoạn   & 3,9\% \\
+AMIT (xe máy)     & Toàn bộ lớp m & 25.757 đoạn & — \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tỷ lệ chấp nhận thấp của Geolife (3,9\%) phản ánh tính nghiêm ngặt của tiêu chí lọc: phần lớn các đoạn bị loại do quá ngắn (dưới 60 giây), có khoảng trống GPS vượt 3 giây, hoặc phạm vi di chuyển vượt 390 m. Kết quả này nhất quán với phân phối mật độ lấy mẫu của Geolife: nhiều phiên đi bộ được ghi nhận tại mật độ thưa (5-10 giây/điểm), tạo ra khoảng trống lớn giữa các điểm GPS.
+
+Tập dữ liệu AMIT cung cấp 25.757 đoạn quỹ đạo xe máy hợp lệ với độ dài từ 59 đến 16.929 điểm (tương ứng 6 đến 1.693 giây tại 10 Hz), trích xuất từ toàn bộ 6 nút giao lộ thuộc các thành phố khác nhau. Số lượng đoạn lớn đảm bảo độ đa dạng cao về hành vi rẽ và tốc độ trong điều kiện giao lộ đô thị thực tế.
+
+\subsubsection{Kiểm chứng tự động}
+
+\hspace{0.5cm} Bộ kiểm tra tự động được mở rộng thêm 38 test phủ toàn bộ các thành phần mới. Bảng \ref{tab:test-summary-w9} trình bày phân phối các hạng mục kiểm chứng mới.
+
+\newpage
+
+\begin{table}[htbp]
+\centering
+\caption{Phân bố bộ kiểm tra tự động sau cập nhật (162 test)}
+\label{tab:test-summary-w9}
+\begin{tabular}{lrp{7.5cm}}
+\toprule
+\textbf{Hạng mục}                   & \textbf{Số test} & \textbf{Nội dung kiểm chứng} \\
+\midrule
+Tiện ích tọa độ                     & 5  & Chuyển đổi ENU, Haversine, gốc toạ độ \\
+Bộ lọc đoạn đi bộ                   & 7  & Thời gian, khoảng trống, độ lệch, nội suy \\
+Bộ lọc đoạn xe máy                  & 4  & Chiều dài, khoảng trống khung, nội suy 2x \\
+Tích hợp Geolife                    & 5  & Tải dữ liệu, định dạng, giới hạn, lấy ngẫu nhiên \\
+Tích hợp AMIT                       & 3  & Tải dữ liệu, định dạng, lấy ngẫu nhiên \\
+Cơ chế phát lại (replay)            & 4  & Phát lại đoạn, vòng lặp, fallback khi không có dữ liệu \\
+Động học drone                      & 5  & Giới hạn tốc độ ngang/đứng, độ cao, thuộc tính heading \\
+Bộ mô phỏng, chế độ thực tế       & 5  & Chọn quỹ đạo, fallback, vô hiệu phản xạ biên \\
+\midrule
+Các hạng mục tuần trước             & 124 & Tất cả pass \\
+\midrule
+\textbf{Tổng}                       & \textbf{162} & \textbf{Tất cả pass, 0 lỗi} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tất cả 162 test đều pass, bao gồm cả 124 test từ các tuần trước và 38 test mới thêm cho các thành phần dữ liệu thực tế. Các test sử dụng monkeypatch để tách biệt với hệ thống tệp: test cơ chế phát lại và fallback không phụ thuộc vào sự hiện diện của tập dữ liệu thực, đảm bảo kết quả ổn định trong mọi môi trường.
+
+\subsection{Phân tích tính thực tế của quỹ đạo mô phỏng}
+
+\hspace{0.5cm} Sau khi tích hợp dữ liệu thực tế từ Geolife và AMIT, một phân tích chuyên sâu về tính thực tế của quỹ đạo mô phỏng đã được thực hiện. Phân tích tập trung vào hai khía cạnh: mô hình vận động (kinematic model) và mô hình điều hướng (navigation model).
+
+Mô hình vận động của từng loại mục tiêu có cơ sở học thuật rõ ràng. Người đi bộ dùng OU process (Ornstein-Uhlenbeck) cho hướng đi với hằng số thời gian 2,0 giây và độ lệch chuẩn 0,4 rad/s, phù hợp với mô hình đi bộ ngẫu nhiên có tương quan (Weifeng 2012). Xe máy dùng bicycle kinematic model với điều kiện gia tốc ngang tối đa 3,0 m/s$^2$, nhất quán với dữ liệu thực nghiệm từ AMIT (Wen et al. 2023). Drone dùng mô hình Dubins-inspired với giới hạn gia tốc 4,0 m/s$^2$, tương ứng với thông số DJI Matrice 100 (Rodrigues et al. 2021).
+
+Tuy nhiên, mô hình điều hướng ban đầu có ba vấn đề cần sửa. Thứ nhất, waypoint được tạo ngẫu nhiên quanh gốc tọa độ quan sát viên, không phải tương đối vị trí hiện tại của mục tiêu. Điều này tạo ra các đường zigzag không tự nhiên khi mục tiêu phải quay lại gần gốc. Thứ hai, phản xạ biên dùng phép chiếu cứng (hard specular reflection), tạo dao động kiểu billiard-ball giữa các waypoint ở hai phía đối diện. Thứ ba, vận tốc xe máy có thể nhảy đột ngột 2-3 m/s mỗi bước, vi phạm nguyên tắc liên tục động học.
+
+Sáu biện pháp sửa đổi đã được thực hiện và kiểm chứng bằng 162 test tự động. Biện pháp quan trọng nhất là chuyển đổi waypoint từ tương đối gốc sang tương đối vị trí hiện tại, và thay thế phản xạ biên cứng bằng cơ chế đẩy mềm (soft potential-field repulsion) dựa trên Social Force Model (Helbing and Molnar 1995). Kết quả là quỹ đạo mô phỏng hiện có lộ trình tiến về phía trước tự nhiên, chuyển động mượt mà tại biên, và duy trì liên tục động học cho tất cả loại mục tiêu.
+
+\newpage
+

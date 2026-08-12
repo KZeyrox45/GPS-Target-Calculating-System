@@ -8,20 +8,24 @@ Usage (from backend/):
     uv run python tests/statistical_analysis.py
 """
 
-import sys
 import math
+import sys
+from pathlib import Path
+
 import numpy as np
 
-sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.simulation.target_simulator import (
-    PedestrianTrajectory, MotorcycleTrajectory, DroneTrajectory,
-)
+from app.algorithms.alpha_beta_filter import AlphaBetaFilter
+from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
+from app.algorithms.sensor_fusion import fuse_sensors
 from app.simulation.boundary import SimulationBoundary
 from app.simulation.sensor_noise import SensorNoiseModel
-from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
-from app.algorithms.alpha_beta_filter import AlphaBetaFilter
-from app.algorithms.sensor_fusion import fuse_sensors
+from app.simulation.target_simulator import (
+    DroneTrajectory,
+    MotorcycleTrajectory,
+    PedestrianTrajectory,
+)
 
 SEEDS = list(range(1, 11))
 DURATION_S = 120.0
@@ -84,8 +88,8 @@ def run_scenario(target_type: str, seed: int):
                                sigma_pos_m=fused.sigma_pos_m)
         ab_state = ab.step(fused.east, fused.north)
 
-        def pos_err(e, n):
-            return math.sqrt((e - gt_e)**2 + (n - gt_n)**2)
+        def pos_err(e, n, _ge=gt_e, _gn=gt_n):
+            return math.sqrt((e - _ge)**2 + (n - _gn)**2)
 
         raw_sq.append(pos_err(fused.east, fused.north) ** 2)
         ab_sq.append(pos_err(float(ab_state[0]), float(ab_state[1])) ** 2)

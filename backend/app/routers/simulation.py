@@ -13,16 +13,17 @@ through Vite's dev-server (/ws -> ws://localhost:8000), so the WS path must be
 at /ws/tracking/{id} on the backend - i.e. mounted at root, not under /api.
 """
 
-import uuid
 import csv
 import io
 import json
 import logging
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
+import uuid
+
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.responses import StreamingResponse
 
 from ..models.schemas import SimulationStartRequest, SimulationStartResponse
-from ..simulation.target_simulator import SimulationEngine, SimulationConfig
+from ..simulation.target_simulator import SimulationConfig, SimulationEngine
 
 log = logging.getLogger(__name__)
 
@@ -56,6 +57,7 @@ async def start_simulation(request: SimulationStartRequest):
         update_rate_hz=request.update_rate_hz,
         alpha=request.alpha,
         seed=request.seed,
+        use_realistic_sim=request.use_realistic_sim,
     )
     _sessions[session_id] = SimulationEngine(config)
 
@@ -206,12 +208,12 @@ async def ws_tracking(websocket: WebSocket, session_id: str):
         log.info("WS disconnected by client: session=%s", session_id)
         engine.stop()
 
-    except Exception as exc:
-        log.exception("WS error for session=%s: %s", session_id, exc)
+    except Exception:
+        log.exception("WS error for session=%s", session_id)
         engine.stop()
         try:
             await websocket.close(code=1011)
-        except Exception:
+        except OSError:
             pass
 
     finally:

@@ -6,12 +6,12 @@ and the underlying get_stats() method of SimulationEngine.
 """
 
 import asyncio
+
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from app.main import app
-from app.simulation.target_simulator import SimulationEngine, SimulationConfig
-
+from app.simulation.target_simulator import SimulationConfig, SimulationEngine
 
 # ---------------------------------------------------------------------------
 # Unit tests: SimulationEngine.get_stats()
@@ -29,6 +29,17 @@ class TestSimulationEngineGetStats:
         )
         return SimulationEngine(config)
 
+    @staticmethod
+    def _run_engine(engine: SimulationEngine, n_steps: int) -> None:
+        """Run engine for n_steps synchronously (bypasses asyncio.sleep pacing)."""
+        async def _run():
+            count = 0
+            async for _ in engine.run():
+                count += 1
+                if count >= n_steps:
+                    engine.stop()
+        asyncio.run(_run())
+
     def test_get_stats_before_run_returns_zero_steps(self):
         engine = self._make_engine()
         stats = engine.get_stats()
@@ -41,32 +52,13 @@ class TestSimulationEngineGetStats:
 
     def test_get_stats_after_run_has_correct_step_count(self):
         engine = self._make_engine(target_type="pedestrian", seed=42)
-        n_steps = 10
-
-        async def _run():
-            count = 0
-            async for _ in engine.run():
-                count += 1
-                if count >= n_steps:
-                    engine.stop()
-
-        asyncio.get_event_loop().run_until_complete(_run())
-
+        self._run_engine(engine, n_steps=10)
         stats = engine.get_stats()
-        assert stats["steps"] == n_steps
+        assert stats["steps"] == 10
 
     def test_get_stats_rmse_are_positive_floats(self):
         engine = self._make_engine(target_type="motorcycle", seed=7)
-
-        async def _run():
-            count = 0
-            async for _ in engine.run():
-                count += 1
-                if count >= 20:
-                    engine.stop()
-
-        asyncio.get_event_loop().run_until_complete(_run())
-
+        self._run_engine(engine, n_steps=10)
         stats = engine.get_stats()
         assert stats["kalman_rmse_m"] > 0.0
         assert stats["alpha_beta_rmse_m"] > 0.0
@@ -76,16 +68,7 @@ class TestSimulationEngineGetStats:
         """Running RMSE must stay below 5 m (thesis specification)."""
         engine = self._make_engine(target_type="pedestrian", seed=42)
         SPEC_THRESHOLD_M = 5.0
-
-        async def _run():
-            count = 0
-            async for _ in engine.run():
-                count += 1
-                if count >= 50:
-                    engine.stop()
-
-        asyncio.get_event_loop().run_until_complete(_run())
-
+        self._run_engine(engine, n_steps=30)
         stats = engine.get_stats()
         assert stats["kalman_rmse_m"] < SPEC_THRESHOLD_M, (
             f"Kalman RMSE {stats['kalman_rmse_m']:.3f} >= {SPEC_THRESHOLD_M} m"
@@ -96,20 +79,9 @@ class TestSimulationEngineGetStats:
 
     def test_get_stats_duration_matches_steps(self):
         engine = self._make_engine(target_type="drone", seed=99)
-        n_steps = 30
-
-        async def _run():
-            count = 0
-            async for _ in engine.run():
-                count += 1
-                if count >= n_steps:
-                    engine.stop()
-
-        asyncio.get_event_loop().run_until_complete(_run())
-
+        self._run_engine(engine, n_steps=20)
         stats = engine.get_stats()
-        # duration_s = steps / update_rate_hz = 30 / 10.0 = 3.0 s
-        expected_duration = n_steps / 10.0
+        expected_duration = 20 / 10.0
         assert abs(stats["duration_s"] - expected_duration) < 0.01
 
     def test_get_stats_target_type_preserved(self):
@@ -120,18 +92,8 @@ class TestSimulationEngineGetStats:
     def test_get_stats_raw_rmse_greater_than_filtered(self):
         """Filtered RMSE should generally be less than raw measurement RMSE."""
         engine = self._make_engine(target_type="pedestrian", seed=42)
-
-        async def _run():
-            count = 0
-            async for _ in engine.run():
-                count += 1
-                if count >= 100:
-                    engine.stop()
-
-        asyncio.get_event_loop().run_until_complete(_run())
-
+        self._run_engine(engine, n_steps=50)
         stats = engine.get_stats()
-        # At least one filter must beat the raw measurement
         assert stats["kalman_rmse_m"] < stats["raw_rmse_m"] or \
                stats["alpha_beta_rmse_m"] < stats["raw_rmse_m"], (
             "Neither filter reduced RMSE below raw measurement"
@@ -256,9 +218,10 @@ class TestExportEndpoint:
 
     async def test_export_content_type_is_csv_when_frames_present(self):
         """Once frames are buffered, response must have Content-Type text/csv."""
-        from app.simulation.target_simulator import SimulationEngine, SimulationConfig
-        from app.routers.simulation import _sessions
         import uuid
+
+        from app.routers.simulation import _sessions
+        from app.simulation.target_simulator import SimulationConfig, SimulationEngine
 
         config = SimulationConfig(target_type="pedestrian", seed=42,
                                    duration_s=5.0, update_rate_hz=10.0)
@@ -286,9 +249,10 @@ class TestExportEndpoint:
 
     async def test_export_csv_has_header_row(self):
         """CSV must contain expected column headers."""
-        from app.simulation.target_simulator import SimulationEngine, SimulationConfig
-        from app.routers.simulation import _sessions
         import uuid
+
+        from app.routers.simulation import _sessions
+        from app.simulation.target_simulator import SimulationConfig, SimulationEngine
 
         config = SimulationConfig(target_type="pedestrian", seed=42,
                                    duration_s=5.0, update_rate_hz=10.0)
@@ -318,9 +282,10 @@ class TestExportEndpoint:
 
     async def test_export_csv_row_count_matches_steps(self):
         """Number of data rows must equal the number of simulation steps run."""
-        from app.simulation.target_simulator import SimulationEngine, SimulationConfig
-        from app.routers.simulation import _sessions
         import uuid
+
+        from app.routers.simulation import _sessions
+        from app.simulation.target_simulator import SimulationConfig, SimulationEngine
 
         n_steps = 8
         config = SimulationConfig(target_type="motorcycle", seed=7,

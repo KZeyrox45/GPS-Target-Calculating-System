@@ -9,11 +9,9 @@ Tests verify:
 """
 
 import math
+
 import numpy as np
 import pytest
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from app.algorithms.kalman_filter import KalmanFilter
 
@@ -134,7 +132,7 @@ class TestKalmanConvergence:
         """Stationary target: filter should converge to near-zero position."""
         rng = np.random.default_rng(7)
         kf = KalmanFilter(dt=0.1, sigma_pos_m=5.0)
-        for step in range(200):
+        for _step in range(200):
             kf.step(rng.normal(0, 5.0), rng.normal(0, 5.0))
         # After 200 steps, estimated position should be close to (0, 0)
         assert abs(kf.position[0]) < 3.0

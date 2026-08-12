@@ -1,6 +1,6 @@
 """__init__.py for simulation package"""
-from .sensor_noise import SensorNoiseModel, NoiseConfig
-from .target_simulator import SimulationEngine, SimulationConfig, TrackingFrame
 from .boundary import SimulationBoundary
+from .sensor_noise import NoiseConfig, SensorNoiseModel
+from .target_simulator import SimulationConfig, SimulationEngine, TrackingFrame
 
-__all__ = ["SensorNoiseModel", "NoiseConfig", "SimulationEngine", "SimulationConfig", "TrackingFrame", "SimulationBoundary"]
+__all__ = ["NoiseConfig", "SensorNoiseModel", "SimulationBoundary", "SimulationConfig", "SimulationEngine", "TrackingFrame"]

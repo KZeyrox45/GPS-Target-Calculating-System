@@ -219,7 +219,7 @@ Stream dữ liệu JSON mỗi `1/update_rate_hz` giây:
 }
 ```
 
-### POST `/api/calculate` (Phase 1)
+### POST `/api/calculate`
 Tính tọa độ đơn điểm từ GPS + góc ngắm + khoảng cách.
 
 ---

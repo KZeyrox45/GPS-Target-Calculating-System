@@ -38,36 +38,36 @@ export default function App() {
         {/* Top navigation bar */}
         <nav className="navbar">
           <NavLink to="/" className="navbar-brand">
-            <span>🛰️ TargetTrack</span>
-            <span className="brand-badge">v2.0</span>
+            <span>GPS-TT</span>
+            <span className="brand-badge">C2</span>
           </NavLink>
 
           <div className="navbar-links">
             <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>
-              🏠 Dashboard
+              SYS
             </NavLink>
             <NavLink to="/tracking" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-              📡 Live Tracking
+              TRACK
             </NavLink>
             <NavLink to="/calculator" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-              📐 Calculator
+              CALC
             </NavLink>
             <NavLink to="/comparison" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
-              📊 So sánh
+              DELTA
             </NavLink>
           </div>
 
           <div className="navbar-status">
+            <StatusBar />
             <button
               id="theme-toggle"
               className="theme-toggle-btn"
               onClick={toggleTheme}
-              title={theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối'}
-              aria-label="Toggle colour theme"
+              title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+              aria-label="Toggle theme"
             >
-              {theme === 'dark' ? '☀️' : '🌙'}
+              {theme === 'dark' ? 'L' : 'D'}
             </button>
-            <StatusBar />
           </div>
         </nav>
 

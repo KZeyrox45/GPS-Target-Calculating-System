@@ -16,8 +16,9 @@ Equations per cycle (1D, applied independently to East and North):
 Stability condition:  0 < α < 1,  0 < β ≤ 2α - α²
 """
 
-import numpy as np
 import math
+
+import numpy as np
 
 
 class AlphaBetaFilter:

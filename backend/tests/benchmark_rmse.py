@@ -8,21 +8,24 @@ Usage:
     python tests/benchmark_rmse.py
 """
 
-import sys
 import math
+import sys
+from pathlib import Path
+
 import numpy as np
 
-sys.path.insert(0, str(__import__('pathlib').Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.simulation.target_simulator import (
-    PedestrianTrajectory, MotorcycleTrajectory, DroneTrajectory,
-)
+from app.algorithms.alpha_beta_filter import AlphaBetaFilter
+from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
+from app.algorithms.sensor_fusion import fuse_sensors
 from app.simulation.boundary import SimulationBoundary
 from app.simulation.sensor_noise import SensorNoiseModel
-from app.algorithms.kalman_filter import KalmanFilter, KalmanFilter3D
-from app.algorithms.alpha_beta_filter import AlphaBetaFilter
-from app.algorithms.sensor_fusion import fuse_sensors
-
+from app.simulation.target_simulator import (
+    DroneTrajectory,
+    MotorcycleTrajectory,
+    PedestrianTrajectory,
+)
 
 
 def run_scenario(
@@ -97,8 +100,8 @@ def run_scenario(
         ab_state = ab.step(fused.east, fused.north)
 
         # 6. Errors (horizontal plane only, comparable across 2D and 3D)
-        def pos_err(e, n):
-            return math.sqrt((e - gt_e)**2 + (n - gt_n)**2)
+        def pos_err(e, n, _ge=gt_e, _gn=gt_n):
+            return math.sqrt((e - _ge)**2 + (n - _gn)**2)
 
         raw_sq.append(pos_err(fused.east, fused.north) ** 2)
         ab_sq.append(pos_err(float(ab_state[0]), float(ab_state[1])) ** 2)

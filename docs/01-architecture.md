@@ -4,15 +4,15 @@
 
 Hệ thống tính toán tọa độ mục tiêu GPS theo thời gian thực, kết hợp ba cảm biến Laser-IMU-GNSS. Đây là đồ án tốt nghiệp tại Trường Đại học Bách Khoa Thành phố Hồ Chí Minh (HCMUT).
 
-## Phát triển hai giai đoạn
+## Phát triển
 
-### Giai đoạn 1: Máy tính điểm đơn tĩnh
+### Máy tính điểm đơn tĩnh
 - **Vị trí**: `index.html` + `js/` + `css/` (gốc repo), bản sao lưu trong `phase1/`
 - **Mục đích**: Tính tọa độ mục tiêu từ một phép đo đơn (GPS observer + góc IMU + khoảng cách laser)
 - **Công nghệ**: JavaScript thuần, CDN Leaflet, không cần build
 - **Thuật toán**: Tính trigonometric trực tiếp, không lọc
 
-### Giai đoạn 2: Mô phỏng theo dõi 3D thời gian thực
+### Mô phỏng theo dõi 3D thời gian thực
 - **Vị trí**: `backend/` (FastAPI) + `frontend/` (React 19 + Vite)
 - **Mục đích**: Theo dõi liên tục mục tiêu di chuyển với hợp nhất cảm biến và lọc
 - **Công nghệ**: Python 3.11+, FastAPI, NumPy, SciPy, React 19, Zustand, Leaflet

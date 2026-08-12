@@ -22,7 +22,7 @@ frontend/
 │   ├── pages/
 │   │   ├── HomePage.jsx         # Trang chủ
 │   │   ├── TrackingPage.jsx     # Giao diện theo dõi thời gian thực
-│   │   ├── StaticCalcPage.jsx   # Máy tính giai đoạn 1
+│   │   ├── StaticCalcPage.jsx   # Máy tính điểm đơn
 │   │   └── ComparisonPage.jsx   # So sánh bộ lọc
 │   ├── components/
 │   │   ├── charts/

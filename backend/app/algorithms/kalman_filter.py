@@ -29,9 +29,9 @@ Design rationale
   automatically tightens when the laser lock is clean and widens when noisy.
 """
 
-import numpy as np
-from typing import Optional
+from typing import ClassVar
 
+import numpy as np
 
 # -----------------------------------------------------------------------------
 # Helper: Discrete White Noise Acceleration (DWNA) Q matrix builders
@@ -117,7 +117,7 @@ class KalmanFilter:
     """
 
     # Recommended sigma_a (m/s^2) acceleration noise per target type
-    SIGMA_A_PRESETS = {
+    SIGMA_A_PRESETS: ClassVar[dict[str, float]] = {
         "pedestrian":  0.5,    # slow, smooth motion - low maneuverability
         "motorcycle":  5.0,    # banked turns at ~10 m/s; a_lat = v^2/r ~ 6.7 m/s^2
         "drone":       5.0,    # agile 3-axis movement
@@ -175,6 +175,9 @@ class KalmanFilter:
         self.P = np.eye(4) * (sigma_pos_m * 10) ** 2   # large initial uncertainty
 
         self._initialized = False
+        self._init_step = 0      # 0=first measurement, 1=second measurement
+        self._prev_e = 0.0
+        self._prev_n = 0.0
 
     # --- Public API ---
 
@@ -185,6 +188,9 @@ class KalmanFilter:
         Call this before the first predict/update cycle.
         """
         self.x = np.array([east, north, 0.0, 0.0])
+        self._prev_e = east
+        self._prev_n = north
+        self._init_step = 0
         self._initialized = True
 
     def predict(self) -> np.ndarray:
@@ -236,10 +242,13 @@ class KalmanFilter:
         self,
         east: float,
         north: float,
-        sigma_pos_m: Optional[float] = None,
+        sigma_pos_m: float | None = None,
     ) -> np.ndarray:
         """
         Convenience: predict then update in one call.
+
+        Uses first two measurements to seed velocity estimate, then
+        proceeds with standard predict/update cycle.
 
         Args:
             east:         Measured East position (metres)
@@ -251,6 +260,15 @@ class KalmanFilter:
         """
         if not self._initialized:
             self.initialize(east, north)
+            return self.x.copy()
+        if self._init_step == 0:
+            # Second measurement: estimate velocity from finite difference
+            self._prev_e = self.x[0]
+            self._prev_n = self.x[1]
+            ve = (east - self._prev_e) / self.dt
+            vn = (north - self._prev_n) / self.dt
+            self.x = np.array([east, north, ve, vn])
+            self._init_step = 1
             return self.x.copy()
         if sigma_pos_m is not None:
             self.update_R(sigma_pos_m)
@@ -370,12 +388,20 @@ class KalmanFilter3D:
         self.P = np.eye(6) * (sigma_pos_m * 10) ** 2
 
         self._initialized = False
+        self._init_step = 0      # 0=first measurement, 1=second measurement
+        self._prev_e = 0.0
+        self._prev_n = 0.0
+        self._prev_u = 0.0
 
     # --- Public API ---
 
     def initialize(self, east: float, north: float, up: float) -> None:
         """Seed filter with first measurement. Initial velocity = 0."""
         self.x = np.array([east, north, up, 0.0, 0.0, 0.0])
+        self._prev_e = east
+        self._prev_n = north
+        self._prev_u = up
+        self._init_step = 0
         self._initialized = True
 
     def predict(self) -> np.ndarray:
@@ -409,10 +435,13 @@ class KalmanFilter3D:
         east: float,
         north: float,
         up: float,
-        sigma_pos_m: Optional[float] = None,
+        sigma_pos_m: float | None = None,
     ) -> np.ndarray:
         """
         Predict + update in one call.
+
+        Uses first two measurements to seed velocity estimate, then
+        proceeds with standard predict/update cycle.
 
         Args:
             east, north, up: Fused ENU position measurement (metres)
@@ -423,6 +452,17 @@ class KalmanFilter3D:
         """
         if not self._initialized:
             self.initialize(east, north, up)
+            return self.x.copy()
+        if self._init_step == 0:
+            # Second measurement: estimate velocity from finite difference
+            self._prev_e = self.x[0]
+            self._prev_n = self.x[1]
+            self._prev_u = self.x[2]
+            ve = (east - self._prev_e) / self.dt
+            vn = (north - self._prev_n) / self.dt
+            vu = (up - self._prev_u) / self.dt
+            self.x = np.array([east, north, up, ve, vn, vu])
+            self._init_step = 1
             return self.x.copy()
         if sigma_pos_m is not None:
             self.update_R(sigma_pos_m)

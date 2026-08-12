@@ -7,9 +7,16 @@ POST /api/calculate
 """
 
 import math
+
 from fastapi import APIRouter
+
+from ..algorithms.geodetics import (
+    calculate_bearing,
+    enu_to_lla,
+    haversine_distance,
+    polar_to_enu,
+)
 from ..models.schemas import StaticCalcRequest, StaticCalcResponse
-from ..algorithms.geodetics import calculate_bearing, haversine_distance, enu_to_lla, polar_to_enu
 
 router = APIRouter()
 
@@ -17,7 +24,7 @@ router = APIRouter()
 @router.post("/calculate", response_model=StaticCalcResponse)
 def calculate_static_target(req: StaticCalcRequest):
     """
-    Single-shot target coordinate calculation (Phase 1 functionality).
+    Single-shot target coordinate calculation.
 
     Uses polar_to_enu + enu_to_lla for full 3-D computation including elevation.
     Falls back to Haversine (flat-Earth) when elevation_deg == 0.
@@ -32,7 +39,7 @@ def calculate_static_target(req: StaticCalcRequest):
     bearing = calculate_bearing(req.observer_lat, req.observer_lon, target_lat, target_lon)
     dist_back = haversine_distance(req.observer_lat, req.observer_lon, target_lat, target_lon)
 
-    # Error estimate (RSS model matching Phase 1)
+    # Error estimate (RSS model)
     sigma_gps = 5.0          # metres
     sigma_az_rad = 0.3 * (math.pi / 180)
     sigma_range = 0.5        # metres

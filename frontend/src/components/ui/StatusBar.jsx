@@ -10,14 +10,14 @@ export default function StatusBar() {
     <div className="flex items-center gap-2">
       {isRunning && (
         <span className="badge badge-running">
-          <span className="badge-dot pulse" />
+          <span className="badge-dot" />
           {fps} Hz
         </span>
       )}
       {showWsStatus && (
         <span className={`badge ${connected ? 'badge-connected' : simulationEnded ? 'badge-idle' : 'badge-disconnected'}`}>
           <span className="badge-dot" />
-          {connected ? 'Connected' : simulationEnded ? 'Completed' : 'Disconnected'}
+          {connected ? 'LINK' : simulationEnded ? 'END' : 'DOWN'}
         </span>
       )}
     </div>

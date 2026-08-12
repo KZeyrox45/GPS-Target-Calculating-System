@@ -5,8 +5,10 @@ Provides random noise generators that simulate real-world sensor imperfections.
 These are used exclusively by the simulation engine - real hardware bypasses this.
 """
 
-import numpy as np
 from dataclasses import dataclass
+from typing import ClassVar
+
+import numpy as np
 
 
 @dataclass
@@ -36,7 +38,7 @@ class SensorNoiseModel:
     """
 
     # Preset configurations per target type
-    PRESETS = {
+    PRESETS: ClassVar[dict[str, NoiseConfig]] = {
         "pedestrian": NoiseConfig(
             gps_lat_sigma_m=5.0, gps_lon_sigma_m=5.0, gps_alt_sigma_m=8.0,
             compass_azimuth_sigma_deg=0.3, compass_elevation_sigma_deg=0.2,

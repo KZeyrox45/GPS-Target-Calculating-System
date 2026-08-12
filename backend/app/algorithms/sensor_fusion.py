@@ -17,8 +17,7 @@ imperfections (used by the simulation engine).
 import math
 from dataclasses import dataclass
 
-from .geodetics import polar_to_enu, enu_to_lla
-
+from .geodetics import enu_to_lla, polar_to_enu
 
 # -------------------------------
 # Sensor specification dataclasses (1-sigma values)

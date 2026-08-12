@@ -13,8 +13,8 @@ coordinates shown on the map.
 """
 
 import math
+
 import numpy as np
-from typing import Tuple
 
 # ----- WGS-84 ellipsoid constants -----
 EARTH_A = 6_378_137.0          # Semi-major axis (m)
@@ -33,7 +33,7 @@ RAD2DEG = 180.0 / math.pi
 def haversine_destination(
     lat_deg: float, lon_deg: float,
     azimuth_deg: float, distance_m: float
-) -> Tuple[float, float]:
+) -> tuple[float, float]:
     """
     Compute destination point from observer + bearing + distance.
     Uses spherical Earth model (Haversine).
@@ -131,7 +131,7 @@ def lla_to_ecef(
     return np.array([X, Y, Z])
 
 
-def ecef_to_lla(ecef: np.ndarray) -> Tuple[float, float, float]:
+def ecef_to_lla(ecef: np.ndarray) -> tuple[float, float, float]:
     """
     Convert ECEF (metres) → LLA (degrees, degrees, metres).
     Uses Bowring's iterative method.
@@ -195,7 +195,7 @@ def lla_to_enu(
 def enu_to_lla(
     enu: np.ndarray,
     origin_lat: float, origin_lon: float, origin_alt: float
-) -> Tuple[float, float, float]:
+) -> tuple[float, float, float]:
     """
     Convert local ENU vector (metres) back to LLA, given observer as origin.
 

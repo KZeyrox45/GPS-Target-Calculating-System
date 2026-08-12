@@ -14,9 +14,10 @@
 - **Ranh giới**: Bị chặn tại bán kính biên
 
 ### Xe máy
-- **Tốc độ**: 5 - 15 m/s
-- **Máy trạng thái**: Điều khiển | Rẽ | Giảm tốc
-- **Rẽ**: Hình học cung với góc rẽ có thể cấu hình
+- **Tốc độ**: 5 - 15 m/s (synthetic) / Theo giới hạn tốc độ đường (20-90 km/h, real-world)
+- **Nguồn dữ liệu real-world**: Đi ngẫu nhiên trên mạng đường bộ TP.HCM (OSMnx), tuân theo giới hạn tốc độ từng loại đường
+- **Máy trạng thái**: Điều khiển | Rẽ | Giảm tốc (synthetic)
+- **Rẽ**: Hình học cung với góc rẽ có thể cấu hình (synthetic)
 - **Độ cao**: Cố định 0 (theo dõi 2D)
 - **Ranh giới**: Phản xạ tại ranh giới (hướng ngược lại theo bán kính)
 
@@ -66,6 +67,45 @@ Với mỗi bước thời gian k (từ 0 đến N-1):
 - Người đi bộ: vị trí bị chặn tại ranh giới
 - Xe máy: hướng phản xạ tại ranh giới
 - Drone: ngang bị ràng buộc, độ cao tự do
+
+## Phân tích tính thực tế của quỹ đạo
+
+### Mô hình vi động (Micro-dynamics) — Hợp lệ
+
+Các mô hình vận động cơ bản đều phù hợp với nghiên cứu học thuật:
+
+- **Người đi bộ:** Quá trình Ornstein-Uhlenbeck cho hướng (τ=2.0s, σ=0.4 rad/s), điều chỉnh步态 tại 1.8 Hz, tạm dừng theo Poisson — tất cả đều phù hợp với Social Force Model (Helbing & Molnár 1995)
+- **Xe máy:** Mô hình kinematic xe đạp với giới hạn gia tốc ngang 3.0 m/s² (synthetic); quỹ đạo đi ngẫu nhiên trên mạng đường bộ TP.HCM (real-world) — phù hợp với dữ liệu AMIT và OSMnx (Wen et al. 2023)
+- **Drone:** Giới hạn kinematic phù hợp với thông số DJI Matrice 100 (Rodrigues et al. 2021): V_max=15 m/s, A_max=4 m/s²
+- **KinematicDrone:** Mô hình thực tế nhất — enforced acceleration limits từ thông số khung thực tế
+
+### Vấn đề điều hướng (Navigation) — Cần cải thiện
+
+Ba vấn đề chính gây ra chuyển động "không thực tế":
+
+1. **Điểm waypoint tương đối gốc** (`target_simulator.py:141-144`): Các điểm được tạo tuyệt đối quanh gốc (0,0), không phải từ vị trí hiện tại. Gây ra các đường đi U-turn bất tự nhiên.
+
+2. **Phản xạ biên cứng** (`boundary.py:66-90`): Khi mục tiêu chạm biên, hướng bị phản xạ như bóng bi-a. Kết hợp với waypoint tương đối gốc, tạo ra mẫu di chuyểnzig-zag.
+
+3. **Vòng lặp segment** (`target_simulator.py:457`): Khi chạy chế độ dataset, quỹ đạo nhảy ngay lập tức về điểm đầu khi kết thúc segment.
+
+### Số liệu tham chiếu từ nghiên cứu
+
+| Thông số | Giá trị hiện tại | Giá trị nghiên cứu | Nguồn |
+|----------|----------------|-------------------|-------|
+| Tốc độ người đi bộ | 0.3-2.0 m/s | 1.2-1.5 m/s (bình thường) | Campbell et al. 2022 |
+| Tốc độ xe máy | 7-13 m/s | 5-20 m/s (giao thông đô thị) | Wen et al. 2023 |
+| Tốc độ drone | 7-15 m/s | ≤17 m/s (DJI Matrice 100) | Rodrigues et al. 2021 |
+| Gia tốc ngang drone | 4.0 m/s² | ~4 m/s² (DJI Matrice 100) | Rodrigues et al. 2021 |
+| Thời gian phản ứng OU | τ=2.0s | 0.3-0.5s (Social Force) | Helbing & Molnár 1995 |
+
+### Tài liệu tham khảo
+
+- Helbing, D., & Molnár, P. (1995). Social force model for pedestrian dynamics. *Physical Review E*, 51(5), 4282-4286.
+- Bongiorno, C., et al. (2021). Vector-based pedestrian navigation in cities. *Nature Computational Science*, 1, 656-667.
+- Rodrigues, E., et al. (2021). In-flight positional and energy use data set of a DJI Matrice 100 quadcopter. *Scientific Data*, 8, 53.
+- Wen, C., et al. (2023). Kinematic characterization of risky riding behavior of on-demand food-delivery motorcyclists in Taiwan. *Transportation Research Record*.
+- Krajzewicz, D., et al. (2012). Road intersection model in SUMO. Springer.
 
 ## Tính RMSE
 
