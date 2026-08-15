@@ -1,4 +1,4 @@
-# Nội dung báo cáo (Tuần 1-8)
+# Nội dung báo cáo (Tuần 1-9)
 
 ## Tuần 1: Giới thiệu và bài toán
 
@@ -178,7 +178,7 @@
 | Mô phỏng simulation | 50 | Quỹ đạo, biên, Kalman3D |
 | Endpoint thống kê và xuất | 17 | Stats engine, endpoint |
 | Nạp dữ liệu thực tế | 38 | Geolife, AMIT, drone, routing |
-| **Tổng** | **163** | **Đạt tất cả** |
+| **Tổng** | **162** | **Đạt tất cả** |
 
 ### Hạng mục còn lại
 | Hạng mục | Tuần | Mô tả |
@@ -203,4 +203,41 @@ main.tex (master)
 └── week-8.tex  — Kiểm tra hồi quy, tổng kết, chuẩn bị demo
 ```
 
-Compiler: pdfLaTeX (tương thích Overleaf). BibTeX cho tham chiếu. 3 lần biên dịch để ổn định tham chiếu chéo.
+Compiler: pdfLaTeX (tương thích Overleaf). BibTeX cho tham chiếu. 5 lần biên dịch để ổn định tham chiếu chéo.
+
+## Tuần 9: Dữ liệu quỹ đạo thực tế
+
+### Nội dung
+- **Tập dữ liệu Geolife**: 252 đoạn đi bộ hợp lệ (60-180 giây, GPS WGS-84, 182 người dùng)
+- **Tập dữ liệu AMIT**: 25.757 đoạn xe máy hợp lệ (tậa độ mét từ camera UAV)
+- **So sánh Geolife và AMIT**: GPS vệ tinh vs. camera UAV, PCHIP vs. nội suy tuyến tính
+- **Bộ nạp dữ liệu (data loader)**: GeolifeWalkLoader, AMITMotorcycleLoader, RoadNetworkMotorcycleLoader
+- **Toggle thực tế**: `use_realistic_sim` kết nối từ giao diện đến engine
+- **Kiểm thử**: 38 test cases mới cho các bộ nạp dữ liệu
+
+### Lý do dùng Geolife cho người đi bộ
+- GPS vệ tinh thực, không phải đường cảnh quan ngẫu nhiên
+- Chứa hành vi thực: dừng chờ, tăng từ từ, rẽ
+- Lọc đoạn: 60-180 giây, khoảng trống GPS dưới 3 giây, phạm vi dưới 400 m
+- Nội suy PCHIP giữ được điểm dừng (không tạo velocity hump như cubic spline)
+
+### Kết quả bộ nạp dữ liệu
+| Bộ nạp | Nguồn | Đoạn hợp lệ | Tần số đầu ra |
+|----------|--------|--------------|---------------|
+| GeolifeWalkLoader | GPS vệ tinh, WGS-84 | 252 | 10 Hz (PCHIP) |
+| AMITMotorcycleLoader | Camera UAV, tọa độ mét | 25.757 | 10 Hz (tuyến tính) |
+| RoadNetworkMotorcycleLoader | OSM TP.HCM | Vô hạn (random walk) | 10 Hz |
+
+### Cấu trúc file
+```
+main.tex (master)
+├── week-1.tex  — Giới thiệu, bài toán, lý thuyết
+├── week-2.tex  — Kiến trúc, luồng dữ liệu, Raspberry Pi
+├── week-3.tex  — Pipeline tọa độ, phân tích sai số, bộ lọc
+├── week-4.tex  — Kết quả mô phỏng, đánh giá RMSE
+├── week-5.tex  — Pipeline thời gian thực, WebSocket, UI
+├── week-6.tex  — Xuất dữ liệu, phân tích sau, trường hợp đặc biệt
+├── week-7.tex  — Phân tích thống kê, độ nhạy tham số
+├── week-8.tex  — Kiểm tra hồi quy, tổng kết, chuẩn bị demo
+└── week-9.tex  — Dữ liệu quỹ đạo thực tế (Geolife, AMIT, Road network toggle)
+```

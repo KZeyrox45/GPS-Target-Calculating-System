@@ -59,7 +59,7 @@ export default function HomePage() {
           <strong style={{ color: 'var(--accent-primary)' }}>PROJECT:</strong>{' '}
           Real-Time Moving Target Tracking via Laser-IMU-GNSS Fusion<br />
           <strong style={{ color: 'var(--accent-primary)' }}>ADVISOR:</strong> TS. Vo Tuan Binh &nbsp;|&nbsp;
-          <strong style={{ color: 'var(--accent-primary)' }}>TEAM:</strong> 072 &nbsp;|&nbsp;
+          <strong style={{ color: 'var(--accent-primary)' }}>TEAM:</strong> 024 &nbsp;|&nbsp;
           <strong style={{ color: 'var(--accent-primary)' }}>SPEC:</strong> RMSE &lt; 5m at range &lt; 1km
         </p>
       </div>
