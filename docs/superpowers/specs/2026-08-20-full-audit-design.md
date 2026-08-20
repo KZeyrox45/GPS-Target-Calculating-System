@@ -17,6 +17,8 @@ Execute the three URGENT MISSIONS from `IMPORTANT_NOTE.md` in the approved order
 
 Hardware is not available. Datasets (Geolife, AMIT, HCMC road network) substitute for real hardware — this substitution is supervisor-approved. All work must make phase 2 clearly different from phase 1 (the archived `phase1/` static single-point calculator).
 
+**Global anti-AI stance (applies to EVERY file in the project, not just reports):** All files — reports, defense-prep, docs, code comments, README, scripts — must show no signs of AI generation. We write and audit as a real human would: no formulaic connectors, no robotic tone, no AI-characteristic `--`/em-dash in prose, no inflated symbolism, no rule-of-three filler. Anything that reads AI-generated is removed or rewritten.
+
 ## 2. Confirmed Decisions (user-approved)
 
 | # | Decision | Choice |
@@ -54,12 +56,17 @@ Scope: `report-weekly/week-1.tex` … `week-10.tex`, `report-weekly/main.tex`, `
 
 Audit targets (AI-writing signs):
 - Formulaic connectors ("Mặt khác", "Ngoài ra", "Hơn nữa", "Cụ thể", "Như vậy", "Đồng thời", "Do đó", rule-of-three constructions)
-- AI-characteristic hyphen/em-dash overuse, "—" in prose
+- AI-characteristic hyphen/em-dash: any `--` in prose renders as em-dash and is an AI sign. **EXCEPTION:** `--` inside TikZ path syntax is required and acceptable. Outside TikZ: replace with natural human wording, or use `-` when representing null data in a table
 - Robotic tone: inflated symbolism, vague attributions, excessive conjunctive phrases, superficial "-ing" analyses (Vietnamese equivalents)
+- Meta/commentary phrases that reference the document structure itself and would not appear in a real report — e.g., week-1.tex ends with "Week 1 presents an overview..." which will NOT appear in the official report; such phrases must be replaced with the actual content/wording used in the official report
 - Redundancy and filler that pads without content
 - Repetition of identical phrasing across weeks
 
 Every number in the report must be cross-checked against the verified source-of-truth tables (see §7) and the actual benchmark outputs (`tests/benchmark_rmse.py` seed=42, `tests/statistical_analysis.py` seeds 1-10). No fabricated numbers.
+
+**Benchmark rigor:** Benchmark scripts themselves may be inaccurate. Before trusting any number they produce, rigorously review the benchmark code (correct RMSE computation, correct ground-truth pairing, correct units) and re-run to confirm the outputs match the verified tables. The data is crucial — a wrong number in the report is disqualifying.
+
+**Parameter justification (report content):** The chosen simulation parameters — seed=42, 120s duration, 10Hz sample rate, 400m boundary — must be properly explained in the report and defended in defense-prep, including anticipating common questions: "Why choose these values?", "What do these values mean?", "If the sensors have different frequencies or correlations, what solution would you have?" (answers: frequency alignment/resampling strategy, cross-correlation handling in sensor fusion).
 
 Report constraints (from RULES.md, enforced):
 - No code file names, code commands, API endpoint paths, or unexplained jargon (B2 Report-to-PDF rule)
@@ -107,7 +114,7 @@ Checks:
 - Outdated code / dead code / deprecated patterns
 - Deadlocks or blocking patterns (esp. async WebSocket paths, threading in SimulationEngine)
 - Unreasonable exception handling (bare `except`, swallowed errors, masking bugs)
-- Optimizable code (apply DSA knowledge; e.g., ring buffer, graph walks, numpy vectorization)
+- **Real-time performance optimization:** this is a real-time system — optimize for the best possible time efficiency, especially on Windows. Python hot paths (filter steps, sensor-fusion loop, data-loader walks, numpy calls, WS frame serialization) must be profiled and optimized for efficiency while strictly maintaining the problem logic and numerical results (verified numbers must not drift)
 - Robotic/AI-like comments in code
 - Input-validation error messages returning raw `Error: ...` → must become user-friendly messages
 - AI-generated content in README/.gitignore/.gitattributes
@@ -138,7 +145,8 @@ Procedure (run order matters):
 - **RULES.md**: single authoritative source at root; `.agents/rules/RULES.md` → short pointer/redirect to root (one file to maintain)
 - **AGENTS.md**: full informational audit vs reality (fix documented discrepancies, e.g., root `scripts/` still containing `generate_report_figures.py` + `run_all_combos.py` despite AGENTS.md claiming deletion); keep complete, not lacking/excessive; may use EXA/Context7/DeepWiki
 - **Commands/**: verify each .bat works (`start_backend`, `start_frontend`, `start_both`, `run_tests`, `kill_servers`, `compile_latex`)
-- **docs/ + defense-prep/**: spoken-language pass — fluent, not theoretical
+- **docs/ + defense-prep/**: spoken-language pass — fluent, not theoretical. Defense-prep Q&A must be closely tied to the project topic, spoken (conversational) not written, and free of every AI-writing element listed in §4a
+- **Data hygiene (`data/`)**: delete any unused dataset data to free up disk space; keep only what the loaders and reports actually use
 - **MCP_PROMPT/**: expand beyond the thin Exa.md
 - **Simulation_Results/**: populate with real results (videos, images, text) generated during Mission I runtime audit + Mission II asset pipeline
 - **Peripherals**: keep AUDIT_REPORT.md (audit history), raspberry_pi/ (documented future-hardware stub), relocate root `scripts/generate_report_figures.py` + `run_all_combos.py` to `backend/scripts/` (keep `demo_script.md`)
@@ -184,3 +192,6 @@ Key facts: WS endpoint `/ws/tracking/{session_id}` mounted at root (not /api); V
 - LaTeX page-count target (~150+) may require careful prose expansion without padding; verify page count from actual 5-pass compile
 - Root copies of week-*.tex vs `report-weekly/Contents/` copies must be reconciled to a single consistent set
 - The runtime audit's 18 combination matrix (3×3×2) is time-consuming; screenshots captured during it double as Mission II assets
+- Benchmark scripts may be inaccurate — the rigor pass may reveal corrected numbers that supersede current verified tables; report numbers must be updated to match corrected ground truth
+- Python performance optimization must not change numerical results — verified RMSE/pipeline numbers must remain identical after optimization
+- `--` em-dash sweep across all LaTeX is mechanical but error-prone — TikZ paths must be preserved; every non-TikZ occurrence needs a human rewrite
