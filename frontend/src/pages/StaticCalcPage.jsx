@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import formatApiError from '../utils/apiError';
 
 const DEFAULT = {
   observer_lat: 10.762622, observer_lon: 106.660172, observer_alt: 10.0,
@@ -20,19 +21,34 @@ export default function StaticCalcPage() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const set = (k) => (e) => setForm((prev) => ({ ...prev, [k]: parseFloat(e.target.value) || e.target.value }));
+  const set = (k) => (e) => {
+    const v = e.target.value;
+    setForm((prev) => ({ ...prev, [k]: v === '' ? '' : Number(v) }));
+  };
 
   async function calculate() {
     setLoading(true); setError(null); setResult(null);
+
+    const numeric = {};
+    for (const [k, v] of Object.entries(form)) {
+      if (v === '' || v === null || Number.isNaN(Number(v))) {
+        setError('Please fill in all fields with valid numbers.');
+        setLoading(false);
+        return;
+      }
+      numeric[k] = Number(v);
+    }
+
     try {
       const res = await fetch('/api/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(numeric),
       });
       if (!res.ok) {
-        const d = await res.json();
-        throw new Error(JSON.stringify(d.detail || 'Server error'));
+        let detail = null;
+        try { detail = (await res.json()).detail; } catch { detail = null; }
+        throw new Error(formatApiError(res.status, detail));
       }
       setResult(await res.json());
     } catch (err) {

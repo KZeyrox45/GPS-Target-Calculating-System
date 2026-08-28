@@ -25,6 +25,7 @@ from app.simulation.target_simulator import (
     DroneTrajectory,
     MotorcycleTrajectory,
     PedestrianTrajectory,
+    RoadNetworkMotorcycleTrajectory,
 )
 
 
@@ -47,6 +48,7 @@ def run_scenario(
     TRAJ_MAP = {
         "pedestrian": PedestrianTrajectory,
         "motorcycle": MotorcycleTrajectory,
+        "motorcycle_road": RoadNetworkMotorcycleTrajectory,
         "drone": DroneTrajectory,
     }
     traj = TRAJ_MAP[target_type](rng=rng, dt=dt)
@@ -123,14 +125,19 @@ def main():
 
     scenarios = [
         ("pedestrian", "Pedestrian (2D KF)"),
-        ("motorcycle", "Motorcycle (2D KF)"),
+        ("motorcycle", "Motorcycle-kinematic (2D KF)"),
+        ("motorcycle_road", "Motorcycle-road (2D KF, deployed)"),
         ("drone",      "Drone     (3D KF)"),
     ]
 
     results = {}
     for target_type, label in scenarios:
         print(f"Running {label}...", end=" ", flush=True)
-        raw_rmse, ab_rmse, kf_rmse, n = run_scenario(target_type)
+        try:
+            raw_rmse, ab_rmse, kf_rmse, n = run_scenario(target_type)
+        except RuntimeError as e:
+            print(f"SKIP ({e})")
+            continue
         results[label] = (raw_rmse, ab_rmse, kf_rmse, n)
         print(f"done ({n} steps) - KF RMSE: {kf_rmse:.2f} m")
 

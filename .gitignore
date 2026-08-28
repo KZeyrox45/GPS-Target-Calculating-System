@@ -1,0 +1,57 @@
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.synctex(busy)
+*.nav
+*.snm
+*.vrb
+texput.log
+
+# Python cache (root level)
+__pycache__/
+*.py[cod]
+
+# Environment
+.env
+.env.local
+.venv/
+
+# Runtime caches (OSM Overpass responses etc.)
+backend/cache/
+
+# JS dependencies (any folder)
+node_modules/
+
+# Compiled report PDFs (build artifacts)
+report-weekly/main.pdf
+report-new/main.pdf
+
+# Playwright MCP test logs
+.playwright-mcp/
+
+# LaTeX auxiliary (arXiv papers, archived reports)
+*.bbl
+*.blg
+phase1/report-phase1/*.pdf
+defense-prep/*.pdf

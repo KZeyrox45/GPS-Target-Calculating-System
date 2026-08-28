@@ -10,8 +10,8 @@ position measurement for the tracking filters.
 
 Fusion output: ENU vector [East, North, Up] with combined uncertainty σ².
 
-This module also applies Gaussian noise models when *simulating* sensor
-imperfections (used by the simulation engine).
+Gaussian noise models for simulating sensor imperfections are also applied
+by the simulation engine (see target_simulator.py).
 """
 
 import math

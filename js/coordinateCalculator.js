@@ -264,10 +264,7 @@ function validateInput(data) {
     return 'Khoảng cách phải lớn hơn 0 km';
   }
 
-  // Cảnh báo nếu khoảng cách lớn
-  if (distance > 100) {
-    return 'Cảnh báo: Khoảng cách lớn (>100km) có thể làm giảm độ chính xác tính toán trên mô hình cầu';
-  }
+  // Lưu ý: khoảng cách >100 km vẫn tính được, chỉ độ chính xác giảm trên mô hình cầu.
 
   // Kiểm tra NaN
   if (isNaN(lat) || isNaN(lon) || isNaN(azimuth) || isNaN(distance)) {
@@ -556,7 +553,7 @@ function calculateTarget(input) {
   } catch (error) {
     return {
       success: false,
-      error: `Lỗi tính toán: ${error.message}`
+      error: 'Không thể tính toán. Vui lòng kiểm tra lại dữ liệu đầu vào và thử lại.'
     };
   }
 }

@@ -2,9 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const FEATURES = [
+  { icon: '#', title: 'TELEMETRY DASH', desc: 'Hardware diagnostics, 59µs pipeline latency budget & MTBF metrics', link: '/dashboard' },
   { icon: '+', title: 'LIVE TRACK', desc: 'Real-time target tracking via WebSocket at 10 Hz update rate', link: '/tracking' },
   { icon: '=', title: 'STATIC CALC', desc: 'Compute static target coordinates from GPS + azimuth + range', link: '/calculator' },
-  { icon: '~', title: 'DELTA COMPARE', desc: 'Compare Kalman Filter vs alpha-beta Filter -- RMSE across trajectory', link: '/comparison' },
+  { icon: '~', title: 'DELTA COMPARE', desc: 'Compare Kalman Filter vs alpha-beta Filter · RMSE across trajectory', link: '/comparison' },
 ];
 
 const ALGORITHMS = [
@@ -21,7 +22,7 @@ export default function HomePage() {
           GPS-TT C2 SYSTEM
         </h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '1rem', fontFamily: 'var(--font-mono)', maxWidth: '600px', margin: '0 auto' }}>
-          Laser-IMU-GNSS Sensor Fusion -- Moving Target Geolocation
+          Laser-IMU-GNSS Sensor Fusion · Moving Target Geolocation
         </p>
         <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', marginTop: '1.25rem' }}>
           <Link to="/tracking" className="btn btn-primary btn-lg">ENGAGE</Link>
@@ -29,7 +30,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
         {FEATURES.map((f) => (
           <Link key={f.title} to={f.link} style={{ textDecoration: 'none' }}>
             <div className="card" style={{ cursor: 'pointer' }}>

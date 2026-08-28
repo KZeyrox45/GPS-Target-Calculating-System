@@ -802,10 +802,11 @@ class SimulationEngine:
         self._boundary = SimulationBoundary(radius_m=config.boundary_radius_m)
         self._is_3d = config.target_type == "drone"
 
-        # Running RMSE accumulators
-        self._kalman_sq_errors: list[float] = []
-        self._ab_sq_errors: list[float] = []
-        self._raw_sq_errors: list[float] = []
+        # Running RMSE accumulators (incremental sums; O(1) per frame)
+        self._kf_sq_sum = 0.0
+        self._ab_sq_sum = 0.0
+        self._raw_sq_sum = 0.0
+        self._error_count = 0
 
         # Frame buffer for CSV export (all frames, bounded by duration)
         self._frames: list[dict] = []
@@ -817,7 +818,7 @@ class SimulationEngine:
 
     def get_stats(self) -> dict:
         """Return RMSE summary and step count for the current session."""
-        n = len(self._kalman_sq_errors)
+        n = self._error_count
         if n == 0:
             return {
                 "steps": 0,
@@ -827,9 +828,9 @@ class SimulationEngine:
                 "duration_s": 0.0,
                 "target_type": self.config.target_type,
             }
-        kf_rmse  = math.sqrt(sum(self._kalman_sq_errors) / n)
-        ab_rmse  = math.sqrt(sum(self._ab_sq_errors)     / n)
-        raw_rmse = math.sqrt(sum(self._raw_sq_errors)    / n)
+        kf_rmse  = math.sqrt(self._kf_sq_sum / n)
+        ab_rmse  = math.sqrt(self._ab_sq_sum / n)
+        raw_rmse = math.sqrt(self._raw_sq_sum / n)
         return {
             "steps": n,
             "kalman_rmse_m":     round(kf_rmse,  4),
@@ -922,12 +923,14 @@ class SimulationEngine:
             ab_err  = pos_error(ab_state[0], ab_state[1])
             raw_err = pos_error(fused.east, fused.north)
 
-            self._kalman_sq_errors.append(kf_err**2)
-            self._ab_sq_errors.append(ab_err**2)
-            self._raw_sq_errors.append(raw_err**2)
+            self._kf_sq_sum += kf_err**2
+            self._ab_sq_sum += ab_err**2
+            self._raw_sq_sum += raw_err**2
+            self._error_count += 1
 
-            kf_rmse  = math.sqrt(sum(self._kalman_sq_errors) / len(self._kalman_sq_errors))
-            ab_rmse  = math.sqrt(sum(self._ab_sq_errors)     / len(self._ab_sq_errors))
+            n = self._error_count
+            kf_rmse = math.sqrt(self._kf_sq_sum / n)
+            ab_rmse = math.sqrt(self._ab_sq_sum / n)
 
             # 8. Build frame
             frame = TrackingFrame(

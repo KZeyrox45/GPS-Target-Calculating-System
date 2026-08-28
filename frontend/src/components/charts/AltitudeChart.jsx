@@ -5,6 +5,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import useTrackingStore from '../../store/trackingStore';
+import { cssVar } from '../../utils/themeColors';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -60,7 +61,7 @@ export default function AltitudeChart({ defaultCollapsed }) {
       {
         label: 'ALT TRUE',
         data: visibleGT.map((p) => p.alt ?? 0),
-        borderColor: 'var(--color-truth)',
+        borderColor: cssVar('--color-truth', '#22c55e'),
         backgroundColor: 'rgba(34,197,94,0.06)',
         borderWidth: 1.5,
         pointRadius: 0,
@@ -70,7 +71,7 @@ export default function AltitudeChart({ defaultCollapsed }) {
       {
         label: 'KF UP',
         data: visibleKF.map((p) => p.kf_up ?? 0),
-        borderColor: 'var(--color-kalman)',
+        borderColor: cssVar('--color-kalman', '#38bdf8'),
         backgroundColor: 'rgba(34,197,94,0.06)',
         borderWidth: 1.5,
         pointRadius: 0,

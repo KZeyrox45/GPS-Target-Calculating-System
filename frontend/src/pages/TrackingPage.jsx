@@ -32,7 +32,7 @@ export default function TrackingPage() {
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
           }}>
-            SIM COMPLETE -- FULL TRAJECTORY DATA
+            SIM COMPLETE · FULL TRAJECTORY DATA
           </div>
         )}
 

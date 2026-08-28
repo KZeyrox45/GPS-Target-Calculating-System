@@ -4,6 +4,7 @@ import TargetMarker from './TargetMarker';
 import TrajectoryPolyline from './TrajectoryPolyline';
 import RoadNetwork from './RoadNetwork';
 import useTrackingStore from '../../store/trackingStore';
+import { cssVar } from '../../utils/themeColors';
 
 // Continuously re-centre map on Kalman-estimated position
 function MapAutoCenter() {
@@ -84,16 +85,16 @@ export default function TrackingMap({ observerPos }) {
         )}
 
         {showGroundTruth && (
-          <TrajectoryPolyline positions={groundTruthHistory} color="var(--color-truth)" weight={3} />
+          <TrajectoryPolyline positions={groundTruthHistory} color={cssVar('--color-truth', '#22c55e')} weight={3} />
         )}
         {showRaw && (
-          <TrajectoryPolyline positions={rawHistory} color="var(--color-raw)" weight={2} dashArray="6 6" />
+          <TrajectoryPolyline positions={rawHistory} color={cssVar('--color-raw', '#eab308')} weight={2} dashArray="6 6" />
         )}
         {showKalman && (
-          <TrajectoryPolyline positions={kalmanHistory} color="var(--color-kalman)" weight={3.5} />
+          <TrajectoryPolyline positions={kalmanHistory} color={cssVar('--color-kalman', '#38bdf8')} weight={3.5} />
         )}
         {showAlphaBeta && (
-          <TrajectoryPolyline positions={alphaBetaHistory} color="var(--color-alphabeta)" weight={2.5} dashArray="8 5" />
+          <TrajectoryPolyline positions={alphaBetaHistory} color={cssVar('--color-alphabeta', '#a78bfa')} weight={2.5} dashArray="8 5" />
         )}
 
         {currentFrame && showGroundTruth && (

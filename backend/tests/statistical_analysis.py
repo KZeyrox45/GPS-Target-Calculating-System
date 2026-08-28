@@ -25,6 +25,7 @@ from app.simulation.target_simulator import (
     DroneTrajectory,
     MotorcycleTrajectory,
     PedestrianTrajectory,
+    RoadNetworkMotorcycleTrajectory,
 )
 
 SEEDS = list(range(1, 11))
@@ -43,6 +44,7 @@ def run_scenario(target_type: str, seed: int):
     TRAJ_MAP = {
         "pedestrian": PedestrianTrajectory,
         "motorcycle": MotorcycleTrajectory,
+        "motorcycle_road": RoadNetworkMotorcycleTrajectory,
         "drone": DroneTrajectory,
     }
     traj = TRAJ_MAP[target_type](rng=rng, dt=dt)
@@ -105,7 +107,7 @@ def run_scenario(target_type: str, seed: int):
 
 def main():
     sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-    target_types = ["pedestrian", "motorcycle", "drone"]
+    target_types = ["pedestrian", "motorcycle", "motorcycle_road", "drone"]
     results = {}
 
     print("GPS Target Calculating System - Multi-seed Statistical Analysis")
@@ -116,7 +118,11 @@ def main():
     for ttype in target_types:
         raw_list, ab_list, kf_list = [], [], []
         for seed in SEEDS:
-            raw, ab, kf = run_scenario(ttype, seed)
+            try:
+                raw, ab, kf = run_scenario(ttype, seed)
+            except RuntimeError as e:
+                print(f"  {ttype:12s} seed={seed:2d}  SKIP ({e})")
+                continue
             raw_list.append(raw)
             ab_list.append(ab)
             kf_list.append(kf)

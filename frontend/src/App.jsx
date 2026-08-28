@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import HomePage       from './pages/HomePage';
+import DashboardPage  from './pages/DashboardPage';
 import TrackingPage   from './pages/TrackingPage';
 import StaticCalcPage from './pages/StaticCalcPage';
 import ComparisonPage from './pages/ComparisonPage';
@@ -46,6 +47,9 @@ export default function App() {
             <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>
               SYS
             </NavLink>
+            <NavLink to="/dashboard" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              DASH
+            </NavLink>
             <NavLink to="/tracking" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               TRACK
             </NavLink>
@@ -75,6 +79,7 @@ export default function App() {
         <main className="page-content">
           <Routes>
             <Route path="/"           element={<HomePage />} />
+            <Route path="/dashboard"  element={<DashboardPage />} />
             <Route path="/tracking"   element={<TrackingPage />} />
             <Route path="/calculator" element={<StaticCalcPage />} />
             <Route path="/comparison" element={<ComparisonPage />} />

@@ -110,8 +110,8 @@ def _parse_plt(path: Path) -> list[tuple[datetime, float, float]]:
                     records.append((dt, lat, lon))
                 except (ValueError, IndexError):
                     continue
-    except OSError:
-        pass
+    except OSError as e:
+        logger.warning("Skipping unreadable trajectory file: %s", e)
     return records
 
 
@@ -137,8 +137,8 @@ def _parse_labels(path: Path) -> list[tuple[datetime, datetime, str]]:
                     labels.append((start, end, mode))
                 except (ValueError, IndexError):
                     continue
-    except OSError:
-        pass
+    except OSError as e:
+        logger.warning("Skipping unreadable labels file: %s", e)
     return labels
 
 
@@ -366,8 +366,8 @@ def _load_amit_csv(path: Path) -> dict[float, list[tuple[int, float, float]]]:
                     vehicles[vid].append((frame, cx, cy))
                 except (ValueError, IndexError):
                     continue
-    except OSError:
-        pass
+    except OSError as e:
+        logger.warning("Skipping unreadable AMIT CSV: %s", e)
     return vehicles
 
 

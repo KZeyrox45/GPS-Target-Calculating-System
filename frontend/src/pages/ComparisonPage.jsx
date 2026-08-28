@@ -5,6 +5,7 @@ import {
 } from 'chart.js';
 import { Scatter, Line } from 'react-chartjs-2';
 import useTrackingStore from '../store/trackingStore';
+import { cssVar } from '../utils/themeColors';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, ScatterController, Title, Tooltip, Legend);
 
@@ -45,7 +46,7 @@ export default function ComparisonPage() {
           x: (p.lon - (groundTruthHistory[0]?.lon || 0)) * 111320 * Math.cos(p.lat * Math.PI / 180),
           y: (p.lat - (groundTruthHistory[0]?.lat || 0)) * 111320,
         })),
-        borderColor: 'var(--color-truth)', backgroundColor: 'transparent',
+        borderColor: cssVar('--color-truth', '#22c55e'), backgroundColor: 'transparent',
         pointRadius: 1.5, showLine: true, tension: 0.3,
       },
       {
@@ -54,7 +55,7 @@ export default function ComparisonPage() {
           x: (p.lon - (groundTruthHistory[0]?.lon || 0)) * 111320 * Math.cos(p.lat * Math.PI / 180),
           y: (p.lat - (groundTruthHistory[0]?.lat || 0)) * 111320,
         })),
-        borderColor: 'var(--color-kalman)', backgroundColor: 'transparent',
+        borderColor: cssVar('--color-kalman', '#38bdf8'), backgroundColor: 'transparent',
         pointRadius: 1, showLine: true, tension: 0.3,
       },
       {
@@ -63,7 +64,7 @@ export default function ComparisonPage() {
           x: (p.lon - (groundTruthHistory[0]?.lon || 0)) * 111320 * Math.cos(p.lat * Math.PI / 180),
           y: (p.lat - (groundTruthHistory[0]?.lat || 0)) * 111320,
         })),
-        borderColor: 'var(--color-alphabeta)', backgroundColor: 'transparent',
+        borderColor: cssVar('--color-alphabeta', '#a78bfa'), backgroundColor: 'transparent',
         pointRadius: 1, showLine: true, borderDash: [4, 4], tension: 0.3,
       },
     ],
@@ -75,12 +76,12 @@ export default function ComparisonPage() {
       {
         label: 'KF RMSE',
         data: metricsHistory.map((m) => m.kalman_rmse),
-        borderColor: 'var(--color-kalman)', pointRadius: 0, borderWidth: 1.5, tension: 0.3,
+        borderColor: cssVar('--color-kalman', '#38bdf8'), pointRadius: 0, borderWidth: 1.5, tension: 0.3,
       },
       {
         label: 'AB RMSE',
         data: metricsHistory.map((m) => m.alpha_beta_rmse),
-        borderColor: 'var(--color-alphabeta)', pointRadius: 0, borderWidth: 1.5, tension: 0.3,
+        borderColor: cssVar('--color-alphabeta', '#a78bfa'), pointRadius: 0, borderWidth: 1.5, tension: 0.3,
         borderDash: [4, 4],
       },
     ],
@@ -90,7 +91,7 @@ export default function ComparisonPage() {
     <div style={{ flex: 1, overflowY: 'auto', padding: '1.5rem' }}>
       <h1 style={{ fontSize: '1.5rem', marginBottom: '0.3rem', fontFamily: 'var(--font-mono)' }}>DELTA COMPARE</h1>
       <p className="text-sm text-muted font-mono" style={{ marginBottom: '1rem' }}>
-        KF vs AB -- Run a simulation on LIVE TRACK first
+        KF vs AB · Run a simulation on LIVE TRACK first
       </p>
 
       {!hasData ? (

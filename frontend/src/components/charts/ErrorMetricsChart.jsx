@@ -5,6 +5,7 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import useTrackingStore from '../../store/trackingStore';
+import { cssVar } from '../../utils/themeColors';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -57,7 +58,7 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
       {
         label: 'KF RMSE',
         data: visible.map((m) => m.kalman_rmse),
-        borderColor: 'var(--color-kalman)',
+        borderColor: cssVar('--color-kalman', '#38bdf8'),
         backgroundColor: 'rgba(34,197,94,0.06)',
         borderWidth: 1.5,
         pointRadius: 0,
@@ -67,7 +68,7 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
       {
         label: 'AB RMSE',
         data: visible.map((m) => m.alpha_beta_rmse),
-        borderColor: 'var(--color-alphabeta)',
+        borderColor: cssVar('--color-alphabeta', '#a78bfa'),
         backgroundColor: 'rgba(168,85,247,0.06)',
         borderWidth: 1.5,
         pointRadius: 0,
@@ -77,7 +78,7 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
       {
         label: 'RAW ERR',
         data: visible.map((m) => m.raw_error),
-        borderColor: 'var(--color-raw)',
+        borderColor: cssVar('--color-raw', '#eab308'),
         backgroundColor: 'rgba(234,179,8,0.06)',
         borderWidth: 1,
         borderDash: [4, 4],
@@ -93,18 +94,6 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
     plugins: {
       ...BASE_OPTIONS.plugins,
       title: { display: false },
-      annotation: {
-        annotations: {
-          thresholdLine: {
-            type: 'line',
-            yMin: 5, yMax: 5,
-            borderColor: 'rgba(239,68,68,0.4)',
-            borderWidth: 1,
-            borderDash: [4, 4],
-            label: { content: '5m spec', enabled: true, color: 'var(--accent-danger)', font: { size: 10 } },
-          },
-        },
-      },
     },
     scales: {
       ...BASE_OPTIONS.scales,

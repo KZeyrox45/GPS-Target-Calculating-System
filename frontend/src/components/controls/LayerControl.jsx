@@ -6,11 +6,12 @@ const LAYERS = [
   { key: 'showRaw',         label: 'RAW', color: 'var(--color-raw)' },
   { key: 'showKalman',      label: 'KF', color: 'var(--color-kalman)' },
   { key: 'showAlphaBeta',   label: 'AB', color: 'var(--color-alphabeta)' },
+  { key: 'showRoads',       label: 'ROADS', color: 'var(--text-muted)' },
 ];
 
 export default function LayerControl() {
   const store = useTrackingStore();
-  const { metricsHistory } = useTrackingStore();
+  const metricsHistory = useTrackingStore((s) => s.metricsHistory);
 
   const lastMetrics = metricsHistory[metricsHistory.length - 1];
 

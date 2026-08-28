@@ -57,6 +57,34 @@
   --font-mono: 'JetBrains Mono', 'Consolas', monospace;
 }
 
+/* --- Light theme (activated via [data-theme='light'] on <html>) --- */
+[data-theme='light'] {
+  --bg-primary:    #f1f5f9;
+  --bg-secondary:  #ffffff;
+  --bg-card:       #ffffff;
+  --bg-card-alt:   #e2e8f0;
+  --bg-hover:      #dbe3ec;
+
+  --accent-primary:  #16a34a;
+  --accent-secondary:#ca8a04;
+  --accent-warning:  #ea580c;
+  --accent-danger:   #dc2626;
+  --accent-success:  #16a34a;
+  --accent-info:     #0284c7;
+
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+  --text-label:     #94a3b8;
+
+  --border-subtle:  rgba(22, 163, 74, 0.15);
+  --border-active:  rgba(22, 163, 74, 0.45);
+  --border-grid:    rgba(15, 23, 42, 0.08);
+
+  --shadow-card: 0 1px 6px rgba(15, 23, 42, 0.12);
+  --shadow-glow: none;
+}
+
 /* --- Reset & base --- */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -382,8 +410,12 @@ code, .mono {
 
 /* --- Leaflet overrides ----- */
 .leaflet-container {
-  background: #f5f5f5 !important;
+  background: var(--map-bg, #f5f5f5) !important;
   font-family: var(--font-sans) !important;
+}
+
+[data-theme='dark'] .leaflet-container {
+  --map-bg: #1a1a1a;
 }
 
 .leaflet-control-zoom a {

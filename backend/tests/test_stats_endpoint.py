@@ -207,14 +207,15 @@ class TestExportEndpoint:
         assert resp.status_code == 404
         assert "Session not found" in resp.json()["detail"]
 
-    async def test_export_active_session_no_frames_returns_204(self):
-        """Immediately after creation, no frames recorded → 204 No Content."""
+    async def test_export_active_session_no_frames_returns_404(self):
+        """Immediately after creation, no frames recorded -> 404 (204 must not carry a body)."""
         async with AsyncClient(
             transport=ASGITransport(app=app), base_url="http://test"
         ) as client:
             session_id = await self._start_session(client)
             resp = await client.get(f"/api/simulation/export/{session_id}")
-        assert resp.status_code == 204
+        assert resp.status_code == 404
+        assert "Chưa có dữ liệu" in resp.json()["detail"]
 
     async def test_export_content_type_is_csv_when_frames_present(self):
         """Once frames are buffered, response must have Content-Type text/csv."""
@@ -312,3 +313,19 @@ class TestExportEndpoint:
             assert len(lines) == n_steps + 1, f"Expected {n_steps + 1} lines, got {len(lines)}"
         finally:
             _sessions.pop(sid, None)
+
+    async def test_dashboard_telemetry_endpoint(self):
+        """Test GET /api/simulation/dashboard returns hardware and pipeline telemetry."""
+        async with AsyncClient(
+            transport=ASGITransport(app=app), base_url="http://test"
+        ) as client:
+            resp = await client.get("/api/simulation/dashboard")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["system_status"] == "NOMINAL"
+        assert "hardware_telemetry" in data
+        assert "gnss" in data["hardware_telemetry"]
+        assert "pipeline_budget" in data
+        assert data["pipeline_budget"]["total_latency_us"] == 59.0
+        assert "verified_benchmarks" in data
+

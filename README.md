@@ -25,7 +25,7 @@ Hệ thống theo dõi và tính toán tọa độ mục tiêu di động theo t
 │  SimulationPanel -> REST POST /api/simulation/start      │
 │  WebSocket consumer -> cập nhật store mỗi 100ms          │
 └────────────────────┬────────────────────────────────────┘
-                     │ WebSocket ws://localhost:8000/ws/{id}
+                     │ WebSocket ws://localhost:8000/ws/tracking/{id}
 ┌────────────────────▼────────────────────────────────────┐
 │                  Backend (FastAPI)                      │
 │  SimulationEngine -> TrajectoryGenerator                 │
@@ -59,7 +59,7 @@ GPS-Target-Calculating-System/
 │   │   │   └── simulation.py       # POST /api/simulation/start + WebSocket
 │   │   ├── models/schemas.py
 │   │   └── main.py
-│   ├── tests/                      # 104 pytest tests
+│   ├── tests/                      # 162 pytest tests
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
@@ -82,7 +82,7 @@ GPS-Target-Calculating-System/
 | Thành phần | Phiên bản |
 |---|---|
 | Python | 3.11+ |
-| Node.js | 18+ |
+| Node.js | 20.19+ (yêu cầu của Vite 8) |
 | npm | 9+ |
 
 ---
@@ -121,7 +121,7 @@ cd backend
 uv run pytest tests/ -v
 ```
 
-Kết quả hiện tại: **104 tests passed**.
+Kết quả hiện tại: **162 tests passed**.
 
 Các nhóm test bao gồm:
 - `TestPedestrianTrajectory` - kiểm tra tốc độ, pause, waypoint navigation
@@ -205,7 +205,7 @@ Khởi động phiên mô phỏng mới.
 
 Trả về `session_id` và `ws_url` để kết nối WebSocket.
 
-### WebSocket `/ws/{session_id}`
+### WebSocket `/ws/tracking/{session_id}`
 Stream dữ liệu JSON mỗi `1/update_rate_hz` giây:
 
 ```json
@@ -228,50 +228,33 @@ Tính tọa độ đơn điểm từ GPS + góc ngắm + khoảng cách.
 
 ### Tại sao mục tiêu không chuyển động hoàn toàn như thực tế?
 
-Đây là **hạn chế cố hữu của mô phỏng thuần túy** (không có dữ liệu cảm biến thực). Cụ thể:
+Hệ thống chưa kết nối được phần cứng thật (laser rangefinder + IMU + GPS), nên dữ liệu đầu vào của chuỗi xử lý là mô phỏng. Trong phạm vi đó, các nguồn thay thế đã được triển khai:
 
-#### 1. Không có dữ liệu cảm biến thực tế
-Hệ thống hiện tại **tự sinh quỹ đạo** bằng mô hình toán học rồi thêm nhiễu giả. Trong thực tế, dữ liệu đến từ:
-- **Laser rangefinder** đo khoảng cách thực với sai số ±1–3m
-- **IMU/la bàn** đo góc ngắm thực với drift và vibration noise
-- **GPS** của quan sát viên với sai số ±3-5m
+#### Những gì đã có
+- **Dữ liệu đi bộ thực**: 252 phân đoạn từ bộ dữ liệu Geolife (Microsoft Research), nội suy PCHIP lên 10 Hz, replay hai chiều không nhảy vị trí.
+- **Xe máy trên đường phố thực**: quỹ đạo random-walk trên mạng đường Hồ Chí Minh City (337K nút từ OSM), điều hướng theo tốc độ từng loại đường.
+- **Ranh giới mềm**: lực đẩy thế năng thay cho phản xạ gương, tránh dao động bi-a tại mép vùng.
+- **Drone đúng giới hạn khí động**: gia tốc/vận tốc bám thông số DJI Matrice 100.
 
-Khi thiếu những nguồn dữ liệu này, mọi "chuyển động thực tế" chỉ là mô phỏng xấp xỉ.
+#### Những gì còn hạn chế
+1. **Chưa có hardware thật**: mọi đo lường đều là mô phỏng xấp xỉ; sai số cảm biến thực (drift IMU, multipath GPS) chỉ được xấp xỉ bằng nhiễu.
+2. **Nhiễu Gaussian**: noise model dùng phân phối chuẩn, trong khi nhiễu thực tế có multipath (GPS phản xạ tòa nhà), scintillation (laser trong mưa), và bias drift theo nhiệt độ.
+3. **Người đi bộ synthetic** vẫn là waypoint ngẫu nhiên tương đối vị trí hiện tại, thiếu yếu tố môi trường (tường, vỉa hè, đám đông).
 
-#### 2. Mô hình quỹ đạo có tính định kỳ
-- `DroneTrajectory` bay theo waypoint ngẫu nhiên -> trông tự nhiên hơn trước, nhưng vẫn là mẫu toán học, không phải hành vi thực của phi công.
-- `MotorcycleTrajectory` dùng state machine STRAIGHT/TURNING với thời gian lấy ngẫu nhiên -> tạo ra pattern giao lộ, nhưng không mô phỏng được giao thông thực (dừng đèn đỏ, tránh xe).
-- `PedestrianTrajectory` dùng waypoint navigation -> giống người đi hơn, nhưng thiếu các yếu tố môi trường (tường, vỉa hè, đám đông).
-
-#### 3. Ranh giới phản xạ nhân tạo
-`SimulationBoundary` phản xạ heading khi target chạm ranh giới, đây là artefact kỹ thuật để target không thoát khỏi vùng quan sát, không phải hành vi vật lý thực.
-
-#### 4. Nhiễu cảm biến là Gaussian
-Noise model dùng phân phối Gaussian (chuẩn), trong khi nhiễu thực tế có thể là:
-- Multipath (GPS phản xạ từ tòa nhà)
-- Scintillation (laser bị nhiễu khói/mưa)
-- IMU bias drift theo nhiệt độ
-
-#### Giải pháp để cải thiện
-Để mô phỏng thực tế hơn, cần:
-1. **Kết nối với hardware thực** - laser rangefinder + IMU + GPS
-2. **Dữ liệu recorded** - replay dataset GPS thực từ thiết bị di động
-3. **Môi trường vật lý** - import bản đồ đường phố để điều khiển quỹ đạo pedestrian/motorcycle
-4. **Noise model nâng cao** - thêm multipath, dropout, bias
+#### Bước tiếp theo
+Khi có phần cứng: thay module sinh dữ liệu bằng client thu thập thật (xem `raspberry_pi/`), giữ nguyên toàn bộ chuỗi xử lý phía sau.
 
 ---
 
 ## Kết quả đánh giá
 
-Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km):
+Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km), kết quả từ benchmark_rmse.py (seed=42, 120s, 10Hz, boundary=400m):
 
-| Kịch bản | Kalman RMSE | α-β RMSE | Đạt spec |
-|---|---|---|---|
-| Người đi bộ (cự ly ~100m) | ~2–4m | ~4–8m | ✅ Kalman |
-| Xe máy (cự ly ~200m) | ~3–6m | ~6–12m | ✅ Kalman |
-| Drone (cự ly ~150m 3D) | ~4–8m | - | ✅ KF3D |
-
-*Kết quả có thể thay đổi tùy seed và boundary_radius_m.*
+| Kịch bản | Đo thô | α-β RMSE | Kalman RMSE | Đạt spec |
+|---|---|---|---|---|
+| Người đi bộ | 0,48 m | 0,26 m | 0,86 m | ✅ |
+| Xe máy | 1,89 m | 1,02 m | 1,80 m | ✅ |
+| Drone (3D) | 1,94 m | 1,06 m | 2,10 m | ✅ |
 
 ---
 
@@ -281,7 +264,7 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km):
 - Python 3.11 + FastAPI + Uvicorn
 - NumPy, SciPy
 - Pydantic v2
-- pytest (104 tests)
+- pytest (162 tests)
 
 **Frontend**
 - React 19 + Vite 8

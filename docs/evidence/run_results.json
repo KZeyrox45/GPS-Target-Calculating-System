@@ -1,0 +1,142 @@
+[
+  {
+    "combo": "pedestrian-ab_only-synthetic",
+    "target": "pedestrian",
+    "algorithm": "ab_only",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 1.4605,
+    "kf_rmse": 0.7277,
+    "ab_rmse": 0.7737
+  },
+  {
+    "combo": "pedestrian-ab_only-realistic",
+    "target": "pedestrian",
+    "algorithm": "ab_only",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 0.3281,
+    "kf_rmse": 1.3406,
+    "ab_rmse": 0.1892
+  },
+  {
+    "combo": "motorcycle-kf_ab-synthetic",
+    "target": "motorcycle",
+    "algorithm": "kf_ab",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "motorcycle-kf_ab-realistic",
+    "target": "motorcycle",
+    "algorithm": "kf_ab",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "motorcycle-kf_only-synthetic",
+    "target": "motorcycle",
+    "algorithm": "kf_only",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "motorcycle-kf_only-realistic",
+    "target": "motorcycle",
+    "algorithm": "kf_only",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "motorcycle-ab_only-synthetic",
+    "target": "motorcycle",
+    "algorithm": "ab_only",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "motorcycle-ab_only-realistic",
+    "target": "motorcycle",
+    "algorithm": "ab_only",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 6.8089,
+    "kf_rmse": 3.3308,
+    "ab_rmse": 3.6262
+  },
+  {
+    "combo": "drone-kf_ab-synthetic",
+    "target": "drone",
+    "algorithm": "kf_ab",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 2.5523,
+    "kf_rmse": 3.6397,
+    "ab_rmse": 1.4045
+  },
+  {
+    "combo": "drone-kf_ab-realistic",
+    "target": "drone",
+    "algorithm": "kf_ab",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 2.8872,
+    "kf_rmse": 3.6287,
+    "ab_rmse": 1.5511
+  },
+  {
+    "combo": "drone-kf_only-synthetic",
+    "target": "drone",
+    "algorithm": "kf_only",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 2.5523,
+    "kf_rmse": 3.6397,
+    "ab_rmse": 1.4045
+  },
+  {
+    "combo": "drone-kf_only-realistic",
+    "target": "drone",
+    "algorithm": "kf_only",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 2.8872,
+    "kf_rmse": 3.6287,
+    "ab_rmse": 1.5511
+  },
+  {
+    "combo": "drone-ab_only-synthetic",
+    "target": "drone",
+    "algorithm": "ab_only",
+    "mode": "synthetic",
+    "frame_count": 1200,
+    "raw_rmse": 2.5523,
+    "kf_rmse": 3.6397,
+    "ab_rmse": 1.4045
+  },
+  {
+    "combo": "drone-ab_only-realistic",
+    "target": "drone",
+    "algorithm": "ab_only",
+    "mode": "realistic",
+    "frame_count": 1200,
+    "raw_rmse": 2.8872,
+    "kf_rmse": 3.6287,
+    "ab_rmse": 1.5511
+  }
+]

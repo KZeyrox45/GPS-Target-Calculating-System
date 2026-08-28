@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import useTrackingStore from '../../store/trackingStore';
 import { useWebSocket } from '../../hooks/useWebSocket';
+import formatApiError from '../../utils/apiError';
 
 export default function SimulationPanel() {
   const { simConfig, setSimConfig, setTargetType, isRunning, setIsRunning, setSessionId, reset, clearHistory, clearMetrics, setSimulationEnded } = useTrackingStore();
@@ -11,6 +12,7 @@ export default function SimulationPanel() {
   async function handleStart() {
     setLoading(true);
     setError(null);
+    disconnect();
     reset();
     clearHistory();
     clearMetrics();
@@ -21,7 +23,11 @@ export default function SimulationPanel() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(simConfig),
       });
-      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      if (!res.ok) {
+        let detail = null;
+        try { detail = (await res.json()).detail; } catch { detail = null; }
+        throw new Error(formatApiError(res.status, detail));
+      }
       const data = await res.json();
       setSessionId(data.session_id);
       setIsRunning(true);

@@ -2,10 +2,11 @@
 
 \subsection{Kiến trúc hệ thống}
 
-\hspace{0.5cm} Hệ thống được thiết kế theo kiến trúc phân lớp (layered architecture), gồm bốn tầng như Hình \ref{fig:architecture}. Mỗi tầng đảm nhận một vai trò riêng biệt và giao tiếp với nhau qua các giao thức chuẩn.
+\hspace{0.5cm} Hệ thống được thiết kế theo kiến trúc phân lớp (layered architecture), gồm bốn tầng như Hình \ref{fig:architecture}. Mỗi tầng đảm nhận một vai trò riêng biệt và giao tiếp với nhau qua các giao thức chuẩn. Kiến trúc phân lớp giúp tách biệt trách nhiệm giữa các tầng, dễ bảo trì và mở rộng khi cần thay đổi thành phần ở bất kỳ tầng nào mà không ảnh hưởng đến các tầng còn lại.
 
 \begin{figure}[H]
 \centering
+\resizebox{\linewidth}{!}{
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw, rounded corners=4mm, 
@@ -42,7 +43,7 @@
 \draw[arrow] (api) -- node[midway, right=3pt, font=\footnotesize] {TCP/IP} (embedded);
 \draw[arrow] (embedded) -- (firmware);
 
-% Mũi tên từ Firmware xuống Sensors (phân tán rõ ràng)
+% Mũi tên từ Firmware xuống Sensors
 \draw[arrow] (firmware) -- node[midway, left=5pt, font=\footnotesize] {UART/I2C} (gps);
 \draw[arrow] (firmware) -- node[midway, right=2pt, font=\footnotesize] {I2C} (imu);
 \draw[arrow] (firmware) -- node[midway, right=5pt, font=\footnotesize] {UART} (laser);
@@ -54,89 +55,97 @@
 \node[labelbox, text=red!50!black] at (6.5,-4.5) {Sensors\\(hardware)};
 
 \end{tikzpicture}
+}
 \caption{Kiến trúc phân lớp của hệ thống}
 \label{fig:architecture}
 \end{figure}
 
 \subsubsection{Tầng cảm biến (Sensor layer)}
 
-\hspace{0.5cm} Đây là tầng thấp nhất, bao gồm phần cứng cảm biến đặt trên thiết bị di động:
+\hspace{0.5cm} Đây là tầng thấp nhất, bao gồm phần cứng cảm biến đặt trên thiết bị di động. Tầng cảm biến chịu trách nhiệm thu thập dữ liệu vật lý từ môi trường và chuyển đổi sang dạng số để xử lý tiếp. Ba cảm biến chính hoạt động độc lập nhưng cần đồng bộ thời gian trước khi đóng gói thành bản tin. Trong môi trường mô phỏng, mỗi cảm biến được thay thế bằng mô hình toán học sinh dữ liệu có phân phối nhiễu đã biết, cho phép kiểm soát chính xác điều kiện thử nghiệm.
+
 \begin{itemize}
-    \item \textbf{Module GPS/GNSS}: Thường là module U-Blox (NEO-6M, NEO-M8N) hoặc tương đương. Xuất dữ liệu định dạng NMEA-0183 qua UART. Tần số cập nhật 1-10 Hz. Độ chính xác 2-5 m ở chế độ dân sự.
-    \item \textbf{Cảm biến IMU}: MPU6050, ICM-20948, hoặc BNO055. Tích hợp accelerometer, gyroscope, và magnetometer. Cho phép tính toán góc hướng (yaw), góc nghiêng (pitch, roll) qua giao thức I2C/SPI. Tần số cao (100-1000 Hz) nhưng cần lọc và hiệu chỉnh nhiệt.
-    \item \textbf{Laser rangefinder}: LIDAR-Lite v3 (40 m, phù hợp ngoài trời), TF-Luna (8 m), hoặc VL53L1X (ToF, tầm 4 m, phù hợp trong nhà). Với yêu cầu theo dõi đến 1000 m ngoài trời, LIDAR-Lite v3 là lựa chọn phù hợp hơn. Đo khoảng cách bằng phương pháp Time-of-Flight. Độ chính xác +/- 1-2 cm, nhưng phụ thuộc vào màu sắc và kết cấu bề mặt mục tiêu.
+    \item \textbf{Module GPS/GNSS}: Thường là module U-Blox (NEO-6M, NEO-M8N) hoặc tương đương. Xuất dữ liệu định dạng NMEA-0183 qua UART. Tần số cập nhật 1-10 Hz. Độ chính xác 2-5 m ở chế độ dân sự. Dữ liệu NMEA chứa thông tin về vĩ độ, kinh độ, cao độ, số vệ tinh bắt được, và giá trị dilution of precision (hiệu suất phân tán sai số)./module GPS cũng cung cấp xung PPS (Pulse Per Second) để đồng bộ thời gian giữa các cảm biến.
+    \item \textbf{Cảm biến IMU}: MPU6050, ICM-20948, hoặc BNO055. Tích hợp accelerometer, gyroscope, và magnetometer. Cho phép tính toán góc hướng (yaw), góc nghiêng (pitch, roll) qua giao thức I2C/SPI. Tần số cao (100-1000 Hz) nhưng cần lọc và hiệu chỉnh nhiệt. BNO055 có lợi thế là bộ xử lý hợp nhất cảm biến (sensor fusion) tích hợp sẵn, giảm tải cho bộ xử lý nhúng.
+    \item \textbf{Laser rangefinder}: LIDAR-Lite v3 (40 m, phù hợp ngoài trời), TF-Luna (8 m), hoặc VL53L1X (ToF, tầm 4 m, phù hợp trong nhà). Với yêu cầu theo dõi đến 1000 m ngoài trời, LIDAR-Lite v3 là lựa chọn phù hợp hơn. Đo khoảng cách bằng phương pháp Time-of-Flight. Độ chính xác $\pm 1$-2 cm, nhưng phụ thuộc vào màu sắc và kết cấu bề mặt mục tiêu.
 \end{itemize}
 
 \subsubsection{Tầng xử lý nhúng (Embedded layer)}
 
-\hspace{0.5cm} Raspberry Pi (RPi 3B+ hoặc 4B) đóng vai trò là bộ điều khiển trung tâm (central hub) kết nối các cảm biến. RPi chạy hệ điều hành Raspberry Pi OS (Linux-based). Phần mềm đọc cảm biến được viết bằng Python.
+\hspace{0.5cm} Raspberry Pi (RPi 3B+ hoặc 4B) đóng vai trò là bộ điều khiển trung tâm (central hub) kết nối các cảm biến. RPi chạy hệ điều hành Raspberry Pi OS (dựa trên Linux). Phần mềm đọc cảm biến được viết bằng Python, chạy trên nền Python 3.11 trở lên.
 
-Vai trò chính của RPi:
-\begin{itemize}
-    \item Đọc dữ liệu từ GPS qua UART (giao tiếp serial).
-    \item Đọc dữ liệu từ IMU qua I2C.
-    \item Đọc dữ liệu từ laser rangefinder qua I2C.
-    \item Đóng gói dữ liệu thành định dạng JSON.
-    \item Gửi dữ liệu lên máy chủ qua kênh truyền dữ liệu hai chiều (Wi-Fi hoặc Ethernet).
-    \item (Tương lai) Thực hiện xử lý sơ bộ như lọc nhiễu, kiểm tra lỗi.
-\end{itemize}
+Vai trò chính của RPi bao gồm: đọc dữ liệu từ GPS qua UART (giao tiếp serial), đọc dữ liệu từ IMU qua I2C, đọc dữ liệu từ laser rangefinder qua I2C hoặc UART, đóng gói dữ liệu thành định dạng JSON, và gửi dữ liệu lên máy chủ qua kênh truyền dữ liệu hai chiều (Wi-Fi hoặc Ethernet). Ở giai đoạn phát triển ban đầu, RPi hoạt động ở chế độ ghi nhận dữ liệu đơn thuần. Khi hệ thống trưởng thành, RPi có thể thực hiện xử lý sơ bộ như lọc nhiễu cơ bản, kiểm tra tính hợp lệ dữ liệu, và cục bộ hóa tọa độ nếu mất kết nối mạng.
 
 \subsubsection{Tầng máy chủ (Server layer)}
 
-\hspace{0.5cm} Máy chủ được xây dựng bằng FastAPI, một framework Python hiện đại hỗ trợ bất đồng bộ (async). Các chức năng:
+\hspace{0.5cm} Máy chủ được xây dựng bằng FastAPI, một framework Python hiện đại hỗ trợ bất đồng bộ (async). Máy chủ chạy trên nền tảng Python thông qua một trình phục vụ web hiệu suất cao. Các chức năng chính:
+
 \begin{itemize}
-    \item \textbf{REST API}: Cho phép khởi tạo phiên (session), dừng phiên, truy vấn lịch sử dữ liệu. Định dạng trả về là JSON.
-    \item \textbf{WebSocket}: Kênh giao tiếp hai chiều thời gian thực. Raspberry Pi gửi dữ liệu cảm biến lên, server xử lý và gửi kết quả xuống giao diện.
-    \item \textbf{Bộ tính toán}: Thực hiện phép chuyển đổi tọa độ (WGS84, ECEF, ENU, Body frame), tính toán vị trí mục tiêu.
-    \item \textbf{Bộ lọc}: Kalman filter và Alpha-beta filter để ước lượng trạng thái.
-    \item \textbf{Quản lý phiên}: Lưu trạng thái phiên (đang hoạt động, đã dừng), thông số cấu hình, lịch sử tọa độ.
+    \item \textbf{REST API}: Cho phép khởi tạo phiên (session), dừng phiên, truy vấn lịch sử dữ liệu. Định dạng trao đổi là JSON. REST API phục vụ cho các thao tác quản lý phiên và truy vấn trạng thái, không phục vụ cho luồng dữ liệu thời gian thực.
+    \item \textbf{WebSocket (kênh truyền dữ liệu hai chiều)}: Kênh giao tiếp hai chiều thời gian thực. Raspberry Pi gửi dữ liệu cảm biến lên qua kênh này, máy chủ xử lý và gửi kết quả xuống giao diện cũng qua kênh này. WebSocket giữ kết nối TCP mở liên tục, loại bỏ chi phí thiết lập kết nối lại mỗi lần trao đổi dữ liệu.
+    \item \textbf{Bộ tính toán}: Thực hiện phép chuyển đổi tọa độ (WGS84, ECEF, ENU, Body frame), tính toán vị trí mục tiêu. Mỗi chu kỳ xử lý mất trung bình 59 micro giây, đáp ứng yêu cầu tần số 10 Hz.
+    \item \textbf{Bộ lọc (estimation filter)}: Kalman filter và alpha-beta filter để ước lượng trạng thái vị trí và vận tốc mục tiêu, giảm ảnh hưởng của nhiễu cảm biến.
+    \item \textbf{Quản lý phiên}: Lưu trạng thái phiên (đang hoạt động, đã dừng), thông số cấu hình, và bộ đệm dữ liệu dạng vòng (ring buffer) lưu trữ các frame gần nhất để phục vụ xuất dữ liệu thống kê.
 \end{itemize}
 
 \subsubsection{Tầng giao diện (Frontend layer)}
 
-\hspace{0.5cm} Giao diện người dùng chạy trên trình duyệt web, sử dụng React và Vite để đóng gói. Các thành phần chính:
+\hspace{0.5cm} Giao diện người dùng chạy trên trình duyệt web, sử dụng React và Vite để đóng gói. Giao diện không chạy trực tiếp trên máy chủ mà được phân phối dưới dạng các tệp tĩnh (static files) mà trình duyệt tải về và thực thi. Các thành phần chính:
+
 \begin{itemize}
-    \item \textbf{Bản đồ}: Thư viện Leaflet hiển thị bản đồ OpenStreetMap. Vị trí người quan sát được đánh dấu xanh, vị trí mục tiêu đánh dấu đỏ. Leaflet đáp ứng tốt cho bản đồ 2D; bản đồ 3D với CesiumJS có thể được bổ sung nếu yêu cầu đề tài mở rộng.
-    \item \textbf{Lớp thông tin}: Hiển thị tọa độ, góc ngắm, khoảng cách, tốc độ, trạng thái hệ thống.
-    \item \textbf{Biểu đồ}: Hiển thị độ cao, sai số, quỹ đạo theo thời gian.
-    \item \textbf{Điều khiển phiên}: Các nút bật/tắt bám mục tiêu, cấu hình tham số.
+    \item \textbf{Bản đồ}: Thư viện bản đồ hiển thị bản đồ OpenStreetMap. Vị trí người quan sát được đánh dấu xanh, vị trí mục tiêu đánh dấu đỏ. Thư viện này đáp ứng tốt cho bản đồ 2D; bản đồ 3D có thể được bổ sung nếu yêu cầu đề tài mở rộng.
+    \item \textbf{Lớp thông tin (info overlay)}: Hiển thị tọa độ, góc ngắm, khoảng cách, tốc độ, trạng thái hệ thống. Các thông số này được cập nhật theo thời gian thực thông qua kênh truyền dữ liệu hai chiều.
+    \item \textbf{Biểu đồ (chart)}: Hiển thị độ cao, sai số, quỹ đạo theo thời gian. Các biểu đồ tương tác có khả năng thu phóng và di chuyển.
+    \item \textbf{Điều khiển phiên}: Các nút bật/tắt bám mục tiêu, cấu hình tham số, chọn loại mục tiêu (người đi bộ, xe máy, drone).
 \end{itemize}
 
-\subsection{Nguyên lý hoạt động}
+\subsection{Thiết kế luồng dữ liệu}
 
-\hspace{0.5cm} Hoạt động của hệ thống được mô tả bằng các bước sau:
+\hspace{0.5cm} Luồng dữ liệu (data flow) của hệ thống bắt đầu từ cảm biến ở tầng thấp nhất, đi qua xử lý nhúng, lên máy chủ, và cuối cùng đến giao diện. Mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi trước khi sang bước tiếp theo.
 
-\subsubsection{Luồng dữ liệu tổng quát}
+\subsubsection{Cấu trúc bản tin cảm biến}
 
-\begin{enumerate}
-    \item Raspberry Pi đọc dữ liệu từ ba cảm biến (GPS, IMU, Laser) theo chu kỳ đều đặn (ví dụ mỗi 50 ms).
-    \item Dữ liệu thô được chuẩn hóa: GPS chuyển sang tọa độ thập phân, IMU tính góc hướng, laser lấy giá trị khoảng cách.
-    \item RPi đóng gói bộ ba dữ liệu này thành một bản tin JSON:
-\begin{verbatim}
-{
-  "timestamp": 1718400000.123,
-  "gps": {"lat": 10.7625, "lon": 106.6602, "alt": 15.0},
-  "imu": {"azimuth": 45.0, "elevation": 10.0},
-  "laser": {"distance": 125.0}
+\hspace{0.5cm} Ở tầng nhúng, Raspberry Pi đóng gói dữ liệu từ ba cảm biến thành một bản tin JSON đồng nhất. Bản tin này là đơn vị dữ liệu cơ bản, được gửi đi mỗi chu kỳ (chu kỳ mặc định 100 ms tương ứng tần số 10 Hz). Cấu trúc bản tin bao gồm các trường chính:
+
+\begin{itemize}
+    \item \textbf{Timestamp}: Dấu thời gian Unix (giây từ 01/01/1970) với độ chính xác đến mili giây. Trường này dùng để đồng bộ dữ liệu giữa nhiều nguồn và tính khoảng thời gian giữa hai lần đo liên tiếp.
+    \item \textbf{GPS}: Đối tượng chứa ba giá trị; vĩ độ (latitude) theo độ thập phân, kinh độ (longitude) theo độ thập phân, và cao độ (altitude) theo mét. Vĩ độ và kinh độ theo hệ tọa độ WGS84.
+    \item \textbf{IMU}: Đối tượng chứa hai góc; azimuth (góc từ hướng Bắc, 0-360 độ) và elevation (góc nâng so với mặt phẳng ngang, -90 đến +90 độ). Hai góc này xác định hướng ngắm của thiết bị laser.
+    \item \textbf{Laser}: Đối tượng chứa một giá trị khoảng cách (distance) theo mét. Giá trị này là khoảng cách đường thẳng từ thiết bị đến bề mặt mục tiêu.
+\end{itemize}
+
+\subsubsection{Định dạng bản tin JSON}
+
+\hspace{0.5cm} Mỗi chu kỳ cảm biến, Raspberry Pi tạo một bản tin JSON và gửi qua kênh truyền dữ liệu hai chiều. Các trường chính của bản tin được liệt kê trong Bảng \ref{tab:message-fields}.
+
+\begin{table}[H]
+\centering
+\caption{Các trường trong bản tin JSON}
+\label{tab:message-fields}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llll}
+\toprule
+\textbf{Trường} & \textbf{Kiểu dữ liệu} & \textbf{Ý nghĩa} & \textbf{Giá trị ví dụ} \\
+\midrule
+timestamp & số thực & Dấu thời gian Unix, đơn vị giây & 1718400000.123 \\
+lat & số thực & Vĩ độ theo độ thập phân & 10.7625 \\
+lon & số thực & Kinh độ theo độ thập phân & 106.6602 \\
+alt & số thực & Cao độ, đơn vị mét & 15.0 \\
+azimuth & số thực & Góc ngắm từ hướng Bắc, đơn vị độ & 45.0 \\
+elevation & số thực & Góc nâng so với mặt phẳng ngang, đơn vị độ & 10.0 \\
+distance & số thực & Khoảng cách từ thiết bị đến bề mặt mục tiêu, đơn vị mét & 125.0 \\
+\bottomrule
+\end{tabular}
 }
-\end{verbatim}
-    \item Bản tin JSON được gửi lên máy chủ qua kênh truyền dữ liệu hai chiều.
-    \item Máy chủ nhận dữ liệu, thực hiện:
-    \begin{itemize}
-        \item Chuyển đổi GPS từ WGS84 sang ECEF, rồi sang ENU.
-        \item Tạo vector định hướng 3D từ azimuth và elevation.
-        \item Nhân vector định hướng với khoảng cách laser để được tọa độ tương đối.
-        \item Cộng vào vị trí người quan sát để được tọa độ mục tiêu trong ENU.
-        \item Chuyển đổi ngược về WGS84.
-        \item Áp dụng Kalman filter hoặc alpha-beta để ước lượng.
-    \end{itemize}
-    \item Tọa độ mục tiêu đã xử lý được gửi xuống giao diện qua kênh truyền dữ liệu hai chiều.
-    \item Giao diện cập nhật vị trí mục tiêu trên bản đồ.
-\end{enumerate}
+\end{table}
 
-\subsubsection{Chuyển đổi tọa độ}
+\subsubsection{Xác thực dữ liệu}
 
-\hspace{0.5cm} Một trong những thành phần quan trọng nhất của hệ thống là chuyển đổi tọa độ. Đầu vào là tọa độ WGS84 của người quan sát. Đầu ra cũng là WGS84 nhưng của mục tiêu. Ở giữa, cần chuyển qua nhiều hệ trung gian:
+\hspace{0.5cm} Trước khi xử lý, máy chủ kiểm tra tính hợp lệ của từng trường trong bản tin. Các kiểm tra bao gồm: GPS có hợp lệ không (vĩ độ trong khoảng -90 đến 90, kinh độ -180 đến 180), laser có giá trị dương không, timestamp có hợp lý không (không quá xa so với thời gian hiện tại). Nếu một trong ba cảm biến không hợp lệ, bản tin đó được đánh dấu là không đầy đủ nhưng vẫn được xử lý với dữ liệu còn lại. Nếu tất cả đều không hợp lệ, bản tin bị từ chối.
+
+\subsection{Chuyển đổi tọa độ}
+
+\hspace{0.5cm} Chuỗi chuyển đổi tọa độ là khâu bắt buộc của hệ thống. Đầu vào là tọa độ WGS84 của người quan sát. Đầu ra cũng là WGS84 nhưng của mục tiêu. Ở giữa, cần chuyển qua nhiều hệ trung gian như sơ đồ sau:
 
 \begin{equation}
 \begin{aligned}
@@ -147,72 +156,421 @@ Vai trò chính của RPi:
 \end{aligned}
 \end{equation}
 
-Bước (1) và (4) sử dụng công thức chuyển đổi giữa WGS84 và ECEF đã được trình bày trong Phase 1. Bước (2) sử dụng ma trận xoay được xây dựng từ kinh độ và vĩ độ. Bước (3) là phép tính vector:
+Bước (1) chuyển đổi từ WGS84 (kinh độ, vĩ độ, cao độ) sang ECEF (Earth-Centered, Earth-Fixed), hệ tọa độ hình chữ nhật có gốc tại tâm Trái Đất. Bước (2) sử dụng ma trận xoay được xây dựng từ kinh độ và vĩ độ của người quan sát để chuyển sang ENU (East-North-Up), hệ tọa độ địa phương. Bước (3) là phép tính vector:
 
 \begin{equation}
 \mathbf{p}_{target} = \mathbf{p}_{observer} + d \cdot \mathbf{v}(\alpha, \beta)
 \end{equation}
 
-Trong đó $d$ là khoảng cách laser, $\alpha$ là azimuth, $\beta$ là elevation, $\mathbf{v}$ là vector đơn vị hướng.
+Trong đó $d$ là khoảng cách laser, $\alpha$ là azimuth, $\beta$ là elevation, $\mathbf{v}$ là vector đơn vị hướng. Bước (4) chuyển ngược từ ENU về ECEF rồi về WGS84 để lấy kinh độ và vĩ độ mục tiêu.
 
-Sơ đồ lớp (class diagram) mô tả các thực thể phần mềm chính và mối quan hệ giữa chúng được trình bày trong Hình \ref{fig:class}.
+Mỗi bước chuyển đổi có sai số riêng. Sai số từ bước (1) và (4) là không đáng kể vì công thức chuyển đổi chính xác. Sai số chính đến từ bước (3), phụ thuộc vào sai số đo laser ($\sigma_d$) và sai số đo góc ($\sigma_\alpha$, $\sigma_\beta$). Mối liên hệ sai số được mô tả bởi công thức:
+
+\begin{equation}
+\sigma_{target} \approx \sqrt{\sigma_d^2 + (d \cdot \sigma_\alpha)^2 + (d \cdot \sigma_\beta)^2}
+\end{equation}
+
+Sai số mục tiêu tăng tuyến tính theo khoảng cách $d$, nghĩa là ở khoảng cách xa, sai số đo góc trở thành yếu tố chi phối.
+
+\subsubsection{Ví dụ số liệu chuyển đổi tọa độ}
+
+\hspace{0.5cm} Để minh họa quy trình chuyển đổi, xét ví dụ cụ thể sau. Người quan sát đứng tại vĩ độ $\varphi = 10{,}7726^\circ$, kinh độ $\lambda = 106{,}6983^\circ$, cao độ $h = 10$ m. Laser đo khoảng cách $d = 200$ m, azimuth $\alpha = 45^\circ$, elevation $\beta = 5^\circ$.
+
+Bước 1, chuyển WGS84 sang ECEF. Sử dụng ellipsoid WGS84 với bán trục lớn $a = 6\,378\,137{,}0$ m và độ dẹt $f = 1/298{,}257\,223\,563$, tính bán trục nhỏ $b = a(1-f) = 6\,356\,752{,}314\,245$ m. Độ lệch tâm viễn giác $e^2 = (a^2 - b^2)/a^2 = 0{,}006\,694\,380\,022\,90$. Bán kính tuyến tính $N = a/\sqrt{1 - e^2 \sin^2\varphi}$. Với $\varphi = 10{,}7726^\circ$, $\sin\varphi \approx 0{,}1870$, $N \approx 6\,378\,200$ m. Kết quả ECEF:
+\begin{itemize}
+    \item $X = (N + h)\cos\varphi\cos\lambda \approx 5\,753\,842$ m
+    \item $Y = (N + h)\cos\varphi\sin\lambda \approx 2\,675\,415$ m
+    \item $Z = [N(1-e^2) + h]\sin\varphi \approx 1\,197\,893$ m
+\end{itemize}
+
+Bước 2, xây dựng ma trận xoay từ ECEF sang ENU tại vị trí người quan sát. Ma trận xoay $R$ gồm ba vector đơn vị:
+\begin{equation}
+R = \begin{bmatrix} -\sin\lambda & \cos\lambda & 0 \\ -\sin\varphi\cos\lambda & -\sin\varphi\sin\lambda & \cos\varphi \\ \cos\varphi\cos\lambda & \cos\varphi\sin\lambda & \sin\varphi \end{bmatrix}
+\end{equation}
+
+Bước 3, tính vector định hướng trong hệ ENU. Với $\alpha = 45^\circ$, $\beta = 5^\circ$, $d = 200$ m:
+\begin{itemize}
+    \item $\Delta e = d \cos\beta \sin\alpha = 200 \times 0{,}9962 \times 0{,}7071 \approx 140{,}7$ m (hướng Đông)
+    \item $\Delta n = d \cos\beta \cos\alpha = 200 \times 0{,}9962 \times 0{,}7071 \approx 140{,}7$ m (hướng Bắc)
+    \item $\Delta u = d \sin\beta = 200 \times 0{,}0872 \approx 17{,}5$ m (hướng lên)
+\end{itemize}
+
+Vị trí mục tiêu trên bản đồ lệch khoảng 199 m về hướng Đông-Bắc và 17,5 m so với mặt phẳng ngang. Sai số từ phép tính này chủ yếu đến từ $\sigma_\alpha$ và $\sigma_\beta$: với $\sigma_\alpha = 0{,}3^\circ$ ở khoảng cách 200 m, sai số ngang là $200 \times \sin(0{,}3^\circ) \approx 1{,}0$ m.
+
+\subsection{Sơ đồ lớp phần mềm}
+
+\hspace{0.5cm} Sơ đồ lớp (class diagram) mô tả các thực thể phần mềm chính và mối quan hệ giữa chúng được trình bày trong Hình \ref{fig:class}.
 
 \newpage
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 \centering
-\includegraphics[width=0.9\textwidth]{Images/class-diagram.png}
+\includegraphics[width=0.8\textwidth]{Images/class-diagram.png}
 \caption{Sơ đồ lớp của hệ thống phần mềm}
 \label{fig:class}
 \end{figure}
 
+Các lớp chính trong sơ đồ bao gồm:
+
+\begin{itemize}
+\item \textbf{Bộ điều phối trung tâm}: Quản lý vòng lặp xử lý chính. Lớp này chịu trách nhiệm tạo phiên, khởi tạo cảm biến mô phỏng, gọi bộ lọc ở mỗi chu kỳ, và lưu trữ kết quả vào bộ đệm dữ liệu. Bộ điều phối duy trì tham chiếu đến tất cả thành phần khác và đảm bảo chúng hoạt động đồng bộ theo chu kỳ thời gian cố định.
+    \item \textbf{Bộ mô phỏng mục tiêu}: Tạo đường đi cho mục tiêu dựa trên loại mục tiêu (người đi bộ, xe máy, drone) và mô hình hóa nhiễu cảm biến tương ứng. Bộ mô phỏng cung cấp vị trí "đúng" (giá trị thực) để so sánh với kết quả ước lượng.
+    \item \textbf{Khối hợp nhất cảm biến}: Nhận dữ liệu thô từ nhiều cảm biến, kết hợp theo trọng số tương ứng với độ tin cậy của từng cảm biến, và xuất ra giá trị hợp nhất.
+    \item \textbf{Bộ lọc Kalman và bộ lọc alpha-beta}: Hai bộ lọc thực hiện ước lượng trạng thái. Bộ lọc Kalman sử dụng mô hình trạng thái phẳng với ma trận nhiễu quá trình (process noise) và nhiễu đo lường (measurement noise), cập nhật dự đoán theo từng chu kỳ. Bộ lọc alpha-beta đơn giản hơn với hệ số alpha và beta cố định, phù hợp cho mục tiêu chuyển động đều.
+    \item \textbf{Khối quản lý vùng hoạt động}: Kiểm tra xem mục tiêu có đang ở trong phạm vi cho phép không và áp dụng phản lực mềm (soft repulsion) để giữ mục tiêu ở bên trong.
+    \item \textbf{Khối chuyển đổi tọa độ}: Chuyển đổi giữa các hệ tọa độ (WGS84, ECEF, ENU). Khối này đóng gói các công thức chuyển đổi thành giao diện đơn giản, giảm thiểu lỗi lập trình khi sử dụng lại ở nhiều nơi.
+    \item \textbf{Khối dữ liệu mạng lưới đường bộ}: Tải và quản lý mạng lưới đường bộ từ tệp dữ liệu đồ thị. Khối này cung cấp chức năng tìm đường ngẫu nhiên trên mạng lưới đường thực, giúp xe máy mô phỏng đi theo đường phố thực tế.
+\end{itemize}
+
+Mối quan hệ giữa các lớp: bộ điều phối trung tâm sở hữu một bộ mô phỏng mục tiêu, một hoặc nhiều bộ lọc (Kalman hoặc alpha-beta), một khối quản lý vùng hoạt động, và một khối chuyển đổi tọa độ. Bộ mô phỏng mục tiêu có thể sử dụng khối dữ liệu mạng lưới đường bộ khi mô phỏng xe máy trên đường thực.
+
 \subsection{Sơ đồ hoạt động (Activity diagram)}
 
-\hspace{0.5cm} Hệ thống có hai quy trình hoạt động chính được mô tả bằng các activity diagrams.
+\hspace{0.5cm} Hệ thống có hai quy trình hoạt động chính được mô tả bằng các sơ đồ hoạt động.
 
 \subsubsection{Quy trình xử lý dữ liệu}
 
-\hspace{0.5cm} Hình \ref{fig:activity-processing} mô tả quy trình xử lý dữ liệu từ lúc đọc cảm biến đến khi xuất tọa độ. Dữ liệu từ GPS, IMU, và laser được đọc đồng thời. Sau đó kiểm tra tính hợp lệ. Nếu hợp lệ, thực hiện chuyển đổi tọa độ, tính vector định hướng, nhân với khoảng cách, áp dụng bộ lọc, và xuất kết quả. Nếu không hợp lệ, ghi nhận lỗi và gửi cảnh báo.
+\hspace{0.5cm} Hình \ref{fig:activity-processing} mô tả quy trình xử lý dữ liệu từ lúc đọc cảm biến đến khi xuất tọa độ mục tiêu. Quy trình bắt đầu bằng việc Raspberry Pi đọc đồng thời ba cảm biến: GPS lấy vị trí hiện tại, IMU lấy góc ngắm, laser lấy khoảng cách. Mỗi giá trị kiểm tra hợp lệ độc lập.
 
-\newpage
-
-\begin{figure}[htb!]
+\begin{figure}[H]
 \centering
-\includegraphics[width=0.55\textwidth]{Images/activity-diagram.png}
+\includegraphics[width=0.52\textwidth]{Images/activity-diagram.png}
 \caption{Quy trình xử lý dữ liệu từ cảm biến đến tọa độ mục tiêu}
 \label{fig:activity-processing}
 \end{figure}
 
-\subsubsection{Quy trình tracking}
+Dữ liệu được đóng gói thành bản tin JSON. Máy chủ nhận bản tin, kiểm tra từng trường. Nếu GPS hợp lệ, thực hiện chuyển đổi tọa độ từ WGS84 sang ENU. Nếu GPS không hợp lệ, bỏ qua bước chuyển đổi và đánh dấu mất vị trí. Với dữ liệu IMU và laser, tạo vector định hướng và nhân với khoảng cách để tính vị trí tương đối so với người quan sát.
 
-\hspace{0.5cm} Hình \ref{fig:activity-tracking} mô tả quy trình tracking từ lúc bắt đầu phiên đến khi kết thúc. Người dùng khởi tạo phiên, hệ thống kết nối kênh truyền dữ liệu hai chiều. Sau đó vào vòng lặp tracking: đọc cảm biến, tính toán, cập nhật bản đồ. Nếu mất tín hiệu, hệ thống chuyển sang chế độ ước lượng từ bộ lọc. Nếu người dùng yêu cầu dừng, vòng lặp kết thúc, lộ trình được lưu lại.
+Vị trí tương đối được cộng vào tọa độ người quan sát để ra vị trí mục tiêu. Kết quả cuối cùng được áp dụng bộ lọc (Kalman hoặc alpha-beta) để giảm nhiễu. Nếu bộ lọc chưa hội tụ, dùng giá trị thô. Kết quả cuối cùng được gửi về giao diện.
 
-\begin{figure}[htb!]
+\subsubsection{Quy trình tracking thời gian thực}
+
+\hspace{0.5cm} Hình \ref{fig:activity-tracking} mô tả quy trình tracking từ lúc bắt đầu phiên đến khi kết thúc. Người dùng chọn loại mục tiêu và thuật toán lọc, rồi bắt đầu phiên. Hệ thống khởi tạo module mô phỏng quỹ đạo mục tiêu tương ứng, thiết lập kênh truyền dữ liệu hai chiều, và bắt đầu vòng lặp xử lý.
+
+Trong vòng lặp, mỗi chu kỳ Raspberry Pi đọc cảm biến, gửi dữ liệu lên máy chủ. Máy chủ xử lý, cập nhật bộ lọc, và gửi kết quả về giao diện. Giao diện cập nhật vị trí mục tiêu trên bản đồ. Vòng lặp tiếp tục cho đến khi người dùng yêu cầu dừng hoặc mất kết nối quá lâu.
+
+Nếu mất tín hiệu cảm biến trong thời gian ngắn, bộ lọc duy trì ước lượng dựa trên mô hình trạng thái trước đó. Nếu mất tín hiệu quá dài (vượt quá ngưỡng), hệ thống dừng vòng lặp và thông báo lỗi. Khi dừng phiên, toàn bộ quỹ đạo được lưu lại để phân tích sau.
+
+\begin{figure}[H]
 \centering
 \includegraphics[width=1\textwidth]{Images/activity-tracking.png}
 \caption{Quy trình tracking thời gian thực}
 \label{fig:activity-tracking}
 \end{figure}
 
+\subsection{Thiết kế kênh truyền dữ liệu hai chiều}
+
+\hspace{0.5cm} Giao tiếp thời gian thực giữa các tầng là yêu cầu cốt lõi của hệ thống. Có nhiều phương pháp truyền dữ liệu từ thiết bị nhúng lên máy chủ và ngược lại, nhưng không phải phương pháp nào cũng phù hợp cho bài toán theo dõi mục tiêu di động.
+
+\subsubsection{So sánh các phương pháp giao tiếp}
+
+\hspace{0.5cm} Phương pháp đầu tiên là HTTP polling (truy vấn định kỳ). Raspberry Pi gửi request POST mỗi chu kỳ, máy chủ nhận và xử lý. Ưu điểm là đơn giản, tương thích tốt với mọi proxy và firewall. Nhược điểm là mỗi lần trao đổi dữ liệu đều thiết lập lại kết nối TCP,cộng thêm header HTTP, tạo chi phí bổ sung. Với tần số 10 Hz, mỗi giây có 10 lần kết nối mới, mỗi lần thêm khoảng 10-50 ms độ trễ từ chi phí phụ. Tổng chi phí có thể chiếm 10-30\% thời gian chu kỳ.
+
+Phương pháp thứ hai là Server-Sent Events (SSE). Máy chủ có thể gửi dữ liệu xuống máy khách (client) liên tục qua một kết nối HTTP duy trì. Tuy nhiên, SSE chỉ hỗ trợ truyền một chiều từ server xuống client. Raspberry Pi không thể gửi dữ liệu lên qua SSE mà cần một kênh riêng, tạo sự phức tạp trong thiết kế.
+
+Phương pháp thứ ba là WebSocket (kênh truyền dữ liệu hai chiều). WebSocket giữ một kết nối TCP mở duy nhất, trao đổi dữ liệu hai chiều mà không cần thiết lập lại kết nối mỗi lần. Sau khi bắt đầu phiên (handshake HTTP ban đầu), tất cả dữ liệu tiếp theo đi qua kết nối này với độ trễ thấp (micro giây đến mili giây).
+
+\subsubsection{Lựa chọn WebSocket}
+
+\hspace{0.5cm} Hệ thống chọn WebSocket (kênh truyền dữ liệu hai chiều) làm phương pháp giao tiếp chính vì các lý do: độ trễ thấp cho giao tiếp thời gian thực, hỗ trợ truyền dữ liệu hai chiều trên cùng một kết nối, khả năng tương thích tốt với firewall và proxy (vì bắt đầu bằng HTTP handshake), và khả năng phát hiện lỗi kết nối để tự động kết nối lại.
+
+Luồng dữ liệu qua WebSocket diễn ra như sau:
+
+\begin{enumerate}
+    \item Raspberry Pi thiết lập kết nối WebSocket đến máy chủ qua port tương ứng. Handshake ban đầu diễn ra dưới dạng HTTP, sau đó chuyển sang giao thức WebSocket.
+    \item Máy chủ xác thực kết nối và tạo một phiên (session) mới tương ứng.
+    \item Ở mỗi chu kỳ, Raspberry Pi gửi bản tin JSON chứa dữ liệu cảm biến qua WebSocket.
+    \item Máy chủ nhận bản tin, xử lý, và gửi kết quả tọa độ mục tiêu về Raspberry Pi (nếu cần) và xuống giao diện web.
+    \item Giao diện web nhận kết quả qua kênh truyền dữ liệu hai chiều riêng (từ máy chủ đến trình duyệt), cập nhật bản đồ.
+    \item Khi phiên kết thúc, một bên gửi tín hiệu đóng kết nối, WebSocket đóng TCP.
+\end{enumerate}
+
+Việc sử dụng WebSocket cũng tạo thuận lợi cho việc mở rộng sau này. Khi phần cứng Raspberry Pi được thay bằng thiết bị nhúng khác hoặc khi có nhiều thiết bị gửi dữ liệu cùng lúc, WebSocket xử lý đa kết nối tốt hơn HTTP polling.
+
+\subsection{Quản lý phiên làm việc}
+
+\hspace{0.5cm} Mỗi lần người dùng bắt đầu theo dõi, hệ thống tạo một phiên (session) mới. Phiên là đơn vị quản lý chính, chứa tất cả trạng thái và dữ liệu liên quan đến một lần theo dõi.
+
+\subsubsection{Vòng đời phiên}
+
+\hspace{0.5cm} Một phiên đi qua các trạng thái: khởi tạo, hoạt động, và kết thúc. Khi người dùng chọn "bắt đầu", hệ thống tạo phiên với các tham số: loại mục tiêu, thuật toán lọc, bán kính vùng hoạt động, và tần số cập nhật. Phiên được gán một mã định danh duy nhất để phân biệt với các phiên khác.
+
+Trong trạng thái hoạt động, phiên duy trì liên kết WebSocket với thiết bị nhúng và giao diện. Mỗi bản tin nhận được được xử lý và lưu vào bộ đệm dữ liệu. Nếu mất kết nối WebSocket, phiên chuyển sang trạng thái "chờ kết nối lại" trong một khoảng thời gian cho phép. Nếu kết nối được khôi phục, phiên tiếp tục bình thường. Nếu hết thời gian chờ, phiên tự động dừng.
+
+Khi người dùng chọn "dừng", phiên đóng kết nối WebSocket, dừng vòng lặp xử lý, và lưu toàn bộ dữ liệu quỹ đạo. Sau đó phiên chuyển sang trạng thái "đã kết thúc" và có thể được truy xuất lại để xem lại quỹ đạo hoặc xuất dữ liệu.
+
+\subsubsection{Bộ đệm dữ liệu dạng vòng}
+
+\hspace{0.5cm} Phiên sử dụng bộ đệm dữ liệu dạng vòng (ring buffer) để lưu trữ các frame gần nhất. Bộ đệm có dung lượng cố định là 500 frame, khi đầy thì ghi đè frame cũ nhất bằng frame mới nhất. Thiết kế này đảm bảo bộ nhớ không tăng vô hạn và luôn có dữ liệu gần đây nhất để truy xuất.
+
+Bộ đệm dạng vòng sử dụng một mảng tĩnh với hai chỉ số: head (vị trí ghi tiếp theo) và count (số frame hiện có). Khi ghi frame mới, dữ liệu được ghi vào mảng tại vị trí head rồi head = (head + 1) mod 500. Độ phức tạp cho cả ghi và đọc đều $\mathcal{O}(1)$ vì không cần dịch chuyển mảng. Điều này khác với mảng động thông thường, nơi chèn đầu có thể mất $\mathcal{O}(n)$.
+
+Dữ liệu trong bộ đệm được sử dụng cho ba mục đích chính. Thứ nhất, hiển thị quỹ đạo trên bản đồ: 500 frame gần nhất tương ứng 50 giây ở tần số 10 Hz, đủ để hiển thị quãng đường mục tiêu đã đi qua. Thứ hai, tính toán thống kê sai số theo thời gian thực: RMSE, sai số tức thời, và sai số tích lũy được tính trên cửa sổ trượt trong bộ đệm. Thứ ba, xuất dữ liệu CSV khi người dùng yêu cầu: toàn bộ nội dung bộ đệm được serialize thành tệp CSV với các cột tọa độ, sai số, và timestamp.
+
 \subsection{Xử lý nhúng với Raspberry Pi}
 
-\hspace{0.5cm} Raspberry Pi được chọn làm nền tảng xử lý nhúng vì những lý do sau:
+\hspace{0.5cm} Raspberry Pi được chọn làm nền tảng xử lý nhúng vì những lý do sau: phù hợp cho những dự án phức tạp cần xử lý đa tác vụ, hệ điều hành Linux đầy đủ hỗ trợ nhiều ngôn ngữ lập trình, nhiều chân GPIO (UART, I2C, SPI) để kết nối cảm biến, khả năng kết nối Internet qua Wi-Fi và Ethernet, và cộng đồng lớn với tài liệu phong phú.
+
+\subsubsection{Kết nối phần cứng}
+
+\hspace{0.5cm} Thiết kế kết nối cụ thể giữa Raspberry Pi và các cảm biến như sau:
+
 \begin{itemize}
-    \item Phù hợp cho những dự án phức tạp, cần xử lý đa tác vụ.
-    \item Hệ điều hành Linux đầy đủ, hỗ trợ nhiều ngôn ngữ lập trình.
-    \item Nhiều chân GPIO: UART, I2C, SPI để kết nối cảm biến.
-    \item Khi dự án cần kết nối Internet phức tạp và giao diện đồ họa đẹp mắt.
-    \item Cộng đồng lớn, tài liệu phong phú.
+    \item \textbf{GPS module}: Kết nối qua chân UART (pin GPIO 14/15). Đọc dữ liệu NMEA bằng thư viện giao tiếp serial với tốc độ baud 9600 hoặc 115200. Dữ liệu NMEA được phân tích để trích xuất thông tin vĩ độ, kinh độ, cao độ.
+    \item \textbf{IMU}: Kết nối qua I2C (pin GPIO 2/3). Đọc dữ liệu bằng thư viện I2C. Địa chỉ I2C mặc định của MPU6050 là 0x68, BNO055 là 0x28. Dữ liệu accelerometer và gyroscope đọc được từ thanh ghi (register) gốc, sau đó xử lý thành góc azimuth và elevation.
+    \item \textbf{Laser rangefinder}: Kết nối qua UART hoặc I2C tùy loại. LIDAR-Lite v3 sử dụng I2C với địa chỉ 0x62. Khoảng cách đọc được tính bằng mét, với sai số khoảng 2 cm ở khoảng cách ngắn.
 \end{itemize}
 
-Thiết kế dự kiến:
+\subsubsection{Phần mềm nhúng}
+
+\hspace{0.5cm} Ứng dụng Python chạy trên Raspberry Pi thực hiện vòng lặp chính: đọc GPS, đọc IMU, đọc laser, đóng gói JSON, gửi qua WebSocket. Vòng lặp chạy theo tần số cố định (mặc định 10 Hz), sử dụng timer để đảm bảo khoảng thời gian đều đặn giữa các lần đọc.
+
+Phần xử lý nhúng được thiết kế để hoạt động độc lập, không cần máy tính. Người dùng mang Raspberry Pi gắn trên bảng điều khiển, tripod hoặc túi đeo ra hiện trường, bật nguồn là hệ thống tự động chạy. Dữ liệu được gửi về máy chủ trung tâm qua mạng Wi-Fi hoặc 4G nếu có thiết bị phát sóng di động (USB dongle).
+
+Phần mềm cũng tích hợp cơ chế tự kiểm tra (health check). Nếu cảm biến nào không phản hồi trong quá thời gian cho phép, phần mềm đánh dấu cảm biến đó là "mất" và tiếp tục hoạt động với các cảm biến còn lại. Nếu tất cả cảm biến mất, phần mềm dừng và báo lỗi.
+
+\subsection{Kiến trúc frontend}
+
+\hspace{0.5cm} Giao diện web được xây dựng theo kiến trúc thành phần (component-based) với React. Kiến trúc phân chia thành bốn nhóm thành phần chính: thành phần bản đồ, thành phần biểu đồ, thành phần điều khiển, và thành phần hiển thị thông tin.
+
+\subsubsection{Cây thành phần React}
+
+\hspace{0.5cm} Cây thành phần bắt đầu từ trang chủ, trang theo dõi, trang tính toán tĩnh, và trang so sánh. Trang theo dõi là trang chính, chứa:
+
 \begin{itemize}
-    \item GPS module kết nối qua chân UART (pin GPIO 14/15). Đọc dữ liệu NMEA bằng thư viện giao tiếp serial.
-    \item IMU kết nối qua I2C (pin GPIO 2/3). Đọc dữ liệu bằng thư viện I2C.
-    \item Laser rangefinder kết nối qua UART hoặc I2C.
-    \item Ứng dụng Python chạy độc lập, đọc cảm biến theo chu kỳ, gửi dữ liệu qua kênh truyền dữ liệu hai chiều.
+\item \textbf{Bản đồ}: Thành phần bản đồ hiển thị bản đồ OpenStreetMap với các lớp (layer) đánh dấu vị trí quan sát (xanh), vị trí mục tiêu (đỏ), và quỹ đạo (đường kẻ).
+    \item \textbf{Bảng điều khiển mô phỏng}: Chứa các nút bắt đầu/dừng, chọn loại mục tiêu, chọn thuật toán lọc, và công tắc chuyển đổi nguồn dữ liệu (dữ liệu mô phỏng hoặc dữ liệu thực).
+    \item \textbf{Thanh trạng thái}: Hiển thị thông tin kết nối kênh truyền dữ liệu hai chiều, tần số cập nhật, và trạng thái hiện tại của hệ thống.
+    \item \textbf{Bảng tọa độ}: Hiển thị tọa độ thời gian thực, góc ngắm, khoảng cách, và tốc độ mục tiêu.
+    \item \textbf{Biểu đồ độ cao và biểu đồ sai số}: Theo dõi độ cao và sai số theo thời gian.
 \end{itemize}
 
-Phần xử lý nhúng này được thiết kế để hoạt động độc lập, không cần máy tính. Người dùng mang Raspberry Pi gắn trên bảng điều khiển, tripod hoặc túi đeo ra hiện trường, bật nguồn là hệ thống tự động chạy. Dữ liệu được gửi về máy chủ trung tâm qua mạng Wi-Fi hoặc 4G nếu có USB dongle.
+\subsubsection{Quản lý trạng thái}
 
-Kết quả được kiểm chứng qua mô phỏng với mô hình nhiễu Gaussian, sử dụng công cụ mô phỏng quỹ đạo tích hợp trong hệ thống. Phương pháp này cho phép kiểm soát điều kiện thử nghiệm và lặp lại kết quả, phù hợp cho giai đoạn đánh giá thuật toán. Vị trí GPS được sinh theo quỹ đạo định trước, góc ngắm và khoảng cách được mô phỏng dựa trên vị trí thực của mục tiêu kết hợp với mô hình nhiễu cảm biến.
+\hspace{0.5cm} Trạng thái toàn cục được quản lý bằng một thư viện quản lý trạng thái nhẹ dành cho React, thay thế các giải pháp phức tạp hơn mà vẫn đảm bảo hiệu năng. Bộ lưu trạng thái chính lưu trữ: vị trí người quan sát và mục tiêu, danh sách quỹ đạo (bộ đệm dạng vòng 500 điểm), trạng thái kết nối kênh truyền dữ liệu hai chiều, tham số phiên, và thống kê sai số.
+
+Khi nhận dữ liệu mới từ kênh truyền dữ liệu hai chiều, bộ lưu trạng thái cập nhật trạng thái và các thành phần giao diện tự động hiển thị lại để cập nhật thông tin mới nhất. Cơ chế theo dõi (subscription) của thư viện quản lý trạng thái đảm bảo chỉ các thành phần thực sự cần dữ liệu mới được làm mới, giảm thiểu chi phí hiển thị.
+
+Bộ lưu trạng thái thiết kế theo nguyên tắc "single source of truth": mọi dữ liệu thời gian thực (vị trí, sai số, trạng thái kết nối) đều đi qua một điểm duy nhất. Thành phần giao diện không lưu trữ state riêng mà đọc trực tiếp từ bộ lưu. Điều này đảm bảo dữ liệu nhất quán giữa các thành phần: khi bản đồ hiển thị vị trí mới nhất, biểu đồ sai số và thanh trạng thái cũng hiển thị dữ liệu tương ứng tại cùng một lúc.
+
+\subsubsection{Hiệu suất hiển thị bản đồ}
+
+\hspace{0.5cm} Bản đồ là thành phần tốn tài nguyên nhất trong giao diện. Mỗi khi nhận vị trí mới, bản đồ cần vẽ lại lớp đánh dấu mục tiêu, đường kẻ quỹ đạo, và vòng tròn bán kính. Nếu vẽ lại toàn bộ mỗi frame (10 Hz), chi phí rendering có thể chiếm hơn 50\% thời gian khung hình (frame budget) của trình duyệt.
+
+Hệ thống giải quyết bằng ba kỹ thuật. Thứ nhất, thay vì tạo lại marker mới mỗi frame, thành phần bản đồ cập nhật tọa độ của marker hiện có (di chuyển marker thay vì xóa rồi tạo mới). Thứ hai, đường kẻ quỹ đạo (polyline) chỉ thêm điểm mới vào cuối danh sách hiện có, không vẽ lại toàn bộ đường. Thư viện bản đồ hỗ trợ cấu trúc dữ liệu strand map cho phép thêm điểm vào polyline trong thời gian $\mathcal{O}(1)$. Thứ ba, vòng tròn bán kính (range rings) chỉ vẽ lại khi bán kính thay đổi, không vẽ lại mỗi frame.
+
+Nhờ ba kỹ thuật trên, chi phí hiển thị bản đồ giảm từ hơn 50\% xuống dưới 15\% thời gian khung hình, đảm bảo giao diện mượt mà ở tần số cập nhật 10 Hz.
+
+\subsubsection{Tích hợp bản đồ}
+
+\hspace{0.5cm} Bản đồ được nhúng trong thành phần bản đồ. Các lớp bản đồ bao gồm: lớp nền OpenStreetMap, lớp đánh dấu vị trí quan sát và mục tiêu, lớp đường kẻ quỹ đạo (polyline), và lớp vòng tròn bán kính (range rings). Bản đồ tương tác tốt với React thông qua thư viện hỗ trợ, cung cấp trạng thái cho mức thu phóng, tâm bản đồ, và vị trí đánh dấu.
+
+Hình \ref{fig:screenshot-tracking} minh họa giao diện theo dõi đang hoạt động. Panel bên trái chứa điều khiển mô phỏng (chọn loại mục tiêu, thuật toán lọc, thời gian chạy, bán kính vùng), nút ENGAGE để bắt đầu, và các lớp bản đồ. Bản đồ chính hiển thị vị trí người quan sát (marker xanh), quỹ đạo mục tiêu (đường kẻ), và vòng tròn bán kính 200 m, 400 m, 600 m. Thanh trạng thái phía trên hiển thị thông số thời gian thực: mục tiêu, thuật toán, khoảng cách, vận tốc, và sai số RMSE.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{Images/sim/tracking-ped-kfab-synthetic.png}
+\caption{Giao diện theo dõi mục tiêu đang hoạt động (mô phỏng người đi bộ, Kalman + alpha-beta)}
+\label{fig:screenshot-tracking}
+\end{figure}
+
+Hình \ref{fig:screenshot-homepage} hiển thị trang chủ của hệ thống, với mô tả chức năng chính và điều hướng đến các trang con.
+
+\newpage
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{Images/sim/homepage.png}
+\caption{Trang chủ hệ thống GPS Target Calculating}
+\label{fig:screenshot-homepage}
+\end{figure}
+
+\subsection{Bảng phân bổ thời gian xử lý}
+
+\hspace{0.5cm} Mỗi chu kỳ xử lý 100 ms (tần số 10 Hz) được phân bổ thời gian cho từng thành phần. Bảng \ref{tab:time-budget} thể hiện phân bổ chi tiết.
+
+\begin{table}[H]
+\centering
+\caption{Phân bổ thời gian xử lý trong một chu kỳ 100 ms}
+\label{tab:time-budget}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lcc}
+\toprule
+\textbf{Thành phần} & \textbf{Thời gian (ms)} & \textbf{Tỷ lệ (\%)} \\
+\midrule
+Đọc cảm biến (GPS + IMU + Laser) & 50,0 & 50 \\
+Đóng gói và gửi JSON & 1,0 & 1 \\
+Chuyển đổi tọa độ WGS84-ENU & 0,1 & 0,1 \\
+Tính vector định hướng và khoảng cách & 0,05 & 0,05 \\
+Bộ lọc Kalman / alpha-beta & 0,05 & 0,05 \\
+Xử lý WebSocket & 2,0 & 2 \\
+Cập nhật giao diện & 30,0 & 30 \\
+Dự phòng và chi phí phát sinh & 16,85 & 16,85 \\
+\midrule
+\textbf{Tổng} & \textbf{100,0} & \textbf{100} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Thời gian đọc cảm biến chiếm tỷ trọng lớn nhất (50 ms) vì GPS module có tần số cập nhật giới hạn. Thời gian cập nhật giao diện (30 ms) phản ánh chi phí hiển thị giao diện và vẽ lại bản đồ. Thời gian xử lý thuật toán (chuyển đổi tọa độ và bộ lọc) rất nhỏ, chỉ khoảng 0,2 ms, cho thấy thuật toán có khả năng mở rộng lên tần số cao hơn nếu cần.
+
+Phân bổ thời gian này cũng cho thấy dung lượng dự phòng đáng kể (16,85 ms, tương đương 16,85\% chu kỳ). Dự phòng này đủ để xử lý các tác vụ bổ sung như xuất dữ liệu CSV, tính toán thống kê, và xử lý lỗi kết nối mà không ảnh hưởng đến tần số cập nhật 10 Hz. Trong thực tế, phần xử lý thuật toán chỉ chiếm 0,2\% thời gian chu kỳ, cho thấy hệ thống có thể chạy ở tần số 100 Hz nếu cảm biến hỗ trợ.
+
+\subsection{So sánh khả năng Phase 1 và Phase 2}
+
+\hspace{0.5cm} Bảng \ref{tab:phase-comparison} so sánh khả năng giữa giai đoạn 1 (tính toán điểm đơn) và giai đoạn 2 (tracking thời gian thực).
+
+\newpage
+
+\begin{table}[H]
+\centering
+\caption{So sánh khả năng giữa Phase 1 và Phase 2}
+\label{tab:phase-comparison}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{p{4.5cm}p{5cm}p{5cm}}
+\toprule
+\textbf{Khía cạnh} & \textbf{Phase 1} & \textbf{Phase 2} \\
+\midrule
+Bài toán & Tính tọa độ mục tiêu tĩnh từ một lần đo & Theo dõi mục tiêu di động liên tục \\
+Số lần đo & Mỗi lần là độc lập & Liên kết theo thời gian \\
+Bộ lọc ước lượng & Không có & Kalman filter và alpha-beta \\
+Kiến trúc & Thuật toán chạy trên trình duyệt & Máy chủ kết hợp trình duyệt (FastAPI + React) \\
+Giao tiếp & Không có kênh truyền & WebSocket (kênh truyền dữ liệu hai chiều) \\
+Quản lý phiên & Không có & Tạo, duy trì, dừng phiên \\
+Mục tiêu & Người đi bộ, xe máy, drone & Người đi bộ, xe máy, drone \\
+Bản đồ & Bản đồ hiển thị vị trí & Bản đồ hiển thị quỹ đạo thời gian thực \\
+Xuất dữ liệu & Không có & Xuất tọa độ quỹ đạo \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Sự khác biệt cơ bản giữa hai giai đoạn là bổ sung bộ lọc ước lượng và kiến trúc máy chủ kết hợp trình duyệt. Giai đoạn 1 tính toán từng điểm độc lập, không có khái niệm "thời gian". Giai đoạn 2 liên kết các phép tính theo thời gian, sử dụng lịch sử để cải thiện độ chính xác qua bộ lọc.
+
+Trong giai đoạn 2, mỗi bản tin cảm biến không chỉ được xử lý độc lập mà còn được bộ lọc Kalman hoặc alpha-beta cập nhật trạng thái dựa trên toàn bộ lịch sử quan sát. Bộ đệm dạng vòng lưu trữ 500 frame gần nhất, cho phép hiển thị quỹ đạo và tính toán thống kê sai số theo thời gian thực. Chuỗi xử lý hoàn chỉnh mất trung bình 59 micro giây mỗi frame, trong đó phần Kalman chiếm 48,5 micro giây (82,2\%) và chuyển đổi tọa độ ECEF sang ENU chiếm 3,8 micro giây (6,4\%). Phần còn lại gồm phiên WebSocket, quản lý phiên, và cập nhật giao diện.
+
+\subsection{Mô hình nhiễu cảm biến}
+
+\hspace{0.5cm} Để kiểm chứng thuật toán, mỗi cảm biến được mô hình hóa với nhiễu thống kê phù hợp. Bảng \ref{tab:noise-model-detail} liệt kê các tham số nhiễu chi tiết cho từng loại cảm biến.
+
+\begin{table}[H]
+\centering
+\caption{Tham số mô hình nhiễu cảm biến}
+\label{tab:noise-model-detail}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{lccc}
+\toprule
+\textbf{Cảm biến} & \textbf{Tham số} & \textbf{Giá trị} & \textbf{Lý do lựa chọn} \\
+\midrule
+GPS (vị trí) & $\sigma_{GPS}$ & 5,0 m & Chế độ dân sự, PDOP trung bình \\
+GPS (vận tốc) & $\sigma_v$ & 1,0 m/s & Dùng trong Kalman model \\
+IMU (azimuth) & $\sigma_{az}$ & 0,3\textdegree{} & Mô phỏng IMU tiêu dùng \\
+IMU (elevation) & $\sigma_{el}$ & 0,2\textdegree{} & Góc nâng có nhiễu thấp hơn \\
+Laser (khoảng cách) & $\sigma_{range}$ & 0,5 m & Phù hợp LIDAR-Lite v3 \\
+Laser (người đi bộ) & $\sigma_{range,ped}$ & 0,3 m & Gần, góc rộng \\
+Laser (xe máy) & $\sigma_{range,moto}$ & 0,5 m & Trung bình \\
+Laser (drone) & $\sigma_{range,drone}$ & 1,0 m & Xa, nhiễu tăng \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Giá trị $\sigma_{GPS} = 5{,}0$ m phản ánh chế độ dân sự phổ biến với PDOP (Position Dilution of Precision) ở mức trung bình. Trong thực tế, giá trị này thay đổi tùy số lượng vệ tinh bắt được, trạng thái bầu trời, và vị trí địa lý. Mô hình giả sử nhiễu GPS là phân phối chuẩn hai chiều độc lập theo hướng East và North, không có systematic bias.
+
+Giá trị $\sigma_{az} = 0{,}3^\circ{}$ và $\sigma_{el} = 0{,}2^\circ{}$ tương ứng với IMU tiêu dùng (MPU6050 hoặc tương đương). Ở khoảng cách 200 m, góc $0{,}3^\circ{}$ tương đương sai số ngang $200 \times \sin(0{,}3^\circ{}) \approx 1{,}0$ m, lớn hơn nhiều so với sai số laser. Điều này giải thích tại sao ở khoảng cách xa, sai số đo góc trở thành yếu tố chi phối tổng sai số mục tiêu.
+
+Giá trị $\sigma_{range}$ khác nhau theo loại mục tiêu vì khoảng cách đo có ảnh hưởng đến nhiễu. Với người đi bộ ở gần (dưới 100 m), laser đo chính xác hơn do bề mặt phản xạ tốt hơn. Với drone ở xa (trên 300 m), nhiễu tăng do suy giảm tín hiệu và ảnh hưởng của môi trường.
+
+Mô hình nhiễu này cho phép kiểm soát chính xác điều kiện thử nghiệm và lặp lại kết quả. Vị trí GPS được sinh theo quỹ đạo định trước, góc ngắm và khoảng cách được mô phỏng dựa trên vị trí thực của mục tiêu kết hợp với nhiễu Gaussian. Kết quả RMSE thu được phản ánh khả năng thực tế của bộ lọc khi xử lý nhiễu cảm biến ở các mức cường độ khác nhau.
+
+\subsection{Mạng lưới đường bộ và xe máy}
+
+\hspace{0.5cm} Với mục tiêu là xe máy, hệ thống sử dụng mạng lưới đường bộ thực từ dữ liệu OpenStreetMap để mô phỏng quỹ đạo đi theo đường phố. Dữ liệu mạng lưới đường được lưu trữ dưới dạng đồ thị (graph) với các nút (node) là giao lộ và các cạnh (edge) là đoạn đường. Mỗi cạnh có thuộc tính loại đường (đường chính, đường phụ, ngõ hẻm) và tốc độ cho phép tương ứng.
+
+Dữ liệu mạng lưới đường được tải từ API của OpenStreetMap, bao phủ toàn bộ khu vực Thành phố Hồ Chí Minh. Tệp dữ liệu đồ thị có dung lượng khoảng 102 MB, chứa 337\,074 nút và 305\,008 cạnh. Mỗi cạnh lưu trữ thông tin về độ dài, loại đường, và tốc độ tối đa cho phép. Dữ liệu này được tải một lần khi hệ thống khởi động và giữ trong bộ nhớ để truy xuất nhanh.
+
+Xe máy mô phỏng bắt đầu từ một giao lộ ngẫu nhiên trong vùng hoạt động, đi theo đường bằng thuật toán đi ngẫu nhiên (random walk) trên đồ thị. Ở mỗi giao lộ, xe máy chọn một hướng đi trong các hướng khả dụng, có ưu tiên chọn đường có tốc độ phù hợp. Thiết kế này tạo quỹ đạo thực tế hơn so với đi thẳng hay đi theo đường tròn, vì xe máy thực tế luôn đi theo mạng lưới đường. Tốc độ mô phỏng nằm trong khoảng 5 đến 6 m/s (tương đương 18 đến 22 km/h), phù hợp với vận tốc xe máy trong đô thị.
+
+\subsection{REST API và quản lý tài nguyên máy chủ}
+
+\hspace{0.5cm} Ngoài kênh truyền dữ liệu hai chiều, hệ thống cung cấp REST API phục vụ quản lý phiên và truy vấn trạng thái. REST API chạy trên cùng một máy chủ FastAPI, sử dụng phương thức HTTP chuẩn (GET, POST, DELETE) và định dạng JSON.
+
+Bảng \ref{tab:rest-api} liệt kê các endpoint chính. Mỗi endpoint có chức năng riêng biệt: tạo phiên mới, dừng phiên, liệt kê phiên đang hoạt động, truy vấn thống kê, và xuất dữ liệu CSV. REST API không tham gia vào luồng dữ liệu thời gian thực, mà chỉ phục vụ các thao tác quản lý.
+
+\begin{table}[H]
+\centering
+\caption{Các endpoint REST API}
+\label{tab:rest-api}
+\resizebox{\linewidth}{!}{
+\begin{tabular}{llll}
+\toprule
+\textbf{Endpoint} & \textbf{Phương thức} & \textbf{Chức năng} & \textbf{Đầu ra} \\
+\midrule
+/api/simulation/start & POST & Tạo phiên mô phỏng mới & \{session\_id, ws\_url\} \\
+/api/simulation/stop/\{id\} & POST & Dừng phiên & \{status\} \\
+/api/simulation/sessions & GET & Liệt kê phiên đang hoạt động & Danh sách phiên \\
+/api/simulation/stats/\{id\} & GET & Thống kê RMSE, frame & \{rmse, frame\_count\} \\
+/api/simulation/export/\{id\} & GET & Xuất toàn bộ frame & CSV stream \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Mỗi phiên mô phỏng chạy trên một luồng xử lý riêng trong FastAPI, sử dụng cơ chế bất đồng bộ (async) để không chặn các yêu cầu REST API khác. Khi người dùng gửi yêu cầu "tạo phiên", FastAPI tạo một task bất đồng bộ chạy mô phỏng, trả về mã định danh phiên ngay lập tức, và bắt đầu chạy mô phỏng trên nền. Trong khi mô phỏng chạy, REST API vẫn khả dụng phục vụ các yêu cầu khác.
+
+Khi dừng phiên, hệ thống đóng kênh truyền dữ liệu hai chiều, dừng vòng lặp mô phỏng, và giải phóng tài nguyên. Dữ liệu quỹ đạo được lưu trong bộ nhớ cho đến khi phiên bị xóa. Nếu không có yêu cầu truy vấn nào trong vòng 30 phút, phiên tự động được dọn dẹp để giải phóng bộ nhớ.
+
+\subsection{Xử lý lỗi và tự động kết nối lại}
+
+\hspace{0.5cm} Hệ thống được thiết kế để chịu lỗi ở nhiều tầng, đảm bảo hoạt động liên tục trong điều kiện mạng không ổn định hoặc cảm biến gián đoạn.
+
+\subsubsection{Mất kết nối WebSocket}
+
+\hspace{0.5cm} Khi kênh truyền dữ liệu hai chiều bị đứt, hệ thống không dừng phiên ngay lập tức. Thay vào đó, phiên chuyển sang trạng thái "chờ kết nối lại" và bắt đầu bộ đếm thời gian. Nếu kết nối được khôi phục trong vòng 10 giây, phiên tiếp tục hoạt động bình thường và bộ lọc duy trì ước lượng dựa trên mô hình trạng thái trước đó.
+
+Nếu mất kết nối quá 10 giây, hệ thống dừng vòng lặp mô phỏng và thông báo lỗi cho giao diện. Khi kết nối được thiết lập lại, người dùng phải bắt đầu phiên mới. Thiết kế này tránh trường hợp bộ lọc hoạt động quá lâu mà không có dữ liệu mới, dẫn đến sai số ước lượng tăng dần theo thời gian.
+
+\subsubsection{Dữ liệu cảm biến không hợp lệ}
+
+\hspace{0.5cm} Ở mỗi chu kỳ xử lý, máy chủ kiểm tra tính hợp lệ của từng trường trong bản tin cảm biến. Nếu GPS không hợp lệ (vĩ độ ngoài khoảng -90 đến 90 độ, kinh độ ngoài -180 đến 180 độ), hệ thống bỏ qua bước chuyển đổi tọa độ và dùng vị trí GPS gần nhất hợp lệ. Nếu laser trả về khoảng cách âm hoặc bằng không, giá trị đó bị loại khỏi phép tính. Nếu IMU trả về góc ngoài phạm vi cho phép, góc đó được thay bằng giá trị trung bình của 5 lần đo gần nhất.
+
+Trường hợp nghiêm trọng nhất là khi cả ba cảm biến đều không hợp lệ. Lúc này, bản tin bị từ chối hoàn toàn và hệ thống đánh dấu "mất dữ liệu". Bộ lọc Kalman tiếp tục dự đoán vị trí dựa trên mô hình trạng thái, nhưng độ tin cậy giảm dần theo thời gian. Nếu mất dữ liệu liên tiếp quá 30 chu kỳ (tương đương 3 giây ở tần số 10 Hz), hệ thống dừng phiên.
+
+\subsubsection{Xử lý ngoại lệ Python}
+
+\hspace{0.5cm} Toàn bộ chuỗi xử lý được bao bọc trong cơ chế bắt ngoại lệ (exception handling). Mỗi bước xử lý chính (đọc cảm biến, chuyển đổi tọa độ, chạy bộ lọc, gửi WebSocket) đều có khối "try-except" riêng. Ngoại lệ không mong muốn được ghi nhận vào log và trả về thông báo lỗi thân thiện thay vì crash toàn bộ ứng dụng.
+
+\subsection{Chế độ mô phỏng và nguồn dữ liệu}
+
+\hspace{0.5cm} Hệ thống hỗ trợ hai chế độ mô phỏng, cho phép so sánh giữa dữ liệu tổng hợp và dữ liệu thực.
+
+\subsubsection{Chế độ tổng hợp (Synthetic)}
+
+\hspace{0.5cm} Ở chế độ này, quỹ đạo mục tiêu được sinh hoàn toàn bằng phần mềm. Mỗi loại mục tiêu có mô hình chuyển động riêng: người đi bộ đi theo hướng ngẫu nhiên với vận tốc 1 đến 2 m/s, xe máy đi theo mạng lưới đường bộ thực của Thành phố Hồ Chí Minh với vận tốc 5 đến 6 m/s, drone bay theo quỹ đạo ba chiều với vận tốc tối đa 15 m/s. Vị trí ban đầu được chọn ngẫu nhiên trong vùng hoạt động.
+
+Nhiễu cảm biến được thêm vào vị trí thực theo mô hình Gaussian xem bảng \ref{tab:noise-model-detail}. Mỗi frame, giá trị GPS, azimuth, elevation, và khoảng cách đều bị nhiễu độc lập. Kết quả RMSE thu được phản ánh khả năng khử nhiễu của bộ lọc trong điều kiện lý tưởng.
+
+\subsubsection{Chế độ dữ liệu thực (Real-World Data)}
+
+\hspace{0.5cm} Ở chế độ này, quỹ đạo mục tiêu được lấy từ dữ liệu thu thập thực tế thay vì sinh phần mềm. Dữ liệu thực bao gồm hai nguồn chính. Nguồn thứ nhất là tập dữ liệu Geolife (Microsoft Research Asia), chứa 6\,460 đoạn quỹ đạo người đi bộ tại Bắc Kinh, Trung Quốc. Từ tập này, hệ thống chọn lọc 252 đoạn phù hợp (độ dài 60 đến 180 giây, bán kính tối đa 400 m, khoảng gián đoạn không quá 3 giây).
+
+Nguồn thứ hai là mạng lưới đường bộ Thành phố Hồ Chí Minh, với 337\,074 nút và 305\,008 cạnh. Xe máy mô phỏng bắt đầu từ một giao lộ ngẫu nhiên và đi theo đường bằng thuật toán đi ngẫu nhiên trên đồ thị. Quỹ đạo thực tế hơn so với chế độ tổng hợp vì phản ánh hình dạng đường phố thực.
+
+Sự khác biệt giữa hai chế độ cho phép kiểm tra tính thực tế của thuật toán. Ở chế độ tổng hợp, quỹ đạo mượt và nhiễu Gaussian thuần túy. Ở chế độ dữ liệu thực, quỹ đạo có thể đột ngột (giao lộ, rẽ), và nhiễu không hoàn toàn Gaussian.
+
+\subsection{Lưu trữ dữ liệu và xuất báo cáo}
+
+\hspace{0.5cm} Hệ thống không sử dụng cơ sở dữ liệu quan hệ. Toàn bộ dữ liệu phiên được lưu trong bộ nhớ RAM của máy chủ trong suốt phiên hoạt động. Thiết kế này phù hợp với bài toán mô phỏng, nơi mỗi phiên chạy độc lập và dữ liệu không cần persistence qua nhiều lần khởi động lại.
+
+Khi phiên kết thúc, người dùng có thể yêu cầu xuất dữ liệu quỹ đạo dưới dạng tệp CSV. Tệp CSV chứa mỗi dòng tương ứng một frame (chu kỳ), với các cột: số thứ tự frame, timestamp, tọa độ East, North, Up của giá trị thực, tọa độ thô (chưa lọc), tọa độ Kalman, tọa độ alpha-beta, và sai số. Dữ liệu CSV hữu ích cho việc phân tích offline bằng các công cụ như pandas, MATLAB, hoặc Excel.
+
+Ngoài CSV, hệ thống cũng ghi nhận thống kê tóm tắt khi dừng phiên: sai số trung bình bình phương (RMSE) cho từng phương pháp lọc, số frame đã xử lý, thời gian chạy thực tế. Các thông số này hiển thị trên giao diện và được lưu trong đối tượng phiên để truy xuất qua REST API.
+
+\subsection{Tóm tắt thiết kế}
+
+\hspace{0.5cm} Kiến trúc phân lớp bốn tầng của hệ thống đảm bảo sự tách biệt giữa phần cứng cảm biến, xử lý nhúng, xử lý máy chủ, và hiển thị giao diện. Luồng dữ liệu đi từ cảm biến lên giao diện qua WebSocket (kênh truyền dữ liệu hai chiều), với mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi tọa độ.
+
+Quản lý phiên đảm bảo mỗi lần theo dõi hoạt động độc lập, với bộ đệm dạng vòng lưu trữ dữ liệu gần nhất mà không tốn bộ nhớ vô hạn. Phân bổ thời gian cho thấy thuật toán có khả năng chạy ở tần số 10 Hz với dự phòng lớn. Thiết kế giao diện với React và thư viện bản đồ cung cấp giao diện trực quan và cập nhật theo thời gian thực.
+
+Các thành phần chính của thiết kế: sơ đồ lớp mô tả trách nhiệm của từng thực thể phần mềm, sơ đồ hoạt động mô tả luồng xử lý dữ liệu và tracking, bản tin JSON định nghĩa giao thức trao đổi dữ liệu, và bảng phân bổ thời gian chứng minh khả năng đáp ứng yêu cầu thời gian thực. Thiết kế này làm nền tảng cho việc triển khai và kiểm chứng ở giai đoạn sau của dự án.
