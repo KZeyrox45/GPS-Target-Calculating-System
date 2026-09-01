@@ -44,7 +44,7 @@ Thông số mô phỏng chuẩn được sử dụng trong toàn bộ đánh gi�
 \centering
 \caption{Thông số mô phỏng chuẩn}
 \label{tab:sim-params-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Tham số} & \textbf{Giá trị} & \textbf{Ghi chú} \\
@@ -73,7 +73,7 @@ Mô hình nhiễu cảm biến được mô tả trong Bảng \ref{tab:noise-wee
 \centering
 \caption{Thông số nhiễu cảm biến trong mô phỏng}
 \label{tab:noise-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Cảm biến} & \textbf{Thông số} & \textbf{Giá trị} \\
@@ -124,7 +124,7 @@ Thông số mô hình người đi bộ được tóm tắt trong Bảng \ref{ta
 \centering
 \caption{Thông số mô hình người đi bộ}
 \label{tab:ped-params}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Tham số} & \textbf{Giá trị} & \textbf{Ghi chú} \\
@@ -167,7 +167,7 @@ y_{k+1} &= y_k + v_k \sin(\theta_k) \cdot \Delta t \\
 \end{aligned}
 \end{equation}
 
-trong đó $v_k$ là vận tốc, $\theta_k$ là góc heading, $\delta_k$ là góc lái, và $L = 1{,}4$ m là chiều dài cơ sở (wheelbase). Góc lái $\delta_k$ được tạo ngẫu nhiên với biên độ nhỏ (±5°), tạo ra các khúc rẽ nhẹ mô phỏng hành vi điều khiển xe trên đường thẳng.
+trong đó $v_k$ là vận tốc, $\theta_k$ là góc heading, $\delta_k$ là góc lái, và $L = 1{,}4$ m là chiều dài cơ sở (wheelbase). Góc lái $\delta_k$ được tạo ngẫu nhiên với biên độ nhỏ ($\pm 5^\circ$), tạo ra các khúc rẽ nhẹ mô phỏng hành vi điều khiển xe trên đường thẳng.
 
 Mô hình này tạo ra quỹ đạo có các khúc rẽ đặc trưng của xe hai bánh, khác với chuyển động tuyến tính của người đi bộ. Hiệu ứng caster trail tự nhiên: xe máy có xu hướng giữ hướng đi hiện tại khi vận tốc cao và rẽ dễ hơn khi vận tốc thấp. Điều này phản ánh đúng vật lý xe hai bánh trong thực tế, nơi centripetal force cần được cân bằng bởi moment của trọng lực để giữ thăng bằng.
 
@@ -177,7 +177,7 @@ Thông số mô hình xe máy được liệt kê trong Bảng \ref{tab:moto-par
 \centering
 \caption{Thông số mô hình xe máy}
 \label{tab:moto-params}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Tham số} & \textbf{Giá trị} & \textbf{Ghi chú} \\
@@ -211,7 +211,7 @@ Thông số mô hình drone được tóm tắt trong Bảng \ref{tab:drone-para
 \centering
 \caption{Thông số mô hình drone kinematic}
 \label{tab:drone-params}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Tham số} & \textbf{Giá trị} & \textbf{Nguồn} \\
@@ -231,13 +231,11 @@ Thời gian tự tương quan OU ($\tau$)  & 1,0 s     & Nhiễu vận tốc \\
 
 \hspace{0.5cm} Bảng \ref{tab:rmse-week4} tổng hợp RMSE ngang (horizontal) của ba phương pháp xử lý trên ba kịch bản mục tiêu. Chỉ tiêu yêu cầu của đề tài là RMSE $<$ 5 m trong phạm vi 500 m. Giá trị RMSE được tính từ sai số Euclidean trung bình phương trên toàn bộ 1.200 bước thời gian, với giá trị khởi tạo seed = 42.
 
-\newpage
-
 \begin{table}[H]
 \centering
 \caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (seed = 42)}
 \label{tab:rmse-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Đo thô} & \textbf{Alpha-beta} & \textbf{Kalman} & \textbf{Yêu cầu} \\
@@ -328,7 +326,7 @@ Một cách đọc CDF phổ biến là chọn một ngưỡng sai số (ví d�
 
 Hình \ref{fig:cdf-pedestrian} hiển thị CDF sai số người đi bộ. Đường alpha-beta (xanh dương) đạt giá trị 1 sớm nhất, cho thấy 100\% sai số nhỏ hơn 0,8 m. Đường Kalman (đỏ) đạt 1 muộn hơn một chút, với khoảng 95\% sai số nhỏ hơn 1,5 m. Đường đo thô (xám) nằm giữa hai đường này. Phân vị 50\% (median) của alpha-beta khoảng 0,2 m, trong khi Kalman khoảng 0,7 m, phản ánh khoảng cách hiệu suất rõ rệt giữa hai bộ lọc.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -348,7 +346,7 @@ Hình \ref{fig:cdf-motorcycle} hiển thị CDF sai số xe máy. Khoảng cách
 
 Hình \ref{fig:cdf-drone} hiển thị CDF sai số drone. Đường CDF của Kalman nằm ngoài đường đo thô trong một phạm vi sai số nhất định (từ 0 đến khoảng 1,5 m), xác nhận quan sát từ biểu đồ thời gian rằng Kalman filter có hiệu suất kém hơn cả đo thô ở một số khoảng thời gian. Điều này xảy ra vì Kalman filter, trong giai đoạn hội tụ ban đầu, tạo sai số lớn hơn đo thô do ưu tiên đo lường nhiễu cao. Alpha-beta tiếp tục duy trì vị trí tốt nhất với CDF đạt 0,95 tại khoảng 1,8 m. Phân vị 50\% của alpha-beta khoảng 0,8 m, so với 1,8 m của Kalman và 1,4 m của đo thô.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -398,7 +396,7 @@ Hình \ref{fig:sigma-vs-range} biểu diễn đường cong $\sigma_{pos}(R)$ v�
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.82\textwidth,
@@ -439,7 +437,7 @@ Nghiên cứu cross-over cũng định hướng cho thiết kế hệ thống th
 
 \hspace{0.5cm} Kết quả benchmark RMSE từ mô phỏng khẳng định ba điểm chính. Thứ nhất, cả alpha-beta và Kalman filter đều đạt yêu cầu bài toán (RMSE $<$ 5 m) trên cả ba loại mục tiêu, chứng tỏ kiến trúc xử lý tín hiệu hai giai đoạn (hợp nhất cảm biến + bộ lọc) hoạt động hiệu quả. Thứ hai, alpha-beta filter đạt RMSE thấp hơn Kalman filter ở môi trường mô phỏng với mô hình CV, nhờ thiết kế phù hợp với điều kiện vận tốc không đổi và không cần giai đoạn hội tụ. Thứ ba, Kalman filter có lợi thế về ước lượng độ bất định và thích nghi với nhiễu đo lường động, là các tính năng quan trọng cho triển khai thực tế nhưng không được phản ánh đầy đủ trong mô phỏng CV đơn giản.
 
-\newpage
+
 
 Bảng \ref{tab:summary-week4} tóm tắt các phát hiện chính từ đánh giá mô phỏng.
 
@@ -447,17 +445,15 @@ Bảng \ref{tab:summary-week4} tóm tắt các phát hiện chính từ đánh g
 \centering
 \caption{Tóm tắt phát hiện chính từ đánh giá mô phỏng}
 \label{tab:summary-week4}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
+\begin{tabularx}{\linewidth}{lXX}
 \toprule
 \textbf{Phát hiện} & \textbf{Chi tiết} & \textbf{Hệ quả} \\
 \midrule
-Alpha-beta tốt hơn & RMSE thấp hơn 46-50\% so với Kalman & Ưu tiên sử dụng trong mô phỏng CV \\
-Kalman có giai đoạn hội tụ & 10-15 giây đầu sai số lớn & Cần cải thiện khởi tạo $\mathbf{P}_0$ \\
-Cả hai đạt yêu cầu & RMSE $<$ 5 m trên mọi kịch bản & Xác nhận kiến trúc hai giai đoạn \\
+Alpha-Beta ổn định trên vận tốc đều & RMSE thấp hơn 46-50\% so với Kalman & Hiệu quả cao trong kịch bản vận tốc đều \\
+Kalman có giai đoạn hội tụ & 10-15 giây đầu sai số lớn hơn & Cần cải thiện khởi tạo $\mathbf{P}_0$ và $\mathbf{x}_0$ \\
+Cả hai đạt yêu cầu kỹ thuật & RMSE $<$ 5 m trên mọi kịch bản & Xác nhận tính tin cậy của chuỗi xử lý \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 Các kết quả này hướng dẫn cho giai đoạn sau: cải thiện mô hình mục tiêu bằng cách thêm các yếu tố cơ động thực tế hơn (gia tốc, đổi hướng), và điều chỉnh tham số Kalman filter theo từng loại mục tiêu để thu hẹp khoảng cách hiệu suất với alpha-beta filter. Đồng thời, cần đánh giá thêm các chỉ tiêu ngoài RMSE như độ trễ (latency), khả năng dự báo (predictive capability), và độ ổn định (stability) trong điều kiện nhiễu cao.
@@ -466,13 +462,13 @@ Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hi�
 
 \subsubsection{Đa seed: kiểm chứng độ ổn định thống kê}
 
-\hspace{0,5cm} Kết quả seed = 42 ở trên chỉ là một mẫu ngẫu nhiên duy nhất. Để kiểm chứng tính tổng quát, hệ thống được chạy lại với 10 giá trị seed khác nhau (seed 1 đến 10), mỗi seed tạo một chuỗi nhiễu riêng biệt cho cả quỹ đạo mục tiêu và phép đo cảm biến. Bảng \ref{tab:multiseed-week4} tổng hợp kết quả trung bình và độ lệch chuẩn trên tập hợp 10 seed.
+\hspace{0.5cm} Kết quả seed = 42 ở trên chỉ là một mẫu ngẫu nhiên duy nhất. Để kiểm chứng tính tổng quát, hệ thống được chạy lại với 10 giá trị seed khác nhau (seed 1 đến 10), mỗi seed tạo một chuỗi nhiễu riêng biệt cho cả quỹ đạo mục tiêu và phép đo cảm biến. Bảng \ref{tab:multiseed-week4} tổng hợp kết quả trung bình và độ lệch chuẩn trên tập hợp 10 seed.
 
 \begin{table}[H]
 \centering
 \caption{Kết quả đa seed: trung bình ± độ lệch chuẩn trên 10 seed (120 giây, 10 Hz, ranh giới 400 m)}
 \label{tab:multiseed-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Phương pháp} & \textbf{Trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Min / Max} \\
@@ -501,7 +497,7 @@ Một quan sát quan trọng là giá trị trung bình đa seed khác biệt c�
 
 \subsubsection{Phân tích ngưỡng cross-over laser-GPS}
 
-\hspace{0,5cm} Ngưỡng cross-over là khoảng cách mà sai số hợp nhất cảm biến từ hai nguồn (GPS và IMU/laser) bằng nhau, được tính bằng cách đặt $\sigma_{gps}^2 = R^2(\sin^2\sigma_{az} + \sin^2\sigma_{el})$ và giải cho $R$:
+\hspace{0.5cm} Ngưỡng cross-over là khoảng cách mà sai số hợp nhất cảm biến từ hai nguồn (GPS và IMU/laser) bằng nhau, được tính bằng cách đặt $\sigma_{gps}^2 = R^2(\sin^2\sigma_{az} + \sin^2\sigma_{el})$ và giải cho $R$:
 \begin{equation}
 R_{cross} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{el}}}.
 \label{eq:crossover}
@@ -522,13 +518,13 @@ Ngưỡng 794 m có ý nghĩa thực tiễn: nếu mục tiêu thường xuyên 
 
 \subsubsection{Thời gian xử lý chuỗi}
 
-\hspace{0,5cm} Hiệu suất tính toán là yếu tố quyết định khả năng hoạt động thời gian thực. Bảng \ref{tab:pipeline-timing-week4} phân tích thời gian xử lý từng giai đoạn trong chuỗi, được đo bằng time.perf\_counter() trên 10.000 lần chạy, Python 3.11, CPython.
+\hspace{0.5cm} Hiệu suất tính toán là yếu tố quyết định khả năng hoạt động thời gian thực. Bảng \ref{tab:pipeline-timing-week4} phân tích thời gian xử lý từng giai đoạn trong chuỗi, được đo bằng time.perf\_counter() trên 10.000 lần chạy, Python 3.11, CPython.
 
 \begin{table}[H]
 \centering
 \caption{Thời gian xử lý chuỗi (trung bình 10.000 lần chạy)}
 \label{tab:pipeline-timing-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Giai đoạn} & \textbf{Thời gian} & \textbf{Tỷ lệ} \\
@@ -550,7 +546,7 @@ Bảng \ref{tab:filter-compare-week4} so sánh thời gian giữa các biến th
 \centering
 \caption{So sánh thời gian giữa các biến thể bộ lọc}
 \label{tab:filter-compare-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Biến thể} & \textbf{Thời gian} & \textbf{Ghi chú} \\
@@ -565,7 +561,7 @@ Kalman 3D         & $\sim$48,5 \textmu s & $6 \times 6$ ma trận + adaptive R \
 
 \subsubsection{Phân tích thời gian hội tụ Kalman}
 
-\hspace{0,5cm} Giai đoạn hội tụ ban đầu của Kalman filter là quan sát quan trọng nhất từ biểu đồ sai số theo thời gian. Quá trình hội tụ tương ứng với việc ma trận hiệp phương sai trạng thái $\mathbf{P}_k$ giảm từ giá trị khởi tạo lớn ($\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$) xuống giá trị steady-state.
+\hspace{0.5cm} Giai đoạn hội tụ ban đầu của Kalman filter là quan sát quan trọng nhất từ biểu đồ sai số theo thời gian. Quá trình hội tụ tương ứng với việc ma trận hiệp phương sai trạng thái $\mathbf{P}_k$ giảm từ giá trị khởi tạo lớn ($\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$) xuống giá trị steady-state.
 
 Thời gian hội tụ ước tính bằng công thức:
 \begin{equation}
@@ -578,13 +574,13 @@ Sau giai đoạn hội tụ, $\mathbf{P}_k$ đạt giá trị steady-state và K
 
 \subsubsection{So sánh hiệu suất theo loại mục tiêu}
 
-\hspace{0,5cm} Phân tích chéo giữa ba loại mục tiêu cho thấy mô hình CV phù hợp nhất với người đi bộ (vận tốc thấp, ít cơ động) và kém phù hợp nhất với drone (vận tốc cao, cơ động 3D). Bảng \ref{tab:target-comparison-week4} tổng hợp các chỉ số so sánh.
+\hspace{0.5cm} Phân tích chéo giữa ba loại mục tiêu cho thấy mô hình CV phù hợp nhất với người đi bộ (vận tốc thấp, ít cơ động) và kém phù hợp nhất với drone (vận tốc cao, cơ động 3D). Bảng \ref{tab:target-comparison-week4} tổng hợp các chỉ số so sánh.
 
 \begin{table}[H]
 \centering
 \caption{So sánh hiệu suất theo loại mục tiêu}
 \label{tab:target-comparison-week4}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Chỉ số} & \textbf{Người đi bộ} & \textbf{Xe máy} & \textbf{Drone} \\
@@ -605,7 +601,7 @@ Tỷ lệ KF/AB (RMSE Kalman chia cho RMSE alpha-beta) đo mức độ alpha-bet
 
 \subsubsection{Hướng phát triển từ kết quả benchmark}
 
-\hspace{0,5cm} Kết quả benchmark định hướng ba hướng phát triển chính cho giai đoạn sau.
+\hspace{0.5cm} Kết quả benchmark định hướng ba hướng phát triển chính cho giai đoạn sau.
 
 Thứ nhất, điều chỉnh tham số Kalman filter theo từng loại mục tiêu. Hiện tại, $\sigma_a$ được đặt thống nhất (0,5 cho người đi bộ, 5,0 cho xe máy và drone). Kết quả cho thấy Kalman filter chưa được điều chỉnh cho từng kịch bản riêng biệt. Việc thay đổi $\sigma_a$ theo vận tốc thực tế của mục tiêu có thể giảm RMSE Kalman đáng kể.
 
@@ -615,9 +611,9 @@ Thứ ba, đánh giá hiệu suất trong điều kiện cơ động thực tế
 
 \subsubsection{Giao diện theo dõi thời gian thực}
 
-\hspace{0,5cm} Hệ thống mô phỏng được điều khiển qua giao diện web thời gian thực, trong đó người dùng chọn loại mục tiêu, phương pháp lọc, và tham số mô phỏng trước khi bắt đầu phiên. Hình \ref{fig:screenshot-tracking-week4} hiển thị giao diện theo dõi đang hoạt động với mục tiêu người đi bộ.
+\hspace{0.5cm} Hệ thống mô phỏng được điều khiển qua giao diện web thời gian thực, trong đó người dùng chọn loại mục tiêu, phương pháp lọc, và tham số mô phỏng trước khi bắt đầu phiên. Hình \ref{fig:screenshot-tracking-week4} hiển thị giao diện theo dõi đang hoạt động với mục tiêu người đi bộ.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -643,7 +639,7 @@ Giao diện còn hiển thị các layer bản đồ có thể bật/tắt: đư
 
 Khi mô phỏng hoàn tất (120 giây), giao diện hiển thị bảng tóm tắt với RMSE cuối cùng của từng phương pháp. Dữ liệu phiên có thể xuất ra file CSV để phân tích ngoại tuyến. Toàn bộ phiên mô phỏng được quản lý qua WebSocket (kênh truyền dữ liệu hai chiều), đảm bảo cập nhật thời gian thực mà không cần làm mới trang.
 
-\newpage
+
 
 \subsection{Phân tích hiệu suất lọc theo từng loại mục tiêu}
 
@@ -655,7 +651,7 @@ Bảng~\ref{tab:target-filter-analysis} tóm tắt cách mỗi bộ lọc phản
 \centering
 \caption{Phân tích hiệu suất lọc theo loại mục tiêu (seed=42, 120 giây, 10 Hz)}
 \label{tab:target-filter-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Bộ lọc} & \textbf{RMSE (m)} & \textbf{Nhận xét} \\
@@ -683,7 +679,7 @@ Người đi bộ cho RMSE thấp nhất vì vận tốc nhỏ, quỹ đạo g�
 \centering
 \caption{Phân tích thời gian thực thi chuỗi xử lý}
 \label{tab:timing-breakdown}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Thành phần} & \textbf{Thời gian ($\mu$s)} & \textbf{Tỷ lệ} \\

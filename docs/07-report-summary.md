@@ -178,7 +178,7 @@
 | Mô phỏng simulation | 50 | Quỹ đạo, biên, Kalman3D |
 | Endpoint thống kê và xuất | 17 | Stats engine, endpoint |
 | Nạp dữ liệu thực tế | 38 | Geolife, AMIT, drone, routing |
-| **Tổng** | **162** | **Đạt tất cả** |
+| **Tổng** | **163** | **Đạt tất cả** |
 
 ### Hạng mục còn lại
 | Hạng mục | Tuần | Mô tả |

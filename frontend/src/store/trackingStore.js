@@ -69,6 +69,11 @@ const useTrackingStore = create((set) => ({
       kalman_rmse:     frame.metrics.kalman_rmse,
       alpha_beta_rmse: frame.metrics.alpha_beta_rmse,
       raw_error:       frame.metrics.raw_error,
+      kalman_error:    frame.metrics.kalman_error ?? 0,
+      alpha_beta_error: frame.metrics.alpha_beta_error ?? 0,
+      speed:           frame.kalman?.speed ?? frame.ground_truth?.speed ?? 0,
+      alt:             frame.kalman?.alt ?? frame.kalman?.up ?? frame.ground_truth?.alt ?? 0,
+      uncertainty_m:   frame.kalman?.uncertainty_m ?? 0,
     };
     set((s) => ({
       metricsHistory: [

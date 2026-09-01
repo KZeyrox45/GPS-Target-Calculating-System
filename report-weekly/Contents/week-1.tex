@@ -16,7 +16,7 @@ Bảng \ref{tab:phase-compare} so sánh chi tiết hai giai đoạn trên các p
 \centering
 \caption{So sánh tổng quan giữa giai đoạn 1 và giai đoạn 2}
 \label{tab:phase-compare}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
 \toprule
 \textbf{Phương diện} & \textbf{Giai đoạn 1} & \textbf{Giai đoạn 2} \\
@@ -64,7 +64,7 @@ Các ràng buộc chính của bài toán bao gồm:
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw, rounded corners=3mm, 
@@ -135,7 +135,7 @@ Trong điều kiện lý tưởng, mỗi cảm biến hoạt động độc lậ
 \centering
 \caption{Tham số mô hình nhiễu cảm biến và giá trị sử dụng}
 \label{tab:noise-model}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Cảm biến} & \textbf{Tham số} & \textbf{Giá trị} & \textbf{Đơn vị} \\
@@ -261,7 +261,7 @@ Trong đó $\sigma_a$ là độ lệch chuẩn gia tốc, hiệu chỉnh theo lo
 \centering
 \caption{Tham số nhiễu quá trình $\sigma_a$ theo loại mục tiêu}
 \label{tab:process-noise}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Loại mục tiêu} & $\sigma_a$ (m/s$^2$) & \textbf{Lý do} \\
@@ -312,7 +312,7 @@ Với $\alpha = 0{,}4$ (giá trị mặc định), ta có $\beta \approx 0{,}051
 \centering
 \caption{Các chỉ số hiệu suất thiết kế của hệ thống}
 \label{tab:performance-spec}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị yêu cầu} & \textbf{Lý do} \\
@@ -364,7 +364,7 @@ Tổng thời gian xử lý dự kiến nhỏ hơn 25 ms, để lại biên an t
 \centering
 \caption{So sánh đặc điểm hai bộ lọc được triển khai}
 \label{tab:filter-compare-w1}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
 \toprule
 \textbf{Đặc điểm} & \textbf{Bộ lọc Kalman} & \textbf{Bộ lọc Alpha-Beta} \\
@@ -489,18 +489,16 @@ Ví dụ trên cho thấy mỗi bước chuyển đổi đều bảo toàn chín
 \centering
 \caption{Tham số mô phỏng và cơ sở lựa chọn}
 \label{tab:sim-params}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lp{9cm}}
+\begin{tabularx}{\linewidth}{lX}
 \toprule
 \textbf{Tham số} & \textbf{Cơ sở lựa chọn} \\
 \midrule
 Seed = 42 & Seed cố định đảm bảo tính tái lập: mọi lần chạy đều cho cùng kết quả RMSE, giúp so sánh thuật toán một cách công bằng. Giá trị 42 là lựa chọn phổ biến trong nghiên cứu (được nhiều bộ benchmark sử dụng). \\
 Thời gian 120 s & 120 giây tương đương 1.200 bước thời gian ở tần số 10 Hz. Đây là khoảng đủ dài để bộ lọc Kalman hội tụ (khoảng 15 đến 20 giây đầu) và thu thập đủ dữ liệu thống kê về RMSE. Thời gian ngắn hơn (30 s) không đủ hội tụ; thời gian dài hơn (300 s) không cải thiện RMSE đáng kể nhưng tăng thời gian mô phỏng. \\
 Tần số 10 Hz & Tần số 10 Hz phù hợp với tần số cập nhật của GPS dân sự (1 đến 10 Hz) và laser rangefinder (10 đến 100 Hz). Sau nội suy, cả ba cảm biến đều được đồng bộ về cùng một lưới thời gian 10 Hz. Tần số cao hơn (50 Hz) tăng chi phí tính toán mà không cải thiện RMSE đáng kể; tần số thấp hơn (1 Hz) mất thông tin động học của mục tiêu. \\
-Biên 400 m & Bán kính 400 m nằm trong khoảng hiệu dụng của laser rangefinder (100 đến 1000 m) và đảm bảo mục tiêu nằm trong vùng laser luôn chính xác hơn GPS (dưới ngưỡng cắt ngang 794 m). Bán kính lớn hơn (800 m) sẽ đưa một số vị trí ra ngoài vùng laser ưu thế; nhỏ hơn (200 m) giới hạn phạm vi thực tế quá hẹp.\\
+Biên 400 m & Bán kính 400 m nằm trong khoảng hiệu dụng của laser rangefinder (100 đến 1000 m) và đảm bảo mục tiêu nằm trong vùng laser luôn chính xác hơn GPS (dưới ngưỡng cắt ngang 794 m). Bán kính lớn hơn (800 m) sẽ đưa một số vị trí ra ngoài vùng laser ưu thế; nhỏ hơn (200 m) giới hạn phạm vi thực tế quá hẹp. \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \subsubsection{Vấn đề không đồng bộ tần số cảm biến}
@@ -531,7 +529,7 @@ Khi khoảng cách giữa hai mẫu thời gian liền kề quá lớn (do mất
 \centering
 \caption{RMSE ngang của ba bộ lọc trên ba kịch bản mục tiêu (seed = 42)}
 \label{tab:rmse-w1}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Đo thô} & \textbf{Alpha-beta} & \textbf{Kalman} & \textbf{Yêu cầu} \\
@@ -557,13 +555,13 @@ Hình \ref{fig:rmse-bar-w1} biểu diễn so sánh trực quan RMSE giữa ba ph
 
 \subsection{Phân tích kết quả đa seed}
 
-\hspace{0,5cm} Kết quả ở seed = 42 chỉ phản ánh một kịch bản khởi tạo duy nhất. Để đánh giá độ ổn định thống kê, nhóm chạy mô phỏng với 10 seed khác nhau (seed = 1 đến 10), mỗi seed tạo một quỹ đạo mục tiêu và nhiễu cảm biến riêng biệt. Bảng \ref{tab:multiseed-w1} tổng hợp kết quả trung bình và độ lệch chuẩn.
+\hspace{0.5cm} Kết quả ở seed = 42 chỉ phản ánh một kịch bản khởi tạo duy nhất. Để đánh giá độ ổn định thống kê, nhóm chạy mô phỏng với 10 seed khác nhau (seed = 1 đến 10), mỗi seed tạo một quỹ đạo mục tiêu và nhiễu cảm biến riêng biệt. Bảng \ref{tab:multiseed-w1} tổng hợp kết quả trung bình và độ lệch chuẩn.
 
 \begin{table}[H]
 \centering
 \caption{Kết quả RMSE đa seed (10 seed, 120 s, 10 Hz, 400 m)}
 \label{tab:multiseed-w1}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Phương pháp} & \textbf{TB (m)} & \textbf{ĐLC (m)} & \textbf{Min (m)} & \textbf{Max (m)} \\
@@ -585,7 +583,7 @@ Kết quả đa seed cho thấy: (a) bộ lọc alpha-beta có độ ổn địn
 
 \subsection{Phân tích ngưỡng cắt ngang laser}
 
-\hspace{0,5cm} Trong hệ thống thực tế, laser rangefinder có giới hạn tầm xa. Khi khoảng cách từ người quan sát đến mục tiêu vượt quá ngưỡng nào đó, đóng góp sai số từ laser vượt quá đóng góp từ GPS. Điểm giao nhau được tính khi $\sigma_{\text{gps}}^2 = (R \cdot \sin\sigma_{\text{az}})^2 + \sigma_{\text{range}}^2 + (R \cdot \sin\sigma_{\text{el}})^2$.
+\hspace{0.5cm} Trong hệ thống thực tế, laser rangefinder có giới hạn tầm xa. Khi khoảng cách từ người quan sát đến mục tiêu vượt quá ngưỡng nào đó, đóng góp sai số từ laser vượt quá đóng góp từ GPS. Điểm giao nhau được tính khi $\sigma_{\text{gps}}^2 = (R \cdot \sin\sigma_{\text{az}})^2 + \sigma_{\text{range}}^2 + (R \cdot \sin\sigma_{\text{el}})^2$.
 
 Với tham số mặc định ($\sigma_{\text{gps}} = 5{,}0$ m, $\sigma_{\text{az}} = 0{,}3^\circ$, $\sigma_{\text{el}} = 0{,}2^\circ$, $\sigma_{\text{range}} = 0{,}5$ m), ngưỡng cắt ngang xảy ra tại khoảng \textbf{794 m}. Hình \ref{fig:crossover-w1} minh họa sự chuyển đổi ưu thế giữa hai nguồn sai số.
 
@@ -622,7 +620,7 @@ Hình \ref{fig:error-cdf-w1} thể hiện phân phối xác suất tích lũy (C
 
 \subsection{Phân tích hiệu năng chuỗi xử lý}
 
-\hspace{0,5cm} Hiệu năng của chuỗi xử lý (pipeline) là yếu tố quyết định khả năng hoạt động thời gian thực. Hình \ref{fig:pipeline-w1} phân tích thời gian xử lý từng bước trong chu kỳ 10 Hz.
+\hspace{0.5cm} Hiệu năng của chuỗi xử lý (pipeline) là yếu tố quyết định khả năng hoạt động thời gian thực. Hình \ref{fig:pipeline-w1} phân tích thời gian xử lý từng bước trong chu kỳ 10 Hz.
 
 \begin{figure}[H]
 \centering
@@ -675,7 +673,7 @@ Trong đó $r_{\text{target}}$ là khoảng cách từ gốc đến mục tiêu,
 \centering
 \caption{So sánh hai chế độ tạo quỹ đạo}
 \label{tab:sim-modes}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3cm}p{5cm}p{5cm}}
 \toprule
 \textbf{Phương diện} & \textbf{Tổng hợp (Synthetic)} & \textbf{Dữ liệu thực (Real-World)} \\
@@ -699,7 +697,7 @@ Chế độ tổng hợp phù hợp để kiểm chuẩn thuật toán vì quỹ
 \centering
 \caption{Tham số cảm biến mô phỏng}
 \label{tab:sensor-params}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Cảm biến} & \textbf{Tham số} & \textbf{Giá trị} & \textbf{Đơn vị} \\

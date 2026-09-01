@@ -21,14 +21,13 @@ Với mỗi seed $k \in \{1, 2, \dots, 10\}$, bộ sinh số ngẫu nhiên tạo
     \item Đối tượng máy bay không người lái (3D): vận tốc không gian từ 6,0 m/s đến 15,0 m/s, thay đổi đồng thời cả ba trục tọa độ Đông, Bắc và Độ cao với giới hạn gia tốc động học danh định.
 \end{enumerate}
 
-Việc áp dụng cùng một hạt giống ngẫu nhiên cho cả ba phương pháp xử lý trong từng kịch bản bảo đảm tính tương thích cặp (paired comparison), loại bỏ hoàn toàn sai số thiên vị do quỹ đạo khác nhau khi so sánh đối đầu giữa bộ lọc Kalman và bộ lọc Alpha-Beta. Bảng \ref{tab:experiment-parameters} tóm tắt các tham số cấu hình thí nghiệm đa seed chuẩn hóa.
+Việc áp dụng cùng một hạt giống ngẫu nhiên cho cả ba phương pháp xử lý trong từng kịch bản bảo đảm tính tương thích cặp (paired comparison), loại bỏ hoàn toàn sai số thiên vị do quỹ đạo khác nhau khi so sánh đối đầu giữa bộ lọc Kalman và bộ lọc Alpha-Beta.
 
 \begin{table}[H]
 \centering
-\caption{Thông số cấu hình chuẩn hóa của thí nghiệm thống kê đa seed}
-\label{tab:experiment-parameters}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccp{6.0cm}}
+\caption{Bộ tham số cấu hình chuẩn cho đánh giá thống kê đa giá trị khởi tạo}
+\label{tab:sim-statistical-config}
+\begin{tabularx}{\linewidth}{lccX}
 \toprule
 \textbf{Tham số cấu hình} & \textbf{Ký hiệu} & \textbf{Giá trị thiết lập} & \textbf{Ý nghĩa vật lý / Ghi chú} \\
 \midrule
@@ -43,8 +42,7 @@ Sai số góc tà IMU & $\sigma_{\text{el}}$ & 0{,}2$^\circ$ & Nhiễu góc nghi
 Tham số vị trí Alpha-Beta & $\alpha$ & 0{,}40 & Hệ số làm mịn vị trí tức thời \\
 Tham số vận tốc Alpha-Beta & $\beta$ & 0{,}0513 & Nghiệm Benedict-Bordner critically damped \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \subsubsection{Cơ sở toán học của các ước lượng thống kê mẫu}
@@ -89,7 +87,7 @@ Hệ số biến thiên (Coefficient of Variation, CV) là đại lượng khôn
 \centering
 \caption{Bảng số liệu RMSE chi tiết theo từng seed ($T=120$ s, $f_s=10$ Hz, đơn vị: mét)}
 \label{tab:raw-seed-data}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{c|ccc|ccc|ccc}
 \toprule
 \multirow{2}{*}{\textbf{Seed}} & \multicolumn{3}{c|}{\textbf{Người đi bộ}} & \multicolumn{3}{c|}{\textbf{Xe máy}} & \multicolumn{3}{c}{\textbf{Drone (3D)}} \\
@@ -117,7 +115,7 @@ Từ bảng dữ liệu chi tiết, các chỉ số thống kê tổng hợp đ�
 \centering
 \caption{Bảng tổng hợp tham số thống kê mô tả đa seed trên 10 giá trị khởi tạo ($n=10$)}
 \label{tab:multi-seed-summary}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Phương pháp} & \textbf{Trung bình (m)} & \textbf{Độ lệch chuẩn $s$} & \textbf{SEM (m)} & \textbf{Min (m)} & \textbf{Max (m)} \\
@@ -157,7 +155,7 @@ Hình \ref{fig:multi-seed-spec} minh họa trực quan kết quả thống kê s
 \centering
 \caption{Khoảng tin cậy 95\% cho kỳ vọng RMSE $\mu$ qua phân phối Student ($n=10, \nu=9$)}
 \label{tab:confidence-intervals-95}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & \textbf{Trung bình $\bar{x}$ (m)} & \textbf{Biên dưới $\text{CI}_{\text{lower}}$ (m)} & \textbf{Biên trên $\text{CI}_{\text{upper}}$ (m)} & \textbf{Độ rộng CI (m)} \\
@@ -212,7 +210,7 @@ trong đó $\bar{d}$ và $s_d$ lần lượt là trung bình và độ lệch ch
 \centering
 \caption{Kết quả kiểm định Student theo cặp so sánh Alpha-Beta và Kalman ($n=10$)}
 \label{tab:paired-t-test}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Kịch bản đối chiếu} & \textbf{Sai biệt TB $\bar{d}$ (m)} & \textbf{Độ lệch chuẩn $s_d$} & \textbf{Thống kê $t_{\text{stat}}$} & \textbf{Giá trị $p$} & \textbf{Kết luận ($p < 0{,}001$)} \\
@@ -247,7 +245,7 @@ Ranh giới phát hiện ngoại lai trên và dưới (Fences) được định
 \centering
 \caption{Bảng phân tích tứ phân vị và kiểm tra điểm ngoại lai qua quy tắc IQR}
 \label{tab:iqr-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccccccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & $Q_1$ (m) & $Q_2$ (m) & $Q_3$ (m) & \textbf{IQR} & \textbf{Ranh giới dưới} & \textbf{Ranh giới trên} & \textbf{Ngoại lai} \\
@@ -270,37 +268,38 @@ Ranh giới phát hiện ngoại lai trên và dưới (Fences) được định
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{%
 \begin{tikzpicture}
 \begin{axis}[
-    width=0.90\textwidth,
+    width=0.95\textwidth,
     height=7.0cm,
     xlabel={Kịch bản \& Thuật toán ước lượng},
     ylabel={RMSE phân bố mẫu (m)},
     ymin=0, ymax=3.2,
     symbolic x coords={Ped-Raw, Ped-AB, Ped-KF, Moto-Raw, Moto-AB, Moto-KF, Drone-Raw, Drone-AB, Drone-KF},
-    xtick=data,
+    xtick={Ped-Raw, Ped-AB, Ped-KF, Moto-Raw, Moto-AB, Moto-KF, Drone-Raw, Drone-AB, Drone-KF},
     x tick label style={rotate=35, anchor=east, font=\scriptsize\sffamily},
     grid=major,
     grid style={dashed, gray!30},
+    enlarge x limits=0.08
 ]
 % Pedestrian
 \addplot+[black, mark=*, mark options={fill=yellow!70!black}, only marks] coordinates {(Ped-Raw, 0.628)};
 \addplot+[black, mark=*, mark options={fill=purple!70!black}, only marks] coordinates {(Ped-AB, 0.339)};
 \addplot+[black, mark=*, mark options={fill=blue!70!black}, only marks] coordinates {(Ped-KF, 0.922)};
+
 % Motorcycle
 \addplot+[black, mark=*, mark options={fill=yellow!70!black}, only marks] coordinates {(Moto-Raw, 1.643)};
 \addplot+[black, mark=*, mark options={fill=purple!70!black}, only marks] coordinates {(Moto-AB, 0.908)};
 \addplot+[black, mark=*, mark options={fill=blue!70!black}, only marks] coordinates {(Moto-KF, 1.527)};
+
 % Drone
 \addplot+[black, mark=*, mark options={fill=yellow!70!black}, only marks] coordinates {(Drone-Raw, 1.955)};
 \addplot+[black, mark=*, mark options={fill=purple!70!black}, only marks] coordinates {(Drone-AB, 1.094)};
 \addplot+[black, mark=*, mark options={fill=blue!70!black}, only marks] coordinates {(Drone-KF, 2.388)};
 
-% Draw Spec Threshold
-\addplot[red, dashed, thick, domain=0:10] coordinates {(Ped-Raw, 5.0) (Drone-KF, 5.0)};
 \end{axis}
-\end{tikzpicture}
+\end{tikzpicture}%
 }
 \caption{Biểu đồ phân vị và giá trị trung vị $Q_2$ của sai số vị trí RMSE qua 10 giá trị seed}
 \label{fig:boxplot-stats}
@@ -327,7 +326,7 @@ Hệ số $\alpha$ được kiểm nghiệm qua ba chế độ vận hành đặ
 \centering
 \caption{Độ nhạy của RMSE trung bình và độ lệch chuẩn theo tham số $\alpha$ (Người đi bộ, 10 seed)}
 \label{tab:alpha-sweep-results}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 $\alpha$ & $\beta$ & \textbf{RMSE trung bình (m)} & \textbf{Độ lệch chuẩn $s$ (m)} & \textbf{Đặc tính động học} \\
@@ -350,10 +349,10 @@ $\alpha$ & $\beta$ & \textbf{RMSE trung bình (m)} & \textbf{Độ lệch chuẩ
 \centering
 \includegraphics[width=0.8\textwidth]{figures/alpha_sensitivity.png}
 \caption{Đặc tuyến phụ thuộc của RMSE trung bình theo tham số làm mịn $\alpha$ của bộ lọc Alpha-Beta}
-\label{fig:alpha-sensitivity}
+\label{fig:alpha-sensitivity-w7}
 \end{figure}
 
-Phân tích kết quả từ Hình \ref{fig:alpha-sensitivity} chỉ ra rằng đối với mục tiêu người đi bộ có dải vận tốc thấp ($v \approx 1{,}4$ m/s), việc giảm $\alpha$ xuống 0,20 giúp giảm RMSE xuống $0{,}214$ m. Tuy nhiên, khi mục tiêu thực hiện đổi hướng đột ngột $90^\circ$, bộ lọc với $\alpha = 0{,}20$ mất tới 1,8 giây để triệt tiêu sai số trễ (lag error), trong khi $\alpha = 0{,}40$ chỉ mất 0,6 giây. Do đó, tham số $\alpha = 0{,}40$ được chọn làm giá trị mặc định cho toàn bộ các chế độ bám bắt đa mục tiêu.
+Phân tích kết quả từ Hình \ref{fig:alpha-sensitivity-w7} chỉ ra rằng đối với mục tiêu người đi bộ có dải vận tốc thấp ($v \approx 1{,}4$ m/s), việc giảm $\alpha$ xuống 0,20 giúp giảm RMSE xuống $0{,}214$ m. Tuy nhiên, khi mục tiêu thực hiện đổi hướng đột ngột $90^\circ$, bộ lọc với $\alpha = 0{,}20$ mất tới 1,8 giây để triệt tiêu sai số trễ (lag error), trong khi $\alpha = 0{,}40$ chỉ mất 0,6 giây. Do đó, tham số $\alpha = 0{,}40$ được chọn làm giá trị mặc định cho toàn bộ các chế độ bám bắt đa mục tiêu.
 
 \subsection{Phân tích lan truyền sai số và khoảng cách giao cắt chi phối}
 
@@ -376,7 +375,7 @@ R_{\text{cross}} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{e
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.9\textwidth,
@@ -415,7 +414,7 @@ Kết quả chỉ ra rằng trong toàn bộ phạm vi hoạt động danh đị
 \centering
 \caption{Đánh giá tác động của bán kính tuần tra $R_{\text{bound}}$ đến chất lượng định vị}
 \label{tab:boundary-sweep-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 $R_{\text{bound}}$ (m) & \textbf{RMSE Đo thô (m)} & \textbf{RMSE $\alpha$-$\beta$ (m)} & \textbf{RMSE Kalman (m)} & \textbf{Đóng góp góc IMU (\%)} \\
@@ -440,7 +439,7 @@ Tại $R_{\text{bound}} = 800$ m, đóng góp phương sai của góc đo IMU v�
 \centering
 \caption{Định lượng chi phí tính toán và bộ nhớ làm việc trên một chu kỳ trích mẫu}
 \label{tab:resource-breakdown}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Chỉ tiêu tài nguyên} & \textbf{Đo thô (RSS)} & \textbf{Alpha-Beta Filter} & \textbf{Kalman Filter (2D/3D)} \\
@@ -470,13 +469,13 @@ F_N(r) = P(\varepsilon \le r) = 1 - \exp\left(-\frac{r^2}{2\sigma^2}\right)
 \label{eq:ecdf-formula}
 \end{equation}
 
-Bảng \ref{tab:ecdf-quantiles} thống kê xác suất tích lũy $P(\varepsilon \le r)$ tại các mốc bán kính ngưỡng $r \in \{0{,}5\text{ m}, 1{,}0\text{ m}, 2{,}0\text{ m}, 3{,}0\text{ m}, 5{,}0\text{ m}\}$ thu được từ toàn bộ $108.000$ điểm dữ liệu thực nghiệm qua 10 seed.
+Bảng \ref{tab:ecdf-quantiles} thống kê xác suất tích lũy sai số $P(\varepsilon \le r)$ tại các mốc bán kính ngưỡng $r$ từ $0{,}5$ m đến $5{,}0$ m thu được từ toàn bộ $108.000$ điểm dữ liệu thực nghiệm qua 10 seed.
 
 \begin{table}[H]
 \centering
 \caption{Xác suất tích lũy sai số vị trí thực nghiệm $P(\varepsilon \le r)$ qua $108.000$ khung mẫu}
 \label{tab:ecdf-quantiles}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & $P(\le 0{,}5\text{ m})$ & $P(\le 1{,}0\text{ m})$ & $P(\le 2{,}0\text{ m})$ & $P(\le 3{,}0\text{ m})$ & $P(\le 5{,}0\text{ m})$ \\
@@ -517,7 +516,7 @@ Bảng \ref{tab:covariance-convergence} theo dõi quá trình suy giảm của b
 \centering
 \caption{Diễn biến hội tụ của ma trận hiệp phương sai trạng thái $\mathbf{P}_k$ theo bước thời gian}
 \label{tab:covariance-convergence}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccp{5.5cm}}
 \toprule
 \textbf{Bước $k$} & \textbf{Thời gian $t$ (s)} & $\mathbf{P}_k(1,1)$ ($\text{m}^2$) & $\mathbf{P}_k(2,2)$ ($\text{m}^2$) & $r_{\text{unc}}(k)$ (m) & \textbf{Trạng thái động học bộ lọc} \\
@@ -545,7 +544,7 @@ Kết quả chứng minh ma trận $\mathbf{P}_k$ cần khoảng 50 đến 100 b
 \centering
 \caption{Phân rã sai số vị trí theo các trục không gian độc lập qua 10 seed ($n=10$)}
 \label{tab:spatial-error-axes}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & \textbf{RMSE trục Đông (m)} & \textbf{RMSE trục Bắc (m)} & \textbf{RMSE trục Đ.cao (m)} & \textbf{Tỷ số $s_E / s_N$} \\
@@ -592,7 +591,7 @@ trong đó $\lambda_{\max}$ và $\lambda_{\min}$ là các giá trị riêng cự
 \centering
 \caption{Khảo sát số điều kiện $\kappa(\mathbf{S}_k)$ của ma trận đổi mới trong suốt quá trình lọc}
 \label{tab:matrix-conditioning}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Giai đoạn lọc} & $\lambda_{\max}(\mathbf{S}_k)$ & $\lambda_{\min}(\mathbf{S}_k)$ & $\kappa(\mathbf{S}_k)$ & \textbf{Đánh giá ổn định số} \\
@@ -618,7 +617,7 @@ Mô hình xe máy động học di chuyển tự do trong không gian hai chiề
 \centering
 \caption{So sánh thống kê đa seed giữa mô hình xe máy động học và xe máy mạng đường OSM}
 \label{tab:motorcycle-models-compare}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{c|ccc|ccc}
 \toprule
 \multirow{2}{*}{\textbf{Seed}} & \multicolumn{3}{c|}{\textbf{Xe máy động học (Kinematic)}} & \multicolumn{3}{c}{\textbf{Xe máy mạng đường (OSM Road)}} \\
@@ -660,7 +659,7 @@ Giá trị $\sigma_a$ điều chỉnh mức độ tin cậy vào mô hình độ
 \centering
 \caption{Độ nhạy RMSE của bộ lọc Kalman theo tham số gia tốc quá trình $\sigma_a$}
 \label{tab:process-noise-sweep}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 $\sigma_a$ ($\text{m/s}^2$) & \textbf{Người đi bộ (m)} & \textbf{Xe máy Kinematic (m)} & \textbf{Xe máy OSM (m)} & \textbf{Drone 3D (m)} \\
@@ -688,7 +687,7 @@ Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán 
 \centering
 \caption{Đánh giá sai số ngoại suy và thời gian tái bắt mục tiêu sau khi mất tín hiệu}
 \label{tab:loss-of-signal-recovery}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Thời gian mất tín hiệu} & \textbf{Độ lệch KF (m)} & \textbf{Bán kính bất định $\mathbf{P}_k$ (m)} & \textbf{Độ lệch $\alpha$-$\beta$ (m)} & \textbf{Thời gian tái bắt KF} \\
@@ -712,7 +711,7 @@ Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán 
 \centering
 \caption{Đánh giá sai số định vị RMSE theo tần số trích mẫu hệ thống $f_s$}
 \label{tab:sampling-rate-sweep}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Tần số $f_s$ (Hz)} & \textbf{Chu kỳ $\Delta t$ (ms)} & \textbf{RMSE $\alpha$-$\beta$ Người (m)} & \textbf{RMSE KF Người (m)} & \textbf{Thời gian xử lý/bước} \\
@@ -749,7 +748,7 @@ Bảng \ref{tab:ekf-vs-linear-compare} đối chiếu hiệu năng giữa EKF tr
 \centering
 \caption{Đối chiếu hiệu năng giữa EKF trực tiếp và Bộ lọc phân tầng ENU đề xuất}
 \label{tab:ekf-vs-linear-compare}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Tiêu chí so sánh} & \textbf{Kiến trúc EKF trực tiếp} & \textbf{Kiến trúc phân tầng ENU (Đề xuất)} & \textbf{Cải thiện / Ưu thế} \\
@@ -782,7 +781,7 @@ Bảng \ref{tab:psd-energy-distribution} thống kê tỷ lệ phân bố năng 
 \centering
 \caption{Phân bố năng lượng phổ sai số $S_{ee}(f)$ trên các dải tần số trích mẫu}
 \label{tab:psd-energy-distribution}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & \textbf{Dải thấp ($0 - 0{,}5$ Hz)} & \textbf{Dải trung ($0{,}5 - 2$ Hz)} & \textbf{Dải cao ($2 - 5$ Hz)} \\
@@ -874,7 +873,7 @@ Bảng \ref{tab:temporal-segmentation-rmse} tổng hợp giá trị RMSE phân �
 \centering
 \caption{Đánh giá sai số RMSE phân đoạn qua ba pha thời gian động học ($n=10$)}
 \label{tab:temporal-segmentation-rmse}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & \textbf{Pha 1 (0--10 s)} & \textbf{Pha 2 (10--30 s)} & \textbf{Pha 3 (30--120 s)} & \textbf{Xu hướng biến thiên} \\
@@ -919,7 +918,7 @@ Với mức ý nghĩa thống kê 95\%, giới hạn tin cậy Bartlett đối v
 \centering
 \caption{Hệ số tự tương quan phần dư đổi mới $r_{yy}(\tau)$ qua 10 bước trễ ($N=1200$)}
 \label{tab:innovation-autocorrelation}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Độ trễ $\tau$} & \textbf{Người đi bộ ($r_{yy}$)} & \textbf{Xe máy ($r_{yy}$)} & \textbf{Drone 3D ($r_{yy}$)} & \textbf{Giới hạn Bartlett 95\%} \\
@@ -955,7 +954,7 @@ Khi bộ lọc nhất quán (consistent), biến ngẫu nhiên $\epsilon_k$ tuâ
 \centering
 \caption{Đánh giá chỉ số NEES trung bình toàn phiên qua 10 seed thực nghiệm}
 \label{tab:nees-consistency-results}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản mục tiêu} & \textbf{Bậc tự do $n_x$} & \textbf{Kỳ vọng lý thuyết} & \textbf{NEES trung bình $\bar{\epsilon}$} & \textbf{Khoảng tin cậy 95\% $\chi^2$} \\

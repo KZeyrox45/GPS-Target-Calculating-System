@@ -35,11 +35,11 @@ Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm bảy bước, mỗi bước có ng
 
 Bảng \ref{tab:timing-budget} tổng hợp ngân sách thời gian của toàn bộ chu kỳ xử lý.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Bước xử lý} & \textbf{Ngân sách (ms)} & \textbf{Tỷ lệ} \\
@@ -79,7 +79,7 @@ Biên an toàn 31\% (tương đương 31 ms) đủ lớn để xử lý các bi�
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{3.5cm}p{3.5cm}p{3.5cm}}
 \toprule
 \textbf{Tiêu chí} & \textbf{HTTP Polling} & \textbf{SSE} & \textbf{WebSocket} \\
@@ -136,7 +136,7 @@ Cấu trúc bản tin cảm biến gồm các trường sau:
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llp{8cm}}
 \toprule
 \textbf{Trường} & \textbf{Kiểu dữ liệu} & \textbf{Ý nghĩa} \\
@@ -166,13 +166,13 @@ laser & đối tượng & khoảng cách đo được từ thiết bị đến m
     \item \textbf{step}: Số thứ tự bước thời gian hiện tại, bắt đầu từ 0 mỗi phiên mới.
 \end{itemize}
 
-\newpage
+
 
 Cấu trúc bản tin kết quả gồm các trường sau:
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llp{8cm}}
 \toprule
 \textbf{Trường} & \textbf{Kiểu dữ liệu} & \textbf{Ý nghĩa} \\
@@ -202,7 +202,7 @@ Bán kính bất định được tính từ công thức $\sigma_{pos} = \sqrt{
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{clp{7cm}}
 \toprule
 \textbf{Bước} & \textbf{Thao tác} & \textbf{Mô tả} \\
@@ -280,7 +280,7 @@ Màu sắc được thiết kế đủ tương phản để phân biệt rõ rà
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị đo} & \textbf{Yêu cầu} \\
@@ -311,7 +311,7 @@ Tần số khung hình (frame rate)          & 60 FPS & $\geq$ 30 FPS \\
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -347,11 +347,11 @@ Biểu đồ cho thấy giai đoạn hội tụ ban đầu của Kalman filter k
 
 \hspace{0.5cm} Hiệu suất tính toán của chuỗi xử lý được đo lường chi tiết trên từng bước để xác định nút thắt cổ chai và tìm cơ hội cải thiện. Bảng \ref{tab:pipeline-timing} trình bày thời gian thực thi trung bình của từng bước, được đo trên 10.000 lần chạy với CPython 3.11 trên máy tính có bộ vi xử lý AMD Ryzen 5 5600X.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Bước xử lý} & \textbf{Thời gian trung bình} & \textbf{Tỷ lệ} \\
@@ -401,7 +401,7 @@ Tổng độ trễ end-to-end xấp xỉ 12 ms, thấp hơn nhiều so với yê
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Thành phần} & \textbf{Bộ nhớ} \\
@@ -434,7 +434,7 @@ Bộ nhớ server chủ yếu tập trung vào trạng thái bộ lọc và bộ
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} \\
@@ -460,7 +460,7 @@ Tổng bandwidth toàn duplex 4.4 KB/s rất thấp so với khả năng truyề
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{2.5cm}p{7cm}p{5cm}}
 \toprule
 \textbf{Thuộc tính} & \textbf{Synthetic (mô phỏng)} & \textbf{Real-World (dữ liệu thực)} \\
@@ -484,7 +484,7 @@ Chế độ Real-World sử dụng dữ liệu từ ba nguồn khác nhau. Với
 
 \hspace{0.5cm} Trang theo dõi (TrackingPage) đóng vai trò là bảng điều khiển thời gian thực chính của hệ thống. Hình \ref{fig:tracking-dashboard} hiển thị giao diện khi mô phỏng đang chạy với mục tiêu đi bộ, bộ lọc Kalman + alpha-beta, chế độ mô phỏng.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -493,18 +493,12 @@ Chế độ Real-World sử dụng dữ liệu từ ba nguồn khác nhau. Với
 \label{fig:tracking-dashboard}
 \end{figure}
 
-Giao diện được tổ chức thành các vùng chức năng:
-
 \begin{itemize}
-    \item \textbf{Vùng điều khiển mô phỏng (Simulation Panel):} Chọn loại mục tiêu (PEDESTRIAN/MOTORCYCLE/DRONE), thuật toán lọc (KF+AB/KF ONLY/AB ONLY), thời lượng (giây), bán kính ranh giới (mét), và nguồn dữ liệu (Synthetic/Real-World Data). Nút ENGAGE bắt đầu mô phỏng.
-
-    \item \textbf{Bản đồ (Tracking Map):} Hiển thị bản đồ OpenStreetMap với các lớp dữ liệu (quỹ đạo thô, Kalman, alpha-beta, đường viền). Bán kính ranh giới 200 m, 400 m, 600 m hiển thị dưới dạng đường tròn bán trong suốt.
-
-    \item \textbf{Biểu đồ sai số (Error Metrics Chart):} Biểu đồ đường thể hiện sai số vị trí theo thời gian cho cả hai bộ lọc và đo thô.
-
-    \item \textbf{Biểu đồ cao độ (Altitude Chart):} (Chỉ cho drone) Hiển thị cao độ thực tế, ước lượng Kalman và alpha-beta theo thời gian.
-
-    \item \textbf{Bảng số liệu (Status Bar):} Hiển thị tọa độ hiện tại (East, North, Alt), sai số RMSE theo từng bộ lọc, số frame, và trạng thái hệ thống.
+    \item \textbf{Bảng điều khiển thông số:} Cho phép lựa chọn loại mục tiêu (người đi bộ, xe máy, drone), giải thuật bám bắt (Kalman, Alpha-Beta hoặc chạy song song), thời lượng theo dõi, bán kính giới hạn và nguồn dữ liệu. Nút khởi chạy cho phép kích hoạt phiên làm việc tức thời.
+    \item \textbf{Bản đồ trực quan hóa:} Hiển thị nền bản đồ số với các lớp dữ liệu tương ứng (vị trí đo thô, ước lượng Kalman, ước lượng Alpha-Beta). Các vòng tròn đồng tâm thể hiện các ngưỡng cự ly quan sát 200 m, 400 m và 600 m.
+    \item \textbf{Biểu đồ sai số thời gian thực:} Biểu diễn diễn biến sai số khoảng cách của từng phương pháp ước lượng so với giá trị thực theo từng khung thời gian.
+    \item \textbf{Biểu đồ cao độ:} Theo dõi biến thiên độ cao thực tế và độ cao ước lượng của các phương tiện bay không người lái.
+    \item \textbf{Thanh trạng thái hệ thống:} Hiển thị tức thời tọa độ địa phương, sai số trung phương tích lũy, số khung hình xử lý và trạng thái kết nối mạng.
 \end{itemize}
 
 \subsection{Xử lý sự cố và phục hồi}
@@ -529,7 +523,7 @@ Giao diện được tổ chức thành các vùng chức năng:
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Phương pháp} & \textbf{TB (m)} & \textbf{ĐLC (m)} & \textbf{Min (m)} & \textbf{Max (m)} \\
@@ -557,7 +551,7 @@ Kết quả đa seed xác nhận độ ổn định thống kê của cả hai p
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giai đoạn 1} & \textbf{Giai đoạn 2} \\
@@ -583,11 +577,11 @@ Sự khác biệt cốt lõi giữa hai giai đoạn là chuyển đổi từ m�
 
 \hspace{0.5cm} Mỗi chu kỳ xử lý 100 ms (10 Hz) bao gồm bảy bước chính. Bảng \ref{tab:pipeline-steps} mô tả chi tiết từng bước, đầu vào, đầu ra và thời gian thực thi.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{clp{3.1cm}p{3.1cm}cc}
 \toprule
 \textbf{Bước} & \textbf{Thao tác} & \textbf{Đầu vào} & \textbf{Đầu ra} & \textbf{Thời gian} & \textbf{Tỷ lệ} \\
@@ -626,7 +620,7 @@ Bảng \ref{tab:adaptive-r-examples} minh họa giá trị $\sigma_{pos}$ tại 
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Khoảng cách (m)} & $\boldsymbol{\sigma_{lateral}}$ \textbf{(m)} & $\boldsymbol{\sigma_{along}}$ \textbf{(m)} & $\boldsymbol{\sigma_{elevation}}$ \textbf{(m)} & $\boldsymbol{\sigma_{pos}}$ \textbf{(m)} \\
@@ -649,11 +643,11 @@ Tại khoảng cách 400 m (ranh giới mặc định), $\sigma_{pos} = 5,60$ m,
 
 \hspace{0.5cm} Hiệu năng hệ thống được đo lường trên nhiều cấp độ: xử lý tính toán, truyền tải mạng, và hiển thị giao diện. Bảng \ref{tab:sys-perf} tổng hợp kết quả đo lường chi tiết.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị đo} & \textbf{Yêu cầu} & \textbf{Trạng thái} \\
@@ -682,7 +676,7 @@ Tất cả các chỉ số đều vượt yêu cầu thiết kế với biên an
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{4cm}p{1.5cm}p{6cm}}
 \toprule
 \textbf{Trường} & \textbf{Kiểu} & \textbf{Mô tả} \\
@@ -717,26 +711,24 @@ Mỗi bản tin có kích thước 180-220 byte, rất nhỏ so với dung lư�
 
 \subsection{Kiến trúc quản lý phiên}
 
-\hspace{0.5cm} Mỗi phiên tracking được quản lý độc lập trên server, với vòng đời gồm bốn giai đoạn: khởi tạo, chạy, tạm dừng, và dọn dẹp. Bảng \ref{tab:session-lifecycle} mô tả chi tiết từng giai đoạn và các thao tác associated.
+\hspace{0.5cm} Mỗi phiên tracking được quản lý độc lập trên server, với vòng đời gồm bốn giai đoạn: khởi tạo, chạy, tạm dừng, và dọn dẹp. Bảng \ref{tab:server-session-lifecycle} mô tả chi tiết từng giai đoạn và các thao tác tương ứng.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
-\begin{tabular}{p{2cm}p{3.5cm}p{7cm}}
+\caption{Vòng đời phiên theo dõi trên máy chủ dịch vụ}
+\label{tab:server-session-lifecycle}
+\begin{tabularx}{\linewidth}{llX}
 \toprule
-\textbf{Giai đoạn} & \textbf{Kích hoạt} & \textbf{Thao tác} \\
+\textbf{Giai đoạn} & \textbf{Kích hoạt} & \textbf{Thao tác xử lý} \\
 \midrule
-Khởi tạo & ENGAGE button & Tạo session ID, khởi tạo 3 bộ lọc (KF, AB, raw), cấp phát ring buffer 500 điểm, bắt đầu mô phỏng \\
-Chạy & Tự động sau khởi tạo & Mô phỏng tạo quỹ đạo, bộ lọc xử lý, gửi bản tin 10 Hz, ghi ring buffer \\
-Tạm dừng & Disconnect / lỗi mạng & Dừng mô phỏng, giữ trạng thái bộ lọc, ring buffer giữ dữ liệu lịch sử \\
-Dọn dẹp & Đóng tab / STOP & Xóa session, giải phóng bộ lọc, dừng mô phỏng, xóa ring buffer \\
+Khởi tạo & Nút khởi chạy & Tạo mã định danh phiên, khởi tạo các bộ lọc ước lượng, cấp phát vùng đệm 500 điểm \\
+Chạy & Tự động sau khởi tạo & Sinh quỹ đạo, bộ lọc xử lý tức thời, truyền dữ liệu nhịp 10 Hz, ghi vùng đệm \\
+Tạm dừng & Mất kết nối mạng & Tạm dừng mô phỏng, bảo toàn trạng thái bộ lọc và dữ liệu lịch sử \\
+Dọn dẹp & Đóng tab hoặc dừng & Hủy phiên làm việc, giải phóng bộ nhớ và cấu trúc dữ liệu vùng đệm \\
 \bottomrule
-\end{tabular}
-}
-\caption{Vòng đời phiên tracking}
-\label{tab:session-lifecycle}
+\end{tabularx}
 \end{table}
 
 Việc quản lý phiên trên server (thay vì client) đảm bảo tính toàn vẹn dữ liệu: ngay cả khi trình duyệt bị đóng đột ngột, server vẫn có thể dọn dẹp tài nguyên đúng cách. Mỗi phiên chiếm khoảng 48 KB bộ nhớ server (bao gồm 3 bộ lọc Kalman/alpha-beta, ring buffer, và trạng thái mô phỏng), cho phép server 6 nhân xử lý đồng thời 6 phiên mà không gây quá tải.
@@ -747,7 +739,7 @@ Việc quản lý phiên trên server (thay vì client) đảm bảo tính toàn
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Thành phần} & \textbf{Thời gian} & \textbf{Phần trăm} \\
@@ -774,7 +766,7 @@ Thời gian chuyển đổi tọa độ (3,8 ms) bao gồm cả phép tính ma t
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3cm}p{3.5cm}p{6cm}}
 \toprule
 \textbf{Lớp} & \textbf{Loại Leaflet} & \textbf{Quản lý hiệu năng} \\
@@ -802,7 +794,7 @@ Hiệu năng render bản đồ được cải thiện bằng ba kỹ thuật ch
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3cm}p{1.5cm}p{2.5cm}p{5cm}}
 \toprule
 \textbf{Nguồn sai số} & \textbf{Ký hiệu} & \textbf{Giá trị} & \textbf{Cơ chế} \\
@@ -830,7 +822,7 @@ Với $\sigma_{GPS} = 5,0$ m, $\sigma_{\alpha} = 0,3^\circ$, $\sigma_{r} = 0,5$ 
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Khoảng cách (m)} & $\sigma_{GPS}$ (m) & $\sigma_{\alpha}$ (m) & $\sigma_{r}$ (m) & $\sigma_{pos}$ tổng hợp (m) \\
@@ -853,11 +845,11 @@ Bảng trên cho thấy ở khoảng cách ngắn (100 m), GPS dominate hoàn to
 
 \hspace{0.5cm} Trong điều kiện thời gian thực (chu kỳ 100 ms), cả hai bộ lọc đều có thể chạy song song trên cùng dữ liệu. Bảng \ref{tab:kf-vs-ab-rt} so sánh chi tiết trong bối cảnh triển khai thực tế.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{4.5cm}p{4.5cm}}
 \toprule
 \textbf{Tiêu chí} & \textbf{Kalman filter} & \textbf{Alpha-beta filter} \\
@@ -886,7 +878,7 @@ Alpha-beta filter tốt hơn về hiệu quả tính toán (10 $\mu$s so với 4
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccc}
 \toprule
 \textbf{Số phiên} & \textbf{CPU server} & \textbf{Bộ nhớ} & \textbf{Bandwidth} \\

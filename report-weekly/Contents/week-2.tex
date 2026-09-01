@@ -6,7 +6,7 @@
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw, rounded corners=4mm, 
@@ -122,7 +122,7 @@ Vai trò chính của RPi bao gồm: đọc dữ liệu từ GPS qua UART (giao 
 \centering
 \caption{Các trường trong bản tin JSON}
 \label{tab:message-fields}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llll}
 \toprule
 \textbf{Trường} & \textbf{Kiểu dữ liệu} & \textbf{Ý nghĩa} & \textbf{Giá trị ví dụ} \\
@@ -201,7 +201,7 @@ Vị trí mục tiêu trên bản đồ lệch khoảng 199 m về hướng Đô
 
 \hspace{0.5cm} Sơ đồ lớp (class diagram) mô tả các thực thể phần mềm chính và mối quan hệ giữa chúng được trình bày trong Hình \ref{fig:class}.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -338,7 +338,7 @@ Phần mềm cũng tích hợp cơ chế tự kiểm tra (health check). Nếu c
 \hspace{0.5cm} Cây thành phần bắt đầu từ trang chủ, trang theo dõi, trang tính toán tĩnh, và trang so sánh. Trang theo dõi là trang chính, chứa:
 
 \begin{itemize}
-\item \textbf{Bản đồ}: Thành phần bản đồ hiển thị bản đồ OpenStreetMap với các lớp (layer) đánh dấu vị trí quan sát (xanh), vị trí mục tiêu (đỏ), và quỹ đạo (đường kẻ).
+    \item \textbf{Bản đồ}: Thành phần bản đồ hiển thị bản đồ OpenStreetMap với các lớp (layer) đánh dấu vị trí quan sát (xanh), vị trí mục tiêu (đỏ), và quỹ đạo (đường kẻ).
     \item \textbf{Bảng điều khiển mô phỏng}: Chứa các nút bắt đầu/dừng, chọn loại mục tiêu, chọn thuật toán lọc, và công tắc chuyển đổi nguồn dữ liệu (dữ liệu mô phỏng hoặc dữ liệu thực).
     \item \textbf{Thanh trạng thái}: Hiển thị thông tin kết nối kênh truyền dữ liệu hai chiều, tần số cập nhật, và trạng thái hiện tại của hệ thống.
     \item \textbf{Bảng tọa độ}: Hiển thị tọa độ thời gian thực, góc ngắm, khoảng cách, và tốc độ mục tiêu.
@@ -376,7 +376,7 @@ Hình \ref{fig:screenshot-tracking} minh họa giao diện theo dõi đang hoạ
 
 Hình \ref{fig:screenshot-homepage} hiển thị trang chủ của hệ thống, với mô tả chức năng chính và điều hướng đến các trang con.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -393,7 +393,7 @@ Hình \ref{fig:screenshot-homepage} hiển thị trang chủ của hệ thống,
 \centering
 \caption{Phân bổ thời gian xử lý trong một chu kỳ 100 ms}
 \label{tab:time-budget}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Thành phần} & \textbf{Thời gian (ms)} & \textbf{Tỷ lệ (\%)} \\
@@ -421,29 +421,27 @@ Phân bổ thời gian này cũng cho thấy dung lượng dự phòng đáng k�
 
 \hspace{0.5cm} Bảng \ref{tab:phase-comparison} so sánh khả năng giữa giai đoạn 1 (tính toán điểm đơn) và giai đoạn 2 (tracking thời gian thực).
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\caption{So sánh khả năng giữa Phase 1 và Phase 2}
+\caption{So sánh đặc tính giữa tính toán điểm tĩnh và bám bắt động thời gian thực}
 \label{tab:phase-comparison}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{p{4.5cm}p{5cm}p{5cm}}
+\begin{tabularx}{\linewidth}{lXX}
 \toprule
-\textbf{Khía cạnh} & \textbf{Phase 1} & \textbf{Phase 2} \\
+\textbf{Khía cạnh} & \textbf{Tính toán điểm tĩnh} & \textbf{Bám bắt động thời gian thực} \\
 \midrule
 Bài toán & Tính tọa độ mục tiêu tĩnh từ một lần đo & Theo dõi mục tiêu di động liên tục \\
-Số lần đo & Mỗi lần là độc lập & Liên kết theo thời gian \\
-Bộ lọc ước lượng & Không có & Kalman filter và alpha-beta \\
-Kiến trúc & Thuật toán chạy trên trình duyệt & Máy chủ kết hợp trình duyệt (FastAPI + React) \\
-Giao tiếp & Không có kênh truyền & WebSocket (kênh truyền dữ liệu hai chiều) \\
-Quản lý phiên & Không có & Tạo, duy trì, dừng phiên \\
-Mục tiêu & Người đi bộ, xe máy, drone & Người đi bộ, xe máy, drone \\
-Bản đồ & Bản đồ hiển thị vị trí & Bản đồ hiển thị quỹ đạo thời gian thực \\
-Xuất dữ liệu & Không có & Xuất tọa độ quỹ đạo \\
+Số lần đo & Mỗi lần là độc lập & Liên kết theo chuỗi thời gian \\
+Bộ lọc ước lượng & Không áp dụng & Lọc Kalman thích nghi và Alpha-Beta \\
+Kiến trúc tính toán & Thuật toán đơn điểm & Máy chủ dịch vụ kết hợp giao diện web \\
+Kênh truyền & Không sử dụng & Kênh truyền dữ liệu hai chiều thời gian thực \\
+Quản lý phiên & Không có & Khởi tạo, duy trì và lưu trữ phiên \\
+Mục tiêu khảo sát & Điểm cố định & Người đi bộ, xe máy, drone \\
+Hiển thị bản đồ & Đánh dấu vị trí tức thời & Hiển thị quỹ đạo và vùng bất định \\
+Xuất dữ liệu & Không hỗ trợ & Xuất toàn bộ chuỗi dữ liệu quỹ đạo \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 Sự khác biệt cơ bản giữa hai giai đoạn là bổ sung bộ lọc ước lượng và kiến trúc máy chủ kết hợp trình duyệt. Giai đoạn 1 tính toán từng điểm độc lập, không có khái niệm "thời gian". Giai đoạn 2 liên kết các phép tính theo thời gian, sử dụng lịch sử để cải thiện độ chính xác qua bộ lọc.
@@ -458,7 +456,7 @@ Trong giai đoạn 2, mỗi bản tin cảm biến không chỉ được xử l�
 \centering
 \caption{Tham số mô hình nhiễu cảm biến}
 \label{tab:noise-model-detail}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Cảm biến} & \textbf{Tham số} & \textbf{Giá trị} & \textbf{Lý do lựa chọn} \\
@@ -502,7 +500,7 @@ Bảng \ref{tab:rest-api} liệt kê các endpoint chính. Mỗi endpoint có ch
 \centering
 \caption{Các endpoint REST API}
 \label{tab:rest-api}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llll}
 \toprule
 \textbf{Endpoint} & \textbf{Phương thức} & \textbf{Chức năng} & \textbf{Đầu ra} \\
@@ -567,9 +565,105 @@ Khi phiên kết thúc, người dùng có thể yêu cầu xuất dữ liệu q
 
 Ngoài CSV, hệ thống cũng ghi nhận thống kê tóm tắt khi dừng phiên: sai số trung bình bình phương (RMSE) cho từng phương pháp lọc, số frame đã xử lý, thời gian chạy thực tế. Các thông số này hiển thị trên giao diện và được lưu trong đối tượng phiên để truy xuất qua REST API.
 
+\subsection{Đặc tả giao thức đóng gói bản tin JSON và tối ưu hóa băng thông truyền thông}
+
+\hspace{0.5cm} Để truyền tải dữ liệu định vị thời gian thực giữa máy chủ dịch vụ và giao diện người dùng, bản tin trạng thái được cấu trúc dưới định dạng JSON với 19 trường số liệu chuẩn hóa:
+\begin{equation}
+S_{\text{payload}} = \sum_{i=1}^{19} S(\text{field}_i) + S_{\text{syntax}} \approx 180 \sim 220\text{ byte/frame}
+\label{eq:json-payload-size-formula}
+\end{equation}
+
+Băng thông mạng tiêu thụ tại tần số phát sóng danh định 10 Hz:
+\begin{equation}
+B_{\text{network}} = S_{\text{payload}} \times f_{\text{sample}} = 200\text{ byte} \times 10\text{ Hz} = 2{,}0\text{ KB/s} = 16{,}0\text{ kbps}
+\label{eq:bandwidth-consumption-formula}
+\end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Bảng phân bổ các trường dữ liệu và kích thước nhị phân trong bản tin JSON 10 Hz}
+\label{tab:json-frame-fields-breakdown}
+\adjustbox{max width=\linewidth}{
+\begin{tabular}{llccl}
+\toprule
+\textbf{Nhóm dữ liệu} & \textbf{Các trường thành phần} & \textbf{Kiểu dữ liệu} & \textbf{Kích thước} & \textbf{Ý nghĩa trắc địa và động học} \\
+\midrule
+Định danh phiên & \texttt{frame\_id}, \texttt{timestamp} & Int, Float & 24 byte & Số thứ tự khung và nhãn thời gian UNIX \\
+Tọa độ thực (Truth) & \texttt{true\_east}, \texttt{true\_north}, \texttt{true\_up} & Float64 & 48 byte & Tọa độ ENU thực tế của mục tiêu mô phỏng \\
+Đo thô cảm biến & \texttt{raw\_east}, \texttt{raw\_north}, \texttt{raw\_up} & Float64 & 48 byte & Vị trí hợp nhất từ Laser-IMU-GNSS chưa lọc \\
+Ước lượng Kalman & \texttt{kf\_east}, \texttt{kf\_north}, \texttt{kf\_up}, \texttt{kf\_v...} & Float64 & 48 byte & Tọa độ và vector vận tốc lọc Kalman 3D \\
+Ước lượng Alpha-Beta & \texttt{ab\_east}, \texttt{ab\_north}, \texttt{ab\_up} & Float64 & 48 byte & Tọa độ ước lượng từ bộ lọc Alpha-Beta \\
+Chỉ số thống kê & \texttt{rmse\_kf}, \texttt{rmse\_ab} & Float32 & 16 byte & Sai số tích lũy trực tiếp tại thời điểm hiện tại \\
+\midrule
+\textbf{Tổng cộng gói tin} & \textbf{19 trường số liệu} & \textbf{JSON UTF-8} & \textbf{$\sim 200$ byte} & \textbf{Băng thông $< 0{,}02\%$ mạng LAN 100 Mbps} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+Kích thước gói tin 200 byte giúp việc truyền tải qua kênh truyền dữ liệu hai chiều chiếm dụng băng thông không đáng kể, bảo đảm khả năng mở rộng phục vụ đồng thời hàng trăm phiên bám bắt mà không gây nghẽn mạng.
+
+\subsection{Kiến trúc bộ nhớ đệm dạng vòng xoay và kiểm soát tràn vùng nhớ}
+
+\hspace{0.5cm} Để lưu trữ chuỗi lịch sử quỹ đạo bám bắt phục vụ trực quan hóa bản đồ mà không gây cạn kiệt bộ nhớ RAM, cấu trúc dữ liệu Bộ đệm vòng xoay cố định (Fixed Ring Buffer) với dung lượng $N_{\text{max}} = 500$ điểm được hiện thực hóa:
+\begin{equation}
+\text{Con trỏ ghi: } \text{head} = (k - 1) \pmod{N_{\text{max}}}
+\label{eq:ring-buffer-head-pointer}
+\end{equation}
+
+Khi số lượng khung vượt quá $500$ ($t > 50$ s), dữ liệu mới nhất sẽ tự động ghi đè lên phần tử cũ nhất mà không cần thực hiện thao tác dịch chuyển mảng, bảo đảm độ phức tạp tính toán luôn đạt $\mathcal{O}(1)$:
+
+\begin{table}[H]
+\centering
+\caption{So sánh hiệu năng giữa mảng động tự co giãn và bộ đệm vòng xoay cố định}
+\label{tab:ring-buffer-vs-dynamic-array}
+\adjustbox{max width=\linewidth}{
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Cấu trúc lưu trữ} & \textbf{Độ phức tạp thêm mới} & \textbf{Độ phức tạp truy xuất} & \textbf{Chiếm dụng RAM sau 1h} & \textbf{Nguy cơ tràn bộ nhớ} \\
+\midrule
+Mảng động (\texttt{list.append}) & $\mathcal{O}(1)$ amortized & $\mathcal{O}(1)$ & $4{,}6$ MB ($36.000$ điểm) & Tăng tuyến tính theo thời gian \\
+\textbf{Bộ đệm vòng ($N=500$)} & $\mathbf{\mathcal{O}(1)\text{ hằng số}}$ & $\mathbf{\mathcal{O}(1)}$ & $\mathbf{64\text{ KB (Cố định)}}$ & \textbf{Hoàn toàn triệt tiêu ($0\%$)} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Kiến trúc tích hợp giao diện người dùng React và cơ chế nhịp tim kết nối}
+
+\hspace{0.5cm} Tại tầng trình diễn, giao diện người dùng xây dựng trên nền tảng React và thư viện bản đồ số Leaflet kết nối với máy chủ qua kênh truyền hai chiều. Cơ chế nhịp tim kết nối (Heartbeat Keep-Alive Protocol) được thiết lập để phát hiện sự cố mạng:
+\begin{equation}
+T_{\text{heartbeat}} = 5{,}0\text{ s}, \quad T_{\text{timeout}} = 15{,}0\text{ s}
+\label{eq:heartbeat-timeout-formula}
+\end{equation}
+
+Nếu trình duyệt không nhận được gói tin trạng thái trong 15 giây liên tục, hệ thống sẽ tự động kích hoạt thuật toán kết nối lại với độ trễ tăng dần theo cấp số nhân (Exponential Backoff):
+\begin{equation}
+t_{\text{retry}}(n) = \min(t_{\max}, t_{\text{base}} \times 2^n) = \min(10{,}0\text{ s}, 1{,}0\text{ s} \times 2^n)
+\label{eq:exponential-backoff-retry}
+\end{equation}
+
+\begin{table}[H]
+\centering
+\caption{Kịch bản thời gian tự động phục hồi kết nối giao diện theo thuật toán Exponential Backoff}
+\label{tab:exponential-backoff-schedule}
+\adjustbox{max width=\linewidth}{
+\begin{tabular}{ccccc}
+\toprule
+\textbf{Lần thử kết nối ($n$)} & \textbf{Thời gian chờ ($t_{\text{retry}}$)} & \textbf{Thời gian tích lũy} & \textbf{Trạng thái giao diện} & \textbf{Hành động phục hồi} \\
+\midrule
+Lần 1 & $1{,}0$ s & $1{,}0$ s & Hiển thị cảnh báo vàng & Tự động kết nối lại socket \\
+Lần 2 & $2{,}0$ s & $3{,}0$ s & Hiển thị cảnh báo cam & Giữ nguyên quỹ đạo gần nhất \\
+Lần 3 & $4{,}0$ s & $7{,}0$ s & Hiển thị cảnh báo đỏ & Thử lại đường truyền mạng \\
+Lần 4 & $8{,}0$ s & $15{,}0$ s & Cắt đứt an toàn & Giải phóng tài nguyên bộ nhớ \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
 \subsection{Tóm tắt thiết kế}
 
-\hspace{0.5cm} Kiến trúc phân lớp bốn tầng của hệ thống đảm bảo sự tách biệt giữa phần cứng cảm biến, xử lý nhúng, xử lý máy chủ, và hiển thị giao diện. Luồng dữ liệu đi từ cảm biến lên giao diện qua WebSocket (kênh truyền dữ liệu hai chiều), với mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi tọa độ.
+\hspace{0.5cm} Kiến trúc phân lớp bốn tầng của hệ thống đảm bảo sự tách biệt giữa phần cứng cảm biến, xử lý nhúng, xử lý máy chủ, và hiển thị giao diện. Luồng dữ liệu đi từ cảm biến lên giao diện qua kênh truyền dữ liệu hai chiều, với mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi tọa độ.
 
 Quản lý phiên đảm bảo mỗi lần theo dõi hoạt động độc lập, với bộ đệm dạng vòng lưu trữ dữ liệu gần nhất mà không tốn bộ nhớ vô hạn. Phân bổ thời gian cho thấy thuật toán có khả năng chạy ở tần số 10 Hz với dự phòng lớn. Thiết kế giao diện với React và thư viện bản đồ cung cấp giao diện trực quan và cập nhật theo thời gian thực.
 

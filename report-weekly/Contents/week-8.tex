@@ -34,7 +34,7 @@ với $\mathbf{P}_k^-$ là ma trận hiệp phương sai tiên nghiệm và $\ma
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -118,7 +118,7 @@ Kết quả giải tích trên chứng minh rằng độ bất định vị trí
 \centering
 \caption{Bảng tính chi tiết độ bất định vị trí và độ lợi Kalman thích nghi theo cự ly quan sát}
 \label{tab:detailed-distance-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccc}
 \toprule
 \textbf{Cự ly $R$ (m)} & $\sigma_{pos}$ (m) & $\mathbf{R}_k = \sigma_{pos}^2$ ($\text{m}^2$) & $\mathbf{K}_k$ (Adaptive) & $\mathbf{K}_{\text{fixed}}$ (Cố định) & \textbf{Độ suy giảm gain (\%)} \\
@@ -162,7 +162,7 @@ Bảng \ref{tab:riccati-steady-state} trình bày sự phụ thuộc của nghi�
 \centering
 \caption{Nghiệm xác lập Riccati $\mathbf{P}_{\infty}$ và bán kính bất định theo cự ly quan sát}
 \label{tab:riccati-steady-state}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Cự ly $R$ (m)} & $\mathbf{R}_k$ ($\text{m}^2$) & $\mathbf{P}_{\infty}(1,1)$ ($\text{m}^2$) & $\mathbf{P}_{\infty}(2,2)$ ($\text{m}^2/\text{s}^2$) & \textbf{Bán kính bất định xác lập (m)} \\
@@ -217,7 +217,7 @@ Bảng \ref{tab:z-domain-stability} phân tích vị trí các điểm cực và
 \centering
 \caption{Vị trí các điểm cực trong miền $Z$ và biên độ dự trữ ổn định theo khoảng cách}
 \label{tab:z-domain-stability}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccc}
 \toprule
 \textbf{Cự ly $R$ (m)} & $K_1$ & $K_2$ & Điểm cực $z_1$ & Điểm cực $z_2$ & \textbf{Bán kính cực $|z_{\max}|$} \\
@@ -257,7 +257,7 @@ Bảng \ref{tab:transient-response-analysis} tổng hợp các chỉ số đáp 
 \centering
 \caption{Đặc tính đáp ứng quá độ của bộ lọc Kalman thích nghi theo cự ly quan sát}
 \label{tab:transient-response-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Cự ly $R$ (m)} & \textbf{Độ vọt lố (Overshoot)} & \textbf{Thời gian xác lập $t_s$ (s)} & \textbf{Sai số dốc vận tốc $e_{\text{ss}}$ (m)} & \textbf{Sai số gia tốc $e_{\text{ss,acc}}$ (m)} \\
@@ -289,7 +289,7 @@ Khi mục tiêu ở xa, thời gian xác lập tăng nhẹ từ $0{,}5$ s lên $
 \centering
 \caption{So sánh toàn diện giữa các chiến lược thiết lập ma trận hiệp phương sai đo lường $\mathbf{R}$}
 \label{tab:adaptive-strategies-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Tiêu chí đánh giá} & \textbf{Cố định tĩnh} & \textbf{Hình học RSS (Đề xuất)} & \textbf{Đổi mới IAE} & \textbf{Logic mờ (Fuzzy)} \\
@@ -317,8 +317,7 @@ Bảng \ref{tab:timing-breakdown-extended} phân rã chi tiết thời gian th�
 \centering
 \caption{Phân rã chi tiết thời gian thực thi chuỗi xử lý trên một chu kỳ trích mẫu}
 \label{tab:timing-breakdown-extended}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lp{5.0cm}ccc}
+\begin{tabularx}{\linewidth}{lXccc}
 \toprule
 \textbf{Giai đoạn xử lý} & \textbf{Nội dung thuật toán} & \textbf{Thời gian ($\mu$s)} & \textbf{Tỷ lệ (\%)} & \textbf{Độ phức tạp} \\
 \midrule
@@ -331,13 +330,12 @@ Bảng \ref{tab:timing-breakdown-extended} phân rã chi tiết thời gian th�
 \midrule
 \textbf{Tổng cộng} & \textbf{Toàn bộ chuỗi xử lý chu kỳ} & \textbf{59{,}0} & \textbf{100{,}0\%} & $\mathcal{O}(n_x^3)$ \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     xbar,
@@ -384,18 +382,16 @@ Tổng thời gian tính toán $59{,}0$ $\mu$s chỉ chiếm đúng $0{,}059\%$ 
 \centering
 \caption{Tổng hợp đặc tính kỹ thuật và nguồn gốc sai số của các cảm biến đo lường}
 \label{tab:sensor-specs-detailed}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{llccp{4.5cm}}
+\begin{tabularx}{\linewidth}{llccX}
 \toprule
 \textbf{Phân hệ cảm biến} & \textbf{Thiết bị mẫu} & \textbf{Độ lệch $\sigma$} & \textbf{Tần số} & \textbf{Cơ chế phát sinh sai số} \\
 \midrule
 Định vị vệ tinh GNSS & U-blox NEO-M8N & 5{,}0 m & 10 Hz & Chậm tầng điện ly, đa đường dẫn multipath \\
-Con quay hồi chuyển IMU & MPU-9250 MEMS & 0{,}3$^\circ$ & 100 Hz & Trôi điểm không (bias drift), nhiễu nhiệt \\
+Con quay hồi chuyển IMU & MPU-9250 MEMS & 0{,}3$^\circ$ & 100 Hz & Trôi điểm không bias drift, nhiễu nhiệt \\
 Gia tốc kế trọng trường & MPU-9250 MEMS & 0{,}2$^\circ$ & 100 Hz & Rung động cơ học, phi tuyến động học \\
 Đo cự ly quang học & Laser LRF-1000 & 0{,}5 m & 10 Hz & Độ phân giải xung thời gian bay TOF \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \subsection{Kiểm định giả thiết độc lập thống kê (IID) và phân tích nhiễu màu}
@@ -412,16 +408,14 @@ Trong môi trường thực tế, sai số đa đường dẫn (multipath) của
 \centering
 \caption{Đánh giá tác động của giả thiết IID so với mô hình mở rộng trạng thái nhiễu màu}
 \label{tab:iid-colored-noise-comparison}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lccp{4.5cm}}
+\begin{tabularx}{\linewidth}{lcc>{\RaggedRight}X}
 \toprule
 \textbf{Phương pháp mô hình} & \textbf{Số chiều trạng thái} & \textbf{Thời gian xử lý} & \textbf{Đánh giá hiệu năng RMSE} \\
 \midrule
 Kalman chuẩn (Giả thiết IID) & 4 chiều & 48{,}5 $\mu$s & RMSE = 0{,}86 m (Tối ưu tài nguyên) \\
 Kalman mở rộng trạng thái (Nhiễu màu) & 8 chiều & 135{,}2 $\mu$s & RMSE = 0{,}82 m (Cải thiện 4{,}6\%) \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 Kết quả cho thấy việc áp dụng giả thiết IID giúp tiết kiệm tới 64,1\% thời gian tính toán trong khi độ chính xác chỉ chênh lệch 4,6\%, hoàn toàn đáp ứng yêu cầu vận hành thời gian thực.
@@ -434,7 +428,7 @@ Kết quả cho thấy việc áp dụng giả thiết IID giúp tiết kiệm t
 \centering
 \caption{Phân tích độ nhạy của cự ly giao cắt $R_{\text{cross}}$ theo từng thông số cảm biến}
 \label{tab:crossover-sensitivity-extended}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản khảo sát} & $\sigma_{gps}$ (m) & $\sigma_{az}$ ($^\circ$) & $\sigma_{range}$ (m) & \textbf{Cự ly giao cắt $R_{\text{cross}}$ (m)} \\
@@ -468,7 +462,7 @@ với $\mathbf{p} = (e, n)^T$ là vector vị trí tức thời và $\kappa_{\te
 \centering
 \caption{So sánh đặc tính quỹ đạo giữa mô hình biên cứng phản xạ và biên mềm thế năng}
 \label{tab:boundary-physics-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lp{5.5cm}p{5.5cm}}
 \toprule
 \textbf{Tiêu chí đánh giá} & \textbf{Biên cứng phản xạ (Hard Boundary)} & \textbf{Biên mềm thế năng (Soft Boundary)} \\
@@ -502,7 +496,7 @@ Tính khả vi quỹ đạo & Không khả vi bậc 1 tại điểm chạm & Kh�
 \centering
 \caption{Đặc tính ma trận trạng thái và thông số phổ nhiễu gia tốc $q$ theo loại mục tiêu}
 \label{tab:target-dynamics-parameters}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Số chiều trạng thái} & \textbf{Tham số $q$ ($\text{m}^2/\text{s}^3$)} & \textbf{Vận tốc cực đại} & \textbf{Mô hình chuyển động} \\
@@ -529,7 +523,7 @@ trong đó $L_u \approx 50$ m là chiều dài tỷ lệ nhiễu loạn, $\sigma
 \centering
 \caption{Đánh giá sai số bám bắt độ cao của Drone dưới các cấp độ nhiễu loạn gió}
 \label{tab:wind-turbulence-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Cấp độ gió} & \textbf{Vận tốc gió $\sigma_w$} & \textbf{RMSE độ cao Đo thô (m)} & \textbf{RMSE độ cao KF (m)} & \textbf{Mức cải thiện (\%)} \\
@@ -552,7 +546,7 @@ Ngay cả trong điều kiện gió giật mạnh $10$ m/s, bộ lọc Kalman 3D
 \centering
 \caption{Phân loại chi tiết và chức năng kiểm chứng của 162 ca kiểm thử tự động}
 \label{tab:complete-test-suite-taxonomy}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcp{6.0cm}}
 \toprule
 \textbf{Nhóm kiểm thử} & \textbf{Mô-đun kiểm thử} & \textbf{Số test} & \textbf{Nội dung kỹ thuật kiểm chứng} \\
@@ -599,7 +593,7 @@ Thời gian dừng trung bình ở trạng thái bám bắt ổn định đạt 
 \hspace{0.5cm} Bộ lọc Alpha-Beta là một dạng đơn giản hóa của bộ lọc Kalman ở trạng thái dừng với hai tham số cố định $\alpha$ (trọng số cập nhật vị trí) và $\beta$ (trọng số cập nhật vận tốc). Để bảo đảm hệ thống có đáp ứng suy giảm tới hạn (Critically Damped) không sinh dao động giả, hệ số $\beta$ được tính toán theo quan hệ giải tích Benedict-Bordner:
 \begin{equation}
 \beta = (2 - \alpha) - 2\sqrt{1 - \alpha}
-\label{eq:benedict-bordner-math}
+\label{eq:benedict-bordner-math-w8}
 \end{equation}
 
 Với giá trị chuẩn danh định $\alpha = 0{,}40$, hệ số $\beta$ được xác định chính xác:
@@ -614,7 +608,7 @@ Khảo sát quét tham số $\alpha \in [0{,}10, 0{,}90]$ qua 10 seed độc l�
 \centering
 \caption{Đánh giá độ nhạy RMSE và thời gian hội tụ theo tham số bộ lọc Alpha-Beta}
 \label{tab:alpha-beta-parameter-sweep}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccc}
 \toprule
 $\alpha$ & $\beta$ (Benedict-Bordner) & \textbf{RMSE Người (m)} & \textbf{RMSE Xe máy (m)} & \textbf{RMSE Drone (m)} & \textbf{Thời gian hội tụ (s)} \\
@@ -659,7 +653,7 @@ Z = (N(\phi)(1 - e^2) + h) \sin\phi
 \centering
 \caption{Kiểm định độ chính xác khứ hồi và sai số trôi tích lũy qua 10.000 chu kỳ lặp}
 \label{tab:geodetic-roundtrip-verification}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Vị trí kiểm thử} & \textbf{Vĩ độ ($\phi$)} & \textbf{Kinh độ ($\lambda$)} & \textbf{Độ cao ($h$)} & \textbf{Sai số khứ hồi tối đa (m)} \\
@@ -690,7 +684,7 @@ Khi tốc độ tiêu thụ dữ liệu của giao diện trình duyệt bị ch
 \centering
 \caption{Đo đạc dung lượng bộ nhớ RAM và tỷ lệ duy trì khung hình dưới các điều kiện mạng}
 \label{tab:ring-buffer-network-conditions}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Môi trường kết nối} & \textbf{Băng thông} & \textbf{Độ trễ RTT} & \textbf{Bộ nhớ RAM tiêu thụ} & \textbf{Tỷ lệ rớt khung} \\
@@ -728,7 +722,7 @@ Quy tắc phân loại:
 \centering
 \caption{Ma trận nhầm lẫn (Confusion Matrix) phân loại mục tiêu trên 300 kịch bản thử nghiệm}
 \label{tab:target-classification-confusion-matrix}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{l|ccc|c}
 \toprule
 \textbf{Thực tế $\backslash$ Dự đoán} & \textbf{Người đi bộ} & \textbf{Xe máy} & \textbf{Drone 3D} & \textbf{Độ chính xác (Recall)} \\
@@ -767,7 +761,7 @@ Do cả hai số hạng trong phương trình Joseph đều có dạng $\mathbf{
 \centering
 \caption{So sánh độ ổn định số học và thời gian tính toán giữa công thức chuẩn và dạng Joseph}
 \label{tab:joseph-vs-standard-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Phương pháp cập nhật} & \textbf{Thời gian xử lý/bước} & \textbf{Sai số đối xứng $\|\mathbf{P} - \mathbf{P}^T\|$} & \textbf{Giá trị riêng cực tiểu $\lambda_{\min}$} \\
@@ -797,7 +791,7 @@ Ngược lại, bộ lọc Kalman với mô hình động học quán tính phâ
 \centering
 \caption{So sánh phản ứng vận tốc giữa phép vi phân trực tiếp và bộ lọc Kalman khi GNSS nhảy bước}
 \label{tab:velocity-spike-response}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Phương pháp ước lượng} & \textbf{Vận tốc thực} & \textbf{Vận tốc ước lượng đỉnh} & \textbf{Độ vọt sai số} & \textbf{Thời gian tái ổn định} \\
@@ -869,7 +863,7 @@ Toàn bộ chuỗi tính toán 3D trên được thực thi trong thời gian $6
 \centering
 \caption{Ước tính thời gian thực thi chuỗi thuật toán trên các nền tảng phần cứng nhúng}
 \label{tab:embedded-hardware-performance}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Nền tảng phần cứng} & \textbf{Kiến trúc vi xử lý} & \textbf{Xung nhịp} & \textbf{Thời gian/chu kỳ} & \textbf{Tải CPU tại 10 Hz} \\
@@ -907,7 +901,7 @@ Khi phép đo là hợp lệ, biến ngẫu nhiên $d_M^2$ tuân theo phân ph�
 \centering
 \caption{Đặc tính cổng gán thống kê $\chi^2$ và tỷ lệ loại bỏ nhiễu sai đo lường}
 \label{tab:mahalanobis-gating-performance}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Kịch bản mục tiêu} & \textbf{Bậc tự do $n_z$} & \textbf{Ngưỡng cổng $\gamma_{0{,}99}$} & \textbf{Tỷ lệ phát hiện đúng} & \textbf{Tỷ lệ loại bỏ xung giả} \\
@@ -930,7 +924,7 @@ Cơ chế gán cổng Mahalanobis giúp hệ thống loại bỏ thành công $9
 \centering
 \caption{So sánh toàn diện giữa Kalman thích nghi đề xuất, UKF và Particle Filter}
 \label{tab:advanced-filters-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Tiêu chí kỹ thuật} & \textbf{Kalman thích nghi (Đề xuất)} & \textbf{UKF (Unscented)} & \textbf{Particle Filter ($N_p=500$)} \\
@@ -973,7 +967,7 @@ Ma trận Gramian khả quan sát thời gian rời rạc qua $N$ chu kỳ:
 \centering
 \caption{Giá trị kỳ dị (Singular Values) của ma trận Gramian khả quan sát theo thời gian}
 \label{tab:observability-singular-values}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Số chu kỳ $N$} & \textbf{Thời gian $t$ (s)} & $\sigma_{\max}(\mathbf{W}_o)$ & $\sigma_{\min}(\mathbf{W}_o)$ & \textbf{Mức độ khả quan sát} \\
@@ -1012,7 +1006,7 @@ Hiệu suất ước lượng thống kê $\eta_{\text{eff}}$ của bộ lọc K
 \centering
 \caption{Đối chiếu giữa giới hạn tối ưu lý thuyết PCRLB và hiệp phương sai Kalman thích nghi}
 \label{tab:pcrlb-comparison-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Cự ly $R$ (m)} & $\operatorname{tr}(\mathbf{J}_k^{-1})$ lý thuyết ($\text{m}^2$) & $\operatorname{tr}(\mathbf{P}_k)$ Kalman ($\text{m}^2$) & \textbf{Sai số vị trí lý thuyết (m)} & \textbf{Hiệu suất tiệm cận $\eta_{\text{eff}}$} \\
@@ -1052,7 +1046,7 @@ Hệ số tương quan chuẩn hóa Pearson giữa tọa độ Đông và Bắc 
 \centering
 \caption{Tiến trình biến thiên của các phần tử ma trận hiệp phương sai $\mathbf{P}_k$ theo các pha chuyển động}
 \label{tab:covariance-elements-evolution}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Pha chuyển động mục tiêu} & $\mathbf{P}_{ee}$ ($\text{m}^2$) & $\mathbf{P}_{e\dot{e}}$ ($\text{m}^2/\text{s}$) & $\mathbf{P}_{\dot{e}\dot{e}}$ ($\text{m}^2/\text{s}^2$) & \textbf{Hệ số tương quan $\rho_{en}$} \\

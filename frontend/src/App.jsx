@@ -38,15 +38,12 @@ export default function App() {
       <div className="app-layout">
         {/* Top navigation bar */}
         <nav className="navbar">
-          <NavLink to="/" className="navbar-brand">
+          <NavLink to="/dashboard" className="navbar-brand">
             <span>GPS-TT</span>
             <span className="brand-badge">C2</span>
           </NavLink>
 
           <div className="navbar-links">
-            <NavLink to="/" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`} end>
-              SYS
-            </NavLink>
             <NavLink to="/dashboard" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               DASH
             </NavLink>
@@ -58,6 +55,9 @@ export default function App() {
             </NavLink>
             <NavLink to="/comparison" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
               DELTA
+            </NavLink>
+            <NavLink to="/sys" className={({ isActive }) => `nav-link${isActive ? ' active' : ''}`}>
+              SYS
             </NavLink>
           </div>
 
@@ -78,12 +78,13 @@ export default function App() {
         {/* Page area */}
         <main className="page-content">
           <Routes>
-            <Route path="/"           element={<HomePage />} />
+            <Route path="/"           element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard"  element={<DashboardPage />} />
             <Route path="/tracking"   element={<TrackingPage />} />
             <Route path="/calculator" element={<StaticCalcPage />} />
             <Route path="/comparison" element={<ComparisonPage />} />
-            <Route path="*"           element={<Navigate to="/" replace />} />
+            <Route path="/sys"        element={<HomePage />} />
+            <Route path="*"           element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </main>
       </div>

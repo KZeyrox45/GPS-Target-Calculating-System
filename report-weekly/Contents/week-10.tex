@@ -15,7 +15,7 @@ Các khiếm khuyết này được phân chia thành ba tầng kiến trúc:
 \centering
 \caption{Phân loại hệ thống 6 khiếm khuyết tính chân thực quỹ đạo và giải pháp xử lý}
 \label{tab:six-realism-issues-taxonomy}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{clllc}
 \toprule
 \textbf{STT} & \textbf{Hiện tượng khiếm khuyết} & \textbf{Tầng kiến trúc} & \textbf{Đối tượng ảnh hưởng} & \textbf{Mức độ nghiêm trọng} \\
@@ -117,7 +117,7 @@ Vector lực đẩy mềm hướng thẳng về tâm trạm quan sát:
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}[scale=0.88]
 
 % ===== LEFT: Hard boundary =====
@@ -277,7 +277,7 @@ Ma trận hiệp phương sai ban đầu $\mathbf{P}_{2|2}$ được xác lập 
 \centering
 \caption{So sánh thời gian hội tụ và sai số cực đại ban đầu giữa hai cơ chế khởi tạo}
 \label{tab:kalman-init-comparison-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Cơ chế khởi tạo} & \textbf{Thời gian hội tụ ($T_{\text{conv}}$)} & \textbf{Sai số cực đại pha đầu} & \textbf{RMSE 5s đầu} \\
@@ -303,14 +303,14 @@ Ma trận hiệp phương sai ban đầu $\mathbf{P}_{2|2}$ được xác lập 
 \centering
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/trajectory_pedestrian-kf_ab-synthetic.png}
+\includegraphics[width=0.8\textwidth]{figures/trajectory_pedestrian-kf_ab-synthetic.png}
 \caption{Người đi bộ: Chế độ Tổng hợp (Synthetic)}
 \label{fig:traj-ped-synthetic}
 \end{subfigure}
 \hfill
 \begin{subfigure}[b]{0.48\textwidth}
 \centering
-\includegraphics[width=0.75\textwidth]{figures/trajectory_pedestrian-kf_ab-realistic.png}
+\includegraphics[width=0.9\textwidth]{figures/trajectory_pedestrian-kf_ab-realistic.png}
 \caption{Người đi bộ: Dữ liệu thực tế (Geolife PCHIP)}
 \label{fig:traj-ped-realistic}
 \end{subfigure}
@@ -377,7 +377,7 @@ Khảo sát quét tham số $\alpha \in [0{,}1, 0{,}9]$ trên kịch bản ngư�
 \centering
 \caption{Bảng quét độ nhạy sai số RMSE theo các giá trị tham số $\alpha$ và $\beta$ liên kết}
 \label{tab:alpha-beta-sensitivity-sweep}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccccccc}
 \toprule
 $\mathbf{\alpha}$ & 0{,}10 & \textbf{0{,}20} & 0{,}30 & \textbf{0{,}40 (Mặc định)} & 0{,}50 & 0{,}60 & 0{,}70 & 0{,}80 & 0{,}90 \\
@@ -406,7 +406,7 @@ Tại $\alpha = 0{,}20$, sai số RMSE đạt mức tối ưu $0{,}214$ m. Hệ 
 \centering
 \caption{Thống kê định lượng sai số bám bắt qua 10 giá trị khởi tạo ngẫu nhiên sau cải tiến}
 \label{tab:multiseed-statistical-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Thuật toán bám} & \textbf{RMSE TB (m)} & \textbf{Độ lệch chuẩn (m)} & \textbf{Giá trị Min (m)} & \textbf{Giá trị Max (m)} \\
@@ -432,7 +432,7 @@ Tại $\alpha = 0{,}20$, sai số RMSE đạt mức tối ưu $0{,}214$ m. Hệ 
 \centering
 \caption{Ma trận đánh giá nghiên cứu loại trừ 8 giai đoạn cải tiến tính chân thực quỹ đạo}
 \label{tab:ablation-study-matrix}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{clcccc}
 \toprule
 \textbf{Giai đoạn} & \textbf{Cấu hình cải tiến kích hoạt} & \textbf{Độ giật (Jerk)} & \textbf{Lỗi quay đầu} & \textbf{Dao động bida} & \textbf{RMSE tổng (m)} \\
@@ -470,7 +470,7 @@ trong đó $l_f = 0{,}75$ m là khoảng cách từ trọng tâm đến trục t
 \centering
 \caption{Đặc tính động học quay vòng của mô hình xe máy theo các góc bẻ lái $\delta_{\text{steer}}$}
 \label{tab:motorcycle-turning-kinematics}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Góc lái $\delta_{\text{steer}}$} & \textbf{Góc trượt thân $\beta_{\text{slip}}$} & \textbf{Bán kính quay vòng $R_c$} & \textbf{Vận tốc góc $\dot{\psi}$ ($v=10\text{ m/s}$)} & \textbf{Góc nghiêng roll $\phi_{\text{lean}}$} \\
@@ -508,7 +508,7 @@ Ma trận quay $\mathbf{R}_B^I$ chuyển đổi từ hệ tọa độ thân (Bod
 \centering
 \caption{Các tham số khí động học và giới hạn góc nghiêng của DJI Matrice 100}
 \label{tab:matrice100-aerodynamic-parameters}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Đại lượng khí động học} & \textbf{Ký hiệu toán học} & \textbf{Giá trị số học} & \textbf{Đơn vị đo} \\
@@ -542,7 +542,7 @@ P(d^2 \le \gamma_{\text{gate}}) = 1 - \alpha_{\text{gate}} = 0{,}99 \implies \ga
 \centering
 \caption{Quy tắc xử lý phép đo theo khoảng cách Mahalanobis trong chu trình lọc}
 \label{tab:innovation-gating-rules}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccl}
 \toprule
 \textbf{Khoảng cách $d_{\text{maha}}^2$} & \textbf{Đánh giá trạng thái phép đo} & \textbf{Hành động xử lý của bộ lọc Kalman} \\
@@ -574,7 +574,7 @@ với hệ số tự tương quan $\rho_{\text{mp}} = e^{-\Delta t / \tau_{\text
 \centering
 \caption{Đặc tính sai số định vị GPS trong các điều kiện môi trường đô thị khác nhau}
 \label{tab:urban-multipath-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Môi trường hoạt động} & \textbf{Độ lệch chuẩn $\sigma_{\text{gps}}$} & \textbf{Thời gian tương quan $\tau_{\text{mp}}$} & \textbf{Sai số vị trí TB} & \textbf{Tỷ lệ trượt bám} \\
@@ -597,7 +597,7 @@ Hệ thống hợp nhất cảm biến hỗn hợp Laser-IMU-GNSS giải quyết
 \centering
 \caption{Bảng phân bổ chi tiết 162 ca kiểm thử tự động theo mô-đun chức năng}
 \label{tab:full-162-test-taxonomy}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcp{6.2cm}}
 \toprule
 \textbf{Mô-đun kiểm thử} & \textbf{Thành phần kiểm chứng} & \textbf{Số lượng} & \textbf{Mục tiêu kiểm chứng kỹ thuật} \\
@@ -624,7 +624,7 @@ Hệ thống hợp nhất cảm biến hỗn hợp Laser-IMU-GNSS giải quyết
 \centering
 \caption{Độ nhạy sai số RMSE theo tham số $\alpha$ trên ba loại mục tiêu ($n=10$ seed, cự ly 400 m)}
 \label{tab:multi-target-alpha-sensitivity}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccccccc}
 \toprule
 \textbf{Mục tiêu} & $\alpha=0{,}1$ & $\mathbf{\alpha=0{,}2}$ & $\alpha=0{,}3$ & $\mathbf{\alpha=0{,}4}$ & $\alpha=0{,}5$ & $\alpha=0{,}6$ & $\alpha=0{,}7$ & $\alpha=0{,}8$ & $\alpha=0{,}9$ \\
@@ -688,7 +688,7 @@ Hệ thống có cặp cực thực kép ($z_1 = z_2 = 0{,}7743$), xác nhận t
 \centering
 \caption{Ngân sách chi tiết thời gian xử lý từng công đoạn trong chu kỳ 100 ms (10 Hz)}
 \label{tab:pipeline-execution-timing-budget}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Công đoạn xử lý tín hiệu} & \textbf{Thời gian đo đạc} & \textbf{Tỷ trọng chuỗi} & \textbf{Tỷ lệ chu kỳ 100 ms} \\
@@ -725,7 +725,7 @@ Phương sai sai số vị trí $\sigma_{\text{pos}}^2(t)$ tăng trưởng theo 
 \centering
 \caption{Sự gia tăng sai số bám bắt trong các kịch bản mất tín hiệu đo lường liên tục}
 \label{tab:dead-reckoning-drift-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Thời gian mất tín hiệu} & \textbf{Số bước mất $\Delta t$} & \textbf{Sai số vị trí $\sigma_{\text{pos}}$} & \textbf{Sai số vận tốc $\sigma_{\text{vel}}$} & \textbf{Khả năng phục hồi bám} \\
@@ -754,7 +754,7 @@ Ngay khi tín hiệu đo xuất hiện trở lại sau 5 giây mất dấu, ma t
 \centering
 \caption{Khảo sát độ trễ nhóm $\tau_g$ và góc trễ pha $\Phi$ theo tần số cơ động mục tiêu}
 \label{tab:group-delay-frequency-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Tần số cơ động $f$} & \textbf{Tần số góc $\omega$} & \textbf{Góc trễ pha Alpha-Beta} & \textbf{Góc trễ pha Kalman} & \textbf{Độ trễ thời gian $\tau_g$} \\
@@ -784,7 +784,7 @@ Khoảng cách tương quan không gian $L_{\text{corr}, i} = \int_0^\infty R_{i
 \centering
 \caption{Khoảng cách tương quan không gian và hệ số đẳng hướng trên ba trục tọa độ}
 \label{tab:spatial-correlation-lengths}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Trục Đông $L_{\text{corr}, E}$} & \textbf{Trục Bắc $L_{\text{corr}, N}$} & \textbf{Trục Đứng $L_{\text{corr}, U}$} & \textbf{Hệ số đẳng hướng $\eta_{EN}$} \\
@@ -812,7 +812,7 @@ với tỷ số quy mô độ cao $L_w = z / 2$, $L_u = z / (0{,}177 + 0{,}00082
 \centering
 \caption{Đo đạc sai số bám bắt 3D của drone dưới các cấp độ nhiễu loạn gió giật tầng thấp}
 \label{tab:dryden-wind-turbulence-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Cấp độ gió khí quyển} & \textbf{Vận tốc gió giật $\sigma_w$} & \textbf{Độ trôi ngang $\Delta p_{EN}$} & \textbf{Độ trôi đứng $\Delta p_U$} & \textbf{RMSE Alpha-Beta 3D} \\
@@ -833,7 +833,7 @@ Ngay cả trong điều kiện gió giật mạnh cấp 6 ($\sigma_w = 3{,}0$ m/
 \hspace{0.5cm} Tính ổn định toàn cục của sai số ước lượng $\mathbf{e}_k = \mathbf{x}_k - \hat{\mathbf{x}}_k$ được chứng minh qua hàm năng lượng Lyapunov ứng viên:
 \begin{equation}
 V(\mathbf{e}_k) = \mathbf{e}_k^T \mathbf{P}_k^{-1} \mathbf{e}_k > 0, \quad \forall \mathbf{e}_k \ne \mathbf{0}
-\label{eq:lyapunov-candidate-function}
+\label{eq:lyapunov-candidate-function-filter}
 \end{equation}
 
 Đạo hàm sai phân theo thời gian $\Delta V_k = V(\mathbf{e}_{k+1}) - V(\mathbf{e}_k)$ thỏa mãn điều kiện suy giảm nghiêm ngặt:
@@ -847,7 +847,7 @@ với $\mathbf{Q}_L$ là ma trận dương xác định.
 \centering
 \caption{Các chỉ số hội tụ ổn định Lyapunov của các giải thuật bám bắt mục tiêu}
 \label{tab:lyapunov-stability-metrics-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Thuật toán bám bắt} & \textbf{Trị riêng cực tiểu $\lambda_{\min}(\mathbf{Q}_L)$} & \textbf{Tốc độ suy giảm năng lượng $\gamma$} & \textbf{Bán kính cầu hút $\mathcal{B}_r$} & \textbf{Tính chất ổn định} \\
@@ -875,7 +875,7 @@ với $T_0 = 25^\circ\text{C}$ là nhiệt độ chuẩn hiệu chuẩn phòng t
 \centering
 \caption{Hiệu quả bù sai số nhiệt độ của cảm biến quán tính qua các dải nhiệt độ vận hành}
 \label{tab:imu-thermal-drift-compensation-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Nhiệt độ môi trường ($T$)} & \textbf{Độ trôi thô (Chưa bù)} & \textbf{Độ trôi sau bù đa thức} & \textbf{Sai số góc phương vị $\psi$} & \textbf{Sai số vị trí ENU} \\

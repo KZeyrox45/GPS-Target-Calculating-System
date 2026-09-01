@@ -34,7 +34,7 @@ Sau khi áp dụng bộ lọc ba lớp, toàn bộ 6.460 phân đoạn thô đư
 \centering
 \caption{Thống kê định lượng 252 phân đoạn người đi bộ Geolife sau khi chuẩn hóa}
 \label{tab:geolife-clean-stats}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Đặc trưng thống kê} & \textbf{Giá trị trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Khoảng biến thiên [Min, Max]} \\
@@ -81,7 +81,7 @@ Hình \ref{fig:geolife-pchip-trajectory} minh họa quỹ đạo người đi b�
 \centering
 \caption{Đặc tính động học xe máy tại 6 giao lộ đô thị trong tập dữ liệu AMIT}
 \label{tab:amit-traffic-intersections}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccccc}
 \toprule
 \textbf{Giao lộ} & \textbf{Địa điểm đô thị} & \textbf{Số lượng xe máy} & \textbf{Vận tốc TB (m/s)} & \textbf{Gia tốc TB ($\text{m/s}^2$)} & \textbf{Bán kính rẽ TB (m)} \\
@@ -131,7 +131,7 @@ Hình \ref{fig:osm-motorcycle-trajectory} thể hiện rõ nét hành vi xe máy
 \centering
 \caption{Giới hạn động học khung bay không người lái DJI Matrice 100 trong mô phỏng}
 \label{tab:drone-kinematic-limits}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Thông số động học} & \textbf{Ký hiệu toán học} & \textbf{Giá trị giới hạn} & \textbf{Cơ sở thực nghiệm} \\
@@ -177,7 +177,7 @@ Hình \ref{fig:drone-3d-trajectory} và Hình \ref{fig:drone-altitude-profile} c
 \centering
 \caption{So sánh sai số RMSE giữa chế độ tổng hợp và dữ liệu thực tế ($n=10$, cự ly 400 m)}
 \label{tab:synthetic-vs-real-rmse}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Mục tiêu} & \textbf{Chế độ quỹ đạo} & \textbf{Đo thô (m)} & \textbf{Alpha-Beta (m)} & \textbf{Kalman Filter (m)} \\
@@ -228,7 +228,7 @@ Phân tích số liệu cho thấy:
 \centering
 \caption{Phân vị sai số định vị thực nghiệm trên các kịch bản dữ liệu thực tế ($n=10$)}
 \label{tab:real-data-percentiles}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Thuật toán} & \textbf{Trung vị $P_{50}$ (m)} & \textbf{Phân vị $P_{90}$ (m)} & \textbf{Phân vị $P_{95}$ (m)} & \textbf{Sai số cực đại (m)} \\
@@ -275,7 +275,7 @@ Theo định lý Fritsch-Carlson (1980), điều kiện cần và đủ để đ
 \centering
 \caption{So sánh năng lượng uốn cong và tính đơn điệu giữa các phương pháp nội suy}
 \label{tab:interpolation-bending-energy}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Phương pháp nội suy} & \textbf{Bảo toàn đơn điệu} & \textbf{Hiện tượng quá vọt (Overshoot)} & \textbf{Năng lượng uốn cong $E_{\text{bend}}$} \\
@@ -305,7 +305,7 @@ p(v) = w_{\text{stop}} \mathcal{N}(v; \mu_{\text{stop}}, \sigma_{\text{stop}}^2)
 \centering
 \caption{Các tham số ước lượng của mô hình hỗn hợp Gauss (GMM) trên tập dữ liệu Geolife}
 \label{tab:gmm-parameters-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Thành phần hành vi} & \textbf{Trọng số $w$} & \textbf{Kỳ vọng $\mu$ (m/s)} & \textbf{Độ lệch $\sigma$ (m/s)} & \textbf{Ý nghĩa động học} \\
@@ -327,7 +327,7 @@ Mô hình GMM chứng minh người đi bộ dành trung bình $18\%$ thời gia
 \centering
 \caption{Phân bố các phân cấp đường bộ và đặc tính vận tốc trong đồ thị mạng đường HCM}
 \label{tab:osm-road-hierarchy}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Phân cấp đường OSM} & \textbf{Tỷ lệ cung đường} & \textbf{Chiều dài TB} & \textbf{Vận tốc mô phỏng} & \textbf{Trọng số chọn rẽ} \\
@@ -356,7 +356,7 @@ Hệ số phân cụm trung bình của đồ thị đạt $C = 0{,}124$ và b�
 \centering
 \caption{Tài nguyên bộ nhớ và thời gian nạp dữ liệu của các bộ tải quỹ đạo thực nghiệm}
 \label{tab:dataloader-benchmarks}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Bộ tải dữ liệu} & \textbf{Kích thước trên đĩa} & \textbf{Dung lượng RAM sau nạp} & \textbf{Thời gian nạp khởi động} \\
@@ -392,7 +392,7 @@ Gia tốc hướng tâm pháp tuyến $a_n(t)$ tác động lên phương tiện
 \centering
 \caption{Khảo sát phân bố độ cong quỹ đạo $\kappa$ và gia tốc hướng tâm trên các loại mục tiêu}
 \label{tab:curvature-distribution-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Loại mục tiêu} & \textbf{Độ cong TB $\bar{\kappa}$ ($\text{m}^{-1}$)} & \textbf{Độ cong Max $\kappa_{\max}$ ($\text{m}^{-1}$)} & \textbf{Bán kính cong Min $R_c$} & \textbf{Gia tốc pháp tuyến Max} \\
@@ -428,7 +428,7 @@ trong đó $\bar{v} \approx 1{,}38$ m/s là vận tốc tịnh tiến trung bìn
 \centering
 \caption{Phân tích độ suy giảm dao động bước chân qua hai bộ lọc bám bắt}
 \label{tab:gait-vibration-attenuation}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Tín hiệu vận tốc} & \textbf{Biên độ dao động sải bước} & \textbf{Tỷ lệ triệt tiêu} & \textbf{Độ mượt mà quỹ đạo} \\
@@ -457,7 +457,7 @@ trong đó $P_0 = 79{,}86$ W là công suất profile khi treo tại chỗ (hove
 \centering
 \caption{Đặc tính công suất tiêu thụ và thời gian bay hữu ích của DJI Matrice 100 theo vận tốc}
 \label{tab:drone-power-consumption}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Vận tốc bay ngang $v$} & \textbf{Công suất profile $P_{\text{prof}}$} & \textbf{Công suất cảm ứng $P_{\text{ind}}$} & \textbf{Tổng công suất $P_{\text{total}}$} & \textbf{Thời gian bay tối đa} \\
@@ -481,8 +481,7 @@ Vận tốc bay tối ưu về mặt năng lượng đạt $v_{\text{opt}} \appr
 \centering
 \caption{Phân loại chi tiết và tiêu chí kiểm chứng 38 ca kiểm thử dữ liệu thực nghiệm}
 \label{tab:38-real-data-tests-breakdown}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{llcp{6.5cm}}
+\begin{tabularx}{\linewidth}{llc>{\RaggedRight}X}
 \toprule
 \textbf{Hạng mục kiểm thử} & \textbf{Mô-đun kiểm tra} & \textbf{Số test} & \textbf{Nội dung kiểm chứng kỹ thuật} \\
 \midrule
@@ -492,13 +491,12 @@ Vận tốc bay tối ưu về mặt năng lượng đạt $v_{\text{opt}} \appr
 4. Tích hợp nạp AMIT & Dataset Loader & 3 & Nạp tệp TRJ CSV, kiểm tra 6 giao lộ, chuẩn hóa mét phẳng \\
 5. Cơ chế phát lại quỹ đạo & Replay Engine & 4 & Phát lại 2 chiều chống nhảy bước, fallback tổng hợp \\
 6. Động học Drone Matrice & Kinematic Drone & 5 & Giới hạn vận tốc ngang 15 m/s, leo 5 m/s, hạ 4 m/s, trần bay \\
-7. Chuyển đổi chế độ mô phỏng & Engine Routing & 5 & Chuyển đổi Synthetic/Real-world, vô hiệu phản xạ biên \\
+7. Chuyển đổi chế độ mô phỏng & Engine Routing & 5 & Chuyển đổi tổng hợp và dữ liệu thực, vô hiệu phản xạ biên \\
 8. Tiện ích trắc địa & Geodetics Util & 5 & Chuyển đổi WGS-84 sang ENU địa phương cho dữ liệu thực \\
 \midrule
 \textbf{Tổng cộng} & \textbf{Dữ liệu thực nghiệm} & \textbf{38} & \textbf{100\% ca kiểm thử đạt chuẩn (0 lỗi, 0 cảnh báo)} \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \subsection{Hình học vi phân Dubins và giới hạn bán kính lượn vòng của Drone}
@@ -515,7 +513,7 @@ Với góc nghiêng cánh tối đa $\phi_{\max} \approx 22{,}2^\circ$ tương �
 \centering
 \caption{Bán kính lượn vòng cực tiểu và thời gian quay vòng của Drone theo vận tốc}
 \label{tab:dubins-turning-radius}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Vận tốc bay $v$} & \textbf{Bán kính cực tiểu $R_{\min}$} & \textbf{Vận tốc góc $\omega_{\max}$} & \textbf{Thời gian quay $90^\circ$} & \textbf{Thời gian quay $180^\circ$} \\
@@ -586,18 +584,16 @@ Toàn bộ quy trình nạp - nội suy - bơm nhiễu - lọc bám bắt diễn
 \centering
 \caption{Đánh giá định lượng mức độ cải thiện tính chân thực quỹ đạo của hệ thống}
 \label{tab:trajectory-realism-evaluation}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{lp{5.0cm}p{5.0cm}c}
+\begin{tabularx}{\linewidth}{l>{\RaggedRight}X>{\RaggedRight}Xc}
 \toprule
-\textbf{Tiêu chí đánh giá} & \textbf{Mô hình thế hệ cũ (Sinusoidal/Specular)} & \textbf{Mô hình thế hệ mới (Geolife/OSM/Matrice)} & \textbf{Mức độ cải thiện} \\
+\textbf{Tiêu chí đánh giá} & \textbf{Mô hình thế hệ trước (Điều hòa/Phản xạ cứng)} & \textbf{Mô hình hiện tại (Geolife/OSM/Matrice)} & \textbf{Mức cải thiện} \\
 \midrule
-Độ giật gia tốc (Jerk) & Rất lớn ($\sim 15\text{ m/s}^3$ tại góc rẽ) & Mượt mà ($< 2{,}5\text{ m/s}^3$ qua PCHIP) & Giảm 83{,}3\% \\
+Độ giật gia tốc & Lớn ($\approx 15\text{ m/s}^3$ tại góc rẽ) & Mượt mà ($< 2{,}5\text{ m/s}^3$ qua PCHIP) & Giảm 83{,}3\% \\
 Hành vi tại biên & Phản xạ bida góc nhọn ($180^\circ - 2\theta$) & Đẩy mềm thế năng chuyển hướng êm & Đạt chuẩn vật lý \\
-Phân bố dừng nghỉ & Không có (di chuyển liên tục) & Đa phương thức GMM ($18\%$ dừng) & Chân thực $100\%$ \\
-Cấu trúc mạng đường & Tự do trên mặt phẳng 2D & Bám sát $305.000$ cung đường OSM & Chân thực $100\%$ \\
+Phân bố dừng nghỉ & Không có (di chuyển liên tục) & Đa phương thức GMM ($18\%$ dừng) & Chân thực 100\% \\
+Cấu trúc mạng đường & Tự do trên mặt phẳng 2D & Bám sát $305.000$ cung đường OSM & Chân thực 100\% \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 \subsection{Đặc tính hóa phương sai Allan của cảm biến quán tính IMU}
@@ -613,7 +609,7 @@ trong đó $\tau = m \tau_0$ là khoảng thời gian lấy trung bình cụm.
 \centering
 \caption{Các hệ số nhiễu quán tính trích xuất từ đồ thị phương sai Allan của cảm biến}
 \label{tab:allan-variance-coefficients}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Thành phần nhiễu} & \textbf{Hệ số ký hiệu} & \textbf{Giá trị trích xuất} & \textbf{Độ dốc trên đồ thị Log-Log} \\
@@ -649,7 +645,7 @@ Tại điểm đảo chiều $t = T$, vận tốc được giảm dần tuyến 
 \centering
 \caption{So sánh sai số và tính ổn định tại vùng chuyển tiếp giữa các cơ chế lặp vòng}
 \label{tab:replay-transition-stability}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Cơ chế xử lý hết đoạn} & \textbf{Độ nhảy bước vị trí $\Delta p$} & \textbf{Độ giật gia tốc (Jerk)} & \textbf{Sai số RMSE tại điểm lặp} \\
@@ -676,7 +672,7 @@ trong đó $w[n]$ là cửa sổ Hanning độ dài $L = 256$ mẫu với độ 
 \centering
 \caption{Đặc tính tần số cắt $-3\text{ dB}$ và tỷ số tín hiệu trên nhiễu (SNR) trên dữ liệu thực}
 \label{tab:spectral-characteristics-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Bộ lọc bám bắt} & \textbf{Tần số cắt $f_{-3\text{dB}}$} & \textbf{Độ dốc suy giảm} & \textbf{SNR đầu vào} & \textbf{SNR đầu ra sau lọc} \\
@@ -703,7 +699,7 @@ Bộ lọc Kalman thích nghi cung cấp độ dốc suy giảm bậc hai ($-40\
 \centering
 \caption{Hệ số tương quan chéo không gian giữa các trục tọa độ trên dữ liệu thực tế và mô hình tổng hợp}
 \label{tab:spatial-cross-correlation-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Tập dữ liệu quỹ đạo} & \textbf{Hệ số tương quan tức thời $\rho_{EN}(0)$} & \textbf{Độ trễ tương quan cực đại $\tau_{\max}$} & \textbf{Bán kính tương quan} & \textbf{Đánh giá tính độc lập} \\
@@ -732,7 +728,7 @@ với toán tử lùi thời gian $B p_k = p_{k-1}$, các hệ số hồi quy $\
 \centering
 \caption{So sánh sai số suy đoán vị trí ngắn hạn giữa mô hình ARIMA và bộ lọc vận tốc không đổi khi mất tín hiệu}
 \label{tab:arima-vs-cv-dead-reckoning}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
 \textbf{Thời gian mất tín hiệu} & \textbf{Mô hình vận tốc không đổi (CV)} & \textbf{Nội suy Hermite PCHIP} & \textbf{Mô hình $\text{ARIMA}(2,1,1)$ (Đề xuất)} & \textbf{Mức giảm sai số} \\
@@ -761,7 +757,7 @@ với vector nửa góc $\mathbf{h} = (\boldsymbol{\omega}_i + \boldsymbol{\omeg
 \centering
 \caption{Đo đạc cường độ quang thông phản xạ và sai số cự ly ToF tương ứng theo vật liệu mục tiêu}
 \label{tab:target-reflectivity-brdf-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Chủng loại vật liệu mục tiêu} & \textbf{Hệ số phản xạ $k_d / k_s$} & \textbf{Cường độ quang thu được} & \textbf{Tỷ số SNR quang học} & \textbf{Sai số cự ly Laser ToF} \\
@@ -789,7 +785,7 @@ p(t_{\text{pause}}) = \sum_{j=1}^3 \pi_j \frac{1}{\sqrt{2\pi}\sigma_j} \exp \lef
 \centering
 \caption{Các tham số mô hình hỗn hợp Gauss (GMM) trích xuất từ dữ liệu thực nghiệm giao thông đô thị}
 \label{tab:gmm-pause-parameters-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Thành phần dừng nghỉ} & \textbf{Trọng số $\pi_j$} & \textbf{Thời gian trung bình $\mu_j$} & \textbf{Độ lệch chuẩn $\sigma_j$} & \textbf{Bản chất hành vi thực tế} \\
@@ -817,7 +813,7 @@ với hệ số tán xạ Mie $\beta_{\text{sca}} = \frac{3{,}91}{V_{\text{vis}}
 \centering
 \caption{Đo đạc suy hao quang học và độ suy giảm cự ly đo hiệu dụng dưới các điều kiện thời tiết}
 \label{tab:atmospheric-optical-attenuation-table}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Điều kiện thời tiết khí quyển} & \textbf{Tầm nhìn $V_{\text{vis}}$} & \textbf{Hệ số suy hao $\gamma_{\text{ext}}$} & \textbf{Suy hao hai chiều tại 500 m} & \textbf{Cự ly đo cực đại} \\

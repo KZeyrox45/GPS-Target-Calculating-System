@@ -112,7 +112,7 @@ async def get_dashboard_telemetry():
         "active_sessions": session_list,
         "hardware_telemetry": {
             "gnss": {
-                "subsystem": "U-blox NEO-M8N / GNSS Module",
+                "subsystem": "GNSS Receiver (U-blox NEO-M8N)",
                 "status": "LOCKED (3D FIX)",
                 "satellites_tracked": 12,
                 "update_rate_hz": 10.0,
@@ -120,7 +120,7 @@ async def get_dashboard_telemetry():
                 "fault_prob_bernoulli": 0.020,
             },
             "imu": {
-                "subsystem": "MPU-9250 9-DOF MEMS IMU",
+                "subsystem": "9-DOF MEMS IMU (MPU-9250)",
                 "status": "CALIBRATED (STABLE)",
                 "sampling_rate_hz": 100.0,
                 "sigma_azimuth_deg": 0.3,
@@ -128,12 +128,29 @@ async def get_dashboard_telemetry():
                 "fault_prob_bernoulli": 0.005,
             },
             "laser": {
-                "subsystem": "Pulsed Laser Rangefinder LRF-1000",
+                "subsystem": "Pulsed Laser Rangefinder (LRF-1000)",
                 "status": "OPTICAL RETURN NOMINAL",
                 "max_range_m": 1000.0,
                 "sigma_range_m": 0.5,
                 "fault_prob_bernoulli": 0.010,
             },
+        },
+        "sensor_noise_models": {
+            "gnss": {"sigma_pos_m": 5.0, "rate_hz": 10.0, "fault_prob": 0.020, "desc": "Zero-mean Gaussian position noise"},
+            "imu": {"sigma_az_deg": 0.3, "sigma_el_deg": 0.2, "rate_hz": 100.0, "fault_prob": 0.005, "desc": "Angular noise in spherical coords"},
+            "laser": {"sigma_r_m": 0.5, "max_range_m": 1000.0, "fault_prob": 0.010, "desc": "ToF Gaussian range error"},
+        },
+        "filter_tuning": {
+            "alpha": 0.40,
+            "beta": 0.051,
+            "filter_type": "Benedict-Bordner Critically Damped",
+            "r_matrix": "Adaptive RSS Weighting Covariance R_k",
+            "q_matrix": "Kinematic Constant-Velocity Process Noise Q",
+        },
+        "dataset_sources": {
+            "pedestrian": "Geolife GPS Walk Dataset (252 Clean Segments, 10 Hz PCHIP)",
+            "motorcycle": "HCMC OSM Road Graph (337K Nodes, 305K Edges, Random Walk)",
+            "drone": "DJI Matrice 100 6-DoF Kinematics (v_max=15m/s, a_max=5m/s²)",
         },
         "pipeline_budget": {
             "lla_to_enu_us": 7.2,

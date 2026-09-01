@@ -110,7 +110,7 @@ Vector ENU thu được:
 
 Ma trận $\mathbf{R}_{ecef}^{enu}$ là trực giao, tức $\mathbf{R}^{-1} = \mathbf{R}^T$. Điều này có nghĩa phép chuyển đổi ngược (ENU sang ECEF) chỉ cần nhân với ma trận chuyển vị, không cần tính ma trận nghịch đảo.
 
-\subsubsection{Chuyển đổi ngược ENU $\rightarrow$ WGS-84}
+\subsubsection{Chuyển đổi ngược ENU \texorpdfstring{$\rightarrow$}{sang} WGS-84}
 
 \hspace{0.5cm} Phép chuyển đổi ngược cần thiết khi ta có vị trí mục tiêu trong ENU và muốn hiển thị tọa độ địa lý trên bản đồ. Quy trình gồm ba bước: chuyển ENU sang hiệu ECEF, cộng với vị trí gốc ECEF, rồi chuyển ECEF sang WGS-84.
 
@@ -144,7 +144,7 @@ Trong thực tế, phương pháp Bowring hội tụ sau 3 đến 5 bước lặ
 
 Với phạm vi hoạt động nhỏ hơn 50 km (phạm vi điển hình của cảm biến laser), sai số giữa hai phương pháp là không đáng kể, dưới $0{,}01$ m.
 
-\newpage
+
 
 \subsection{Phân tích truyền sai số RSS}
 
@@ -166,8 +166,8 @@ Các thông số sai số 1-sigma được lấy từ thông số kỹ thuật t
 \begin{table}[H]
 \centering
 \caption{Tham số sai số 1-sigma của từng cảm biến}
-\label{tab:sensor-params}
-\resizebox{\linewidth}{!}{
+\label{tab:sensor-params-w3}
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Cảm biến} & \textbf{Ký hiệu} & \textbf{Giá trị 1-$\sigma$} \\
@@ -210,7 +210,7 @@ IMU đóng góp khoảng 61\% tổng sai số. Ở khoảng cách xa, sai số g
 
 Hình \ref{fig:error-prop} trực quan hóa đóng góp của từng cảm biến qua khoảng cách.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
@@ -226,7 +226,7 @@ Hình \ref{fig:error-prop} trực quan hóa đóng góp của từng cảm biế
 \centering
 \caption{Tổng hợp đóng góp sai số theo khoảng cách}
 \label{tab:rss-summary}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Khoảng cách} & $\sigma_{gps}$ & $\sigma_{lateral}$ / $\sigma_{elev}$ & $\sigma_{pos}$ \\
@@ -346,7 +346,7 @@ Giá trị $\sigma_a$ được hiệu chỉnh theo từng loại mục tiêu:
 \centering
 \caption{Tham số $\sigma_a$ theo loại mục tiêu}
 \label{tab:sigma-a}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Loại mục tiêu} & $\sigma_a$ (m/s$^2$) & \textbf{Ý nghĩa} \\
@@ -590,7 +590,7 @@ Trong mô phỏng hiện tại, mỗi cảm biến luôn có dữ liệu (đư�
 \centering
 \caption{Thời gian thực thi mỗi bước lọc}
 \label{tab:filter-timing}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Thành phần} & \textbf{Thời gian} & \textbf{Tỷ lệ} \\
@@ -615,26 +615,24 @@ Thời gian 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi
 
 \begin{table}[H]
 \centering
-\caption{So sánh chi tiết bộ lọc Kalman và alpha-beta}
+\caption{So sánh chi tiết bộ lọc Kalman và Alpha-Beta}
 \label{tab:kf-vs-ab}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{p{3,5cm}p{5cm}p{5cm}}
+\begin{tabularx}{\linewidth}{lXX}
 \toprule
-\textbf{Tiêu chí} & \textbf{Kalman} & \textbf{Alpha-Beta} \\
+\textbf{Tiêu chí} & \textbf{Kalman Filter} & \textbf{Alpha-Beta Filter} \\
 \midrule
 Tham số & $\mathbf{K}$ thay đổi mỗi bước & $\alpha$, $\beta$ cố định \\
 Độ bất định & Có ($\mathbf{P}_k$, uncertainty\_m) & Không \\
 Độ phức tạp tính toán & $\mathcal{O}(n^3)$ với $n$ là số trạng thái & $\mathcal{O}(n)$, $n$ là số trục \\
-Thời gian thực thi (Python) & $\sim$50 $\mu$s / bước & $\sim$10 $\mu$s / bước \\
-Chất lượng lọc & Tốt hơn từ 5 đến 15\% RMSE (mô phỏng) & Thấp hơn nhưng ổn định \\
+Thời gian thực thi & $\approx 50$ $\mu$s / bước & $\approx 10$ $\mu$s / bước \\
+Chất lượng lọc & Tối ưu theo tiêu chuẩn Bayes & Thấp hơn nhưng ổn định \\
 Năng lực thích nghi & Tự động điều chỉnh theo nhiễu & Cần hiệu chỉnh thủ công \\
 Phù hợp & Mục tiêu cơ động, nhiễu thay đổi & Mục tiêu di chuyển đều, tài nguyên hạn chế \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
-Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp. Trên Raspberry Pi, tài nguyên tiết kiệm được có thể dùng cho các tác vụ khác như đọc cảm biến và giao tiếp mạng. Tuy nhiên, bộ lọc này không cung cấp thông tin về độ bất định, vốn là thông tin quan trọng để đánh giá chất lượng bám mục tiêu và đưa ra quyết định trong các hệ thống thực.
+Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp. Trên thiết bị nhúng, tài nguyên tiết kiệm được có thể dùng cho các tác vụ khác như định tuyến và giao tiếp mạng. Tuy nhiên, bộ lọc này không cung cấp thông tin về độ bất định, vốn là thông tin quan trọng để đánh giá chất lượng bám mục tiêu và đưa ra quyết định trong các hệ thống thực.
 
 \subsection{Điều kiện sử dụng từng bộ lọc}
 
@@ -687,7 +685,7 @@ Sự khác biệt giữa hai bộ lọc ở drone lớn nhất vì Kalman 3D x�
 
 \hspace{0.5cm} Kalman filter với cơ chế Adaptive R là lựa chọn phù hợp nhất cho hệ thống bám mục tiêu thờigian thực vì ba lý do: (1) thích nghi tự động với nhiễu thay đổi theo khoảng cách; (2) cung cấp độ bất định để đánh giá chất lượng ước tính; (3) mở rộng tự nhiên lên 3D cho drone. Alpha-beta filter đóng vai trò baseline và phương án dự phòng khi tài nguyên tính toán hạn chế. Cả hai đều được triển khai trong hệ thống để so sánh trực tiếp qua mô phỏng.
 
-\subsection{Phân tích độ nhạy tham số $\alpha$}
+\subsection{Phân tích độ nhạy tham số \texorpdfstring{$\alpha$}{alpha}}
 
 \hspace{0.5cm} Tham số $\alpha$ của bộ lọc alpha-beta ảnh hưởng trực tiếp đến hành vi lọc. Giá trị $\alpha$ quyết định tỉ lệ giữa tín hiệu (mô hình vận tốc không đổi) và nhiễu (GPS) trong đầu ra. Phân tích độ nhạy giúp hiểu rõ tại sao $\alpha = 0{,}4$ là lựa chọn phù hợp.
 
@@ -695,7 +693,7 @@ Sự khác biệt giữa hai bộ lọc ở drone lớn nhất vì Kalman 3D x�
 \centering
 \caption{Ảnh hưởng của $\alpha$ đến hiệu năng (người đi bộ, seed=42)}
 \label{tab:alpha-sensitivity}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{cccc}
 \toprule
 $\alpha$ & $\beta$ (Benedict-Bordner) & RMSE (m) & Đặc điểm \\
@@ -738,7 +736,7 @@ Bảng sau tóm tắt các tham số thiết kế chính:
 \centering
 \caption{Tóm tắt tham số thiết kế thuật toán lọc}
 \label{tab:design-params-summary}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lll}
 \toprule
 \textbf{Tham số} & \textbf{Giá trị} & \textbf{Nguồn xác định} \\

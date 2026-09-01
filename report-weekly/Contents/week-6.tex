@@ -12,7 +12,7 @@
 \centering
 \caption{Cấu trúc cột trong file CSV xuất ra}
 \label{tab:csv-schema}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llp{6.5cm}}
 \toprule
 \textbf{Nhóm} & \textbf{Cột} & \textbf{Mô tả} \\
@@ -87,7 +87,7 @@ Hình \ref{fig:rmse-convergence} biểu diễn diễn biến RMSE tích lũy the
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -127,7 +127,7 @@ Phân tích chi tiết hơn tại các mốc thời gian cụ thể cho thấy d
 \centering
 \caption{RMSE tích lũy tại các mốc thời gian (kịch bản xe máy, seed = 42)}
 \label{tab:rmse-timepoints}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Phương pháp} & \textbf{30 s} & \textbf{60 s} & \textbf{90 s} & \textbf{120 s} \\
@@ -152,7 +152,7 @@ Giai đoạn hội tụ sớm (khoảng 50 đến 100 bước đầu, tương đ
 \centering
 \caption{Phương sai sai số theo trục East và North (seed = 42, 120 s, 10 Hz)}
 \label{tab:error-axis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Kịch bản} & \textbf{Phương pháp} & $\sigma_E$ (m) & $\sigma_N$ (m) & $\text{RMSE}_{EN}$ (m) \\
@@ -183,7 +183,7 @@ Tuy nhiên, tỉ lệ giữa hai thành phần East và North có thể thay đ�
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -220,7 +220,7 @@ Hình \ref{fig:error-cdf-moto} và Hình \ref{fig:error-cdf-drone} trình bày k
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -251,7 +251,7 @@ Hình \ref{fig:error-cdf-moto} và Hình \ref{fig:error-cdf-drone} trình bày k
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.88\textwidth,
@@ -286,11 +286,11 @@ Hình \ref{fig:error-cdf-moto} và Hình \ref{fig:error-cdf-drone} trình bày k
 
 \hspace{0.5cm} Hình \ref{fig:traj-ped}, \ref{fig:traj-moto} và \ref{fig:traj-drone} trình bày quỹ đạo thực (đường liền), đo thô (điểm phân tán) và hai đường lọc (Kalman, alpha-beta) trên mặt phẳng East-North cho mỗi loại mục tiêu.
 
-\newpage
+
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.85\textwidth,
@@ -320,7 +320,7 @@ Hình \ref{fig:error-cdf-moto} và Hình \ref{fig:error-cdf-drone} trình bày k
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.85\textwidth,
@@ -350,7 +350,7 @@ Hình \ref{fig:error-cdf-moto} và Hình \ref{fig:error-cdf-drone} trình bày k
 
 \begin{figure}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tikzpicture}
 \begin{axis}[
     width=0.85\textwidth,
@@ -396,22 +396,22 @@ trong đó $R$ là khoảng cách laser, $\theta_{el}$ là góc elevation và $\
 
 Khi $\theta_{el} < 0$: $\cos(\theta_{el}) > 0$ (khoảng cách ngang vẫn dương), $\sin(\theta_{el}) < 0$ (Up âm, tức mục tiêu thấp hơn người quan sát). Về mặt toán học, hàm này xử lý đúng không cần thêm điều kiện rẽ nhánh.
 
-Bảng \ref{tab:elevation-edge} xác minh hành vi ở các góc elevation đặc trưng với $R = 100$ m và $\psi_{az} = 0°$ (hướng Bắc).
+Bảng \ref{tab:elevation-edge} xác minh hành vi ở các góc elevation đặc trưng với $R = 100$ m và $\psi_{az} = 0^{\circ}$ (hướng Bắc).
 
 \begin{table}[H]
 \centering
-\caption{Kết quả chuyển đổi polar sang ENU với $R = 100$ m, $\psi_{az} = 0°$, các góc elevation khác nhau}
+\caption{Kết quả chuyển đổi polar sang ENU với $R = 100$ m, $\psi_{az} = 0^{\circ}$, các góc elevation khác nhau}
 \label{tab:elevation-edge}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccl}
 \toprule
 $\theta_{el}$ & East (m) & North (m) & Up (m) & Nhận xét \\
 \midrule
-$+30°$ & 0{,}00  & 86{,}60  & $+$50{,}00 & Mục tiêu cao hơn người quan sát \\
-$0°$   & 0{,}00  & 100{,}00 &    0{,}00  & Cùng mặt phẳng ngang \\
-$-15°$ & 0{,}00  & 96{,}59  & $-$25{,}88 & Mục tiêu thấp hơn người quan sát \\
-$-45°$ & 0{,}00  & 70{,}71  & $-$70{,}71 & Góc ngắm xuống dốc \\
-$-90°$ & 0{,}00  &  0{,}00  & $-$100{,}00 & Mục tiêu thẳng đứng xuống \\
+$+30^{\circ}$ & 0{,}00  & 86{,}60  & $+$50{,}00 & Mục tiêu cao hơn người quan sát \\
+$0^{\circ}$   & 0{,}00  & 100{,}00 &    0{,}00  & Cùng mặt phẳng ngang \\
+$-15^{\circ}$ & 0{,}00  & 96{,}59  & $-$25{,}88 & Mục tiêu thấp hơn người quan sát \\
+$-45^{\circ}$ & 0{,}00  & 70{,}71  & $-$70{,}71 & Góc ngắm xuống dốc \\
+$-90^{\circ}$ & 0{,}00  &  0{,}00  & $-$100{,}00 & Mục tiêu thẳng đứng xuống \\
 \bottomrule
 \end{tabular}
 }
@@ -429,7 +429,7 @@ Kết quả cho thấy chuỗi chuyển đổi tọa độ hoạt động đúng
 
 trong đó $\sigma_U$ là phương sai sai số trên trục Up.
 
-Trong hầu hết trường hợp mô phỏng, $\sigma_U$ nhỏ hơn $\sigma_E$ và $\sigma_N$ đáng kể vì khoảng cách laser $R$ ảnh hưởng trực tiếp đến độ chính xác elevation nhưng thành phần GPS (độc lập với elevation) vẫn chiếm ưu thế. Tuy nhiên, khi elevation âm lớn (góc ngắm xuống dốc hơn $-30°$), thành phần $R \sin(\theta_{el})$ tăng nhanh và có thể trở thành nguồn sai số đáng kể nếu khoảng cách laser không được hiệu chuẩn đúng.
+Trong hầu hết trường hợp mô phỏng, $\sigma_U$ nhỏ hơn $\sigma_E$ và $\sigma_N$ đáng kể vì khoảng cách laser $R$ ảnh hưởng trực tiếp đến độ chính xác elevation nhưng thành phần GPS (độc lập với elevation) vẫn chiếm ưu thế. Tuy nhiên, khi elevation âm lớn (góc ngắm xuống dốc hơn $-30^{\circ}$), thành phần $R \sin(\theta_{el})$ tăng nhanh và có thể trở thành nguồn sai số đáng kể nếu khoảng cách laser không được hiệu chuẩn đúng.
 
 Đối với kịch bản drone 3D, thành phần elevation luôn dương (drone bay trên cao) và dao động trong khoảng 20 đến 100 m, nên elevation âm không xảy ra trong điều kiện mô phỏng tiêu chuẩn. Trường hợp elevation âm chỉ có ý nghĩa thực tế khi drone bay ở độ cao thấp hơn người quan sát, hoặc khi người quan sát ở tầng thượng nhìn xuống drone bay phía dưới.
 
@@ -462,7 +462,7 @@ Một hạn chế khác của danh sách trong bộ nhớ là không tự độn
 \item Drone: quỹ đạo 3D với vận tốc ngang và vận tốc lên xuống được kiểm soát bởi các tham số kinematic (giới hạn gia tốc, vận tốc cực đại).
 \end{itemize}
 
-Độ nhiễu cảm biến trong chế độ Synthetic được mô hình hóa bằng phân phối Gaussian với các tham số cố định: $\sigma_{GPS} = 5{,}0$ m, $\sigma_{az} = 0{,}3°$, $\sigma_{el} = 0{,}2°$, $\sigma_{range} = 0{,}5$ m.
+Độ nhiễu cảm biến trong chế độ Synthetic được mô hình hóa bằng phân phối Gaussian với các tham số cố định: $\sigma_{GPS} = 5{,}0$ m, $\sigma_{az} = 0{,}3^{\circ}$, $\sigma_{el} = 0{,}2^{\circ}$, $\sigma_{range} = 0{,}5$ m.
 
 \subsubsection{Chế độ Real-World Data}
 
@@ -483,7 +483,7 @@ Một hạn chế khác của danh sách trong bộ nhớ là không tự độn
 \centering
 \caption{So sánh chế độ Synthetic và Real-World Data}
 \label{tab:mode-comparison}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
 \toprule
 \textbf{Tiêu chí} & \textbf{Synthetic} & \textbf{Real-World Data} \\
@@ -499,7 +499,7 @@ Phù hợp & Kiểm tra unit, regression test & Đánh giá thực tế hóa \\
 }
 \end{table}
 
-\newpage
+
 
 RMSE của hai chế độ có sự khác biệt đáng kể. Trong chế độ Synthetic, quỹ đạo mượt mà và nhiễu Gaussian thuần khiến bộ lọc hoạt động ở điều kiện lý tưởng nhất, RMSE thấp hơn. Trong chế độ Real-World Data, quỹ đạo thực có các chuyển hướng đột ngột, thay đổi tốc độ bất ngờ và nhiễu không-Gaussian, khiến RMSE cao hơn 15 đến 30\% so với Synthetic.
 
@@ -511,7 +511,7 @@ RMSE của hai chế độ có sự khác biệt đáng kể. Trong chế độ 
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Mốc thời gian} & \textbf{Đi bộ (m)} & \textbf{Xe máy (m)} & \textbf{Drone (m)} \\
@@ -544,7 +544,7 @@ Alpha-beta filter hội tụ nhanh hơn đáng kể: sau 10 giây, RMSE đã đ�
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Loại} & \textbf{Phương pháp} & \textbf{East RMSE (m)} & \textbf{North RMSE (m)} & \textbf{Tỷ lệ E/N} \\
@@ -570,11 +570,11 @@ Tỷ lệ East/North gần bằng 1,0 cho tất cả trường hợp (0,99-1,06)
 
 \hspace{0.5cm} Phân phối tích lũy (CDF) cho biết xác suất sai số nhỏ hơn một ngưỡng nhất định. Bảng \ref{tab:cdf-percentiles} liệt kê các percentile quan trọng.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Percentile} & \textbf{Đi bộ (m)} & \textbf{Xe máy (m)} & \textbf{Drone (m)} \\
@@ -615,7 +615,7 @@ Trong dữ liệu drone thực tế, elevation thường dương (drone bay trê
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} \\
@@ -639,11 +639,11 @@ Sai số RMSE cao hơn cho xe máy (1,80 m Kalman, 1,02 m alpha-beta) so với �
 
 \hspace{0.5cm} Hiệu năng xuất CSV được đo bằng thời gian thực thi trên server Python và dung lượng file kết quả. Bảng \ref{tab:csv-perf} tổng hợp kết quả đo benchmark.
 
-\newpage
+
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} & \textbf{Ghi chú} \\
@@ -669,7 +669,7 @@ Thiết kế StreamingResponse (thay vì tải toàn bộ file rồi gửi) đ�
 
 \begin{table}[H]
 \centering
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} \\
@@ -704,7 +704,7 @@ Drone bay theo quỹ đạo 3D với vận tốc ngang tối đa 15 m/s và vậ
 
 Đặc biệt, cột \texttt{uncertainty\_m} (bán kính bất định từ Kalman P matrix) cho phép xác định khoảng confidence interval cho mỗi điểm đo. Ví dụ, tại 95\% confidence, vị trí thực nằm trong vòng tròn bán kính $2 \times \sigma_{pos}$ quanh ước lượng Kalman. Thông tin này rất hữu ích cho việc ra quyết định trong hệ thống bám mục tiêu thực tế.
 
-\newpage
+
 
 \subsection{Phân tích ổn định đa seed}
 
@@ -714,7 +714,7 @@ Drone bay theo quỹ đạo 3D với vận tốc ngang tối đa 15 m/s và vậ
 \centering
 \caption{Biến thiên RMSE cuối phiên qua 10 seed}
 \label{tab:csv-multiseed}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llccc}
 \toprule
 \textbf{Loại} & \textbf{Phương pháp} & \textbf{Trung bình (m)} & \textbf{Độ lệch chuẩn (m)} & \textbf{CV (\%)} \\
@@ -748,7 +748,7 @@ Hệ số biến thiên (CV) dao động trong khoảng 9,8\%-18,0\%, cho thấy
 \centering
 \caption{So sánh chế độ Synthetic và Real-World Data từ dữ liệu CSV}
 \label{tab:mode-compare-csv}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
 \toprule
 \textbf{Tiêu chí} & \textbf{Synthetic} & \textbf{Real-World Data} \\
@@ -774,7 +774,7 @@ Phạm vi & Toàn vùng mô phỏng & Phụ thuộc vùng GPS phủ sóng \\
 \centering
 \caption{Hiệu năng phiên mô phỏng tiêu chuẩn}
 \label{tab:session-perf}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} \\
@@ -804,7 +804,7 @@ Hiệu suất này xác nhận hệ thống có khả năng xử lý dữ liệu
 \centering
 \caption{RMSE tách trục East và North (seed=42, 120 giây)}
 \label{tab:axis-split}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{llcc}
 \toprule
 \textbf{Loại} & \textbf{Phương pháp} & \textbf{RMSE East (m)} & \textbf{RMSE North (m)} \\
@@ -828,7 +828,7 @@ Hiệu suất này xác nhận hệ thống có khả năng xử lý dữ liệu
 }
 \end{table}
 
-Sai số East và North gần bằng nhau trên tất cả các trường hợp (độ chênh lệch nhỏ hơn 3\%), xác nhận nhiễu GPS là isotropic (đồng hướng) và không có thiên vị phương hướng. Kết quả này phù hợp với mô hình nhiễu Gaussian được thiết lập trong hệ thống: $\sigma_{az} = 0{,}3°$ và $\sigma_{el} = 0{,}2°$ tạo ra nhiễu gần như đối xứng trên mặt phẳng ngang.
+Sai số East và North gần bằng nhau trên tất cả các trường hợp (độ chênh lệch nhỏ hơn 3\%), xác nhận nhiễu GPS là isotropic (đồng hướng) và không có thiên vị phương hướng. Kết quả này phù hợp với mô hình nhiễu Gaussian được thiết lập trong hệ thống: $\sigma_{az} = 0{,}3^{\circ}$ và $\sigma_{el} = 0{,}2^{\circ}$ tạo ra nhiễu gần như đối xứng trên mặt phẳng ngang.
 
 Phân tích tách trục cũng hữu ích để phát hiện lỗi thiết lập: nếu sai số East khác biệt rõ rệt so với North, đó có thể là dấu hiệu thiên vị gyro hoặc sai số systematic từ một thành phần cảm biến cụ thể.
 
@@ -838,21 +838,19 @@ Phân tích tách trục cũng hữu ích để phát hiện lỗi thiết lập
 
 \begin{table}[H]
 \centering
-\caption{Xử lý trường hợp đặc biệt trong xuất CSV}
+\caption{Xử lý trường hợp đặc biệt trong xuất chuỗi dữ liệu}
 \label{tab:csv-edge-cases}
-\resizebox{\linewidth}{!}{
-\begin{tabular}{p{3.5cm}p{5cm}p{5cm}}
+\begin{tabularx}{\linewidth}{lXX}
 \toprule
 \textbf{Trường hợp} & \textbf{Nguyên nhân} & \textbf{Cách xử lý} \\
 \midrule
-Cao độ drone âm & Mô hình drone tạo altitude nhỏ hơn 0 & Bảng chuyển đổi polar-to-ENU dừng elevation at $-90°$, altitude được clamp về 0 \\
-Ring buffer chưa đủ 500 khung & Phiên chạy ngắn (< 50 giây) & Xuất toàn bộ nội dung buffer, không cần ring wrap \\
-Mục tiêu chạm biên & Mô hình phản lực đẩy mềm & Vị trí thực vẫn được ghi, không có gap trong CSV \\
-WebSocket ngắt giữa chừng & Lỗi mạng hoặc đóng tab & File CSV vẫn đầy đủ đến khung cuối cùng \\
-Seed không xác định & Phiên dùng seed=None & Cột timestamp khác giữa các lần chạy, cần so sánh thủ công \\
+Cao độ drone âm & Mô hình tạo độ cao nhỏ hơn 0 & Giới hạn góc ngắm tại $-90^{\circ}$, đưa độ cao về 0 \\
+Vùng đệm chưa đủ 500 khung & Phiên chạy ngắn ($< 50$ giây) & Xuất toàn bộ nội dung hiện có trong vùng đệm \\
+Mục tiêu chạm biên & Phản lực trường thế năng mềm & Vị trí thực vẫn được ghi nhận liên tục, không tạo đứt gãy \\
+Ngắt kết nối giữa chừng & Đứt kết nối mạng truyền thông & Tệp xuất vẫn lưu trữ đầy đủ đến khung cuối cùng \\
+Khởi tạo ngẫu nhiên & Phiên không cố định giá trị khởi tạo & Dấu thời gian khác nhau giữa các lần chạy, cần so sánh độc lập \\
 \bottomrule
-\end{tabular}
-}
+\end{tabularx}
 \end{table}
 
 Trường hợp đáng chú ý là trường hợp WebSocket ngắt giữa chừng. Hệ thống được thiết kế để mỗi bản tin WebSocket chứa đủ thông tin cho một khung hình, nên nếu kết nối ngắt, dữ liệu đã nhận vẫn đầy đủ. File CSV được ghi theo luồng (streaming), mỗi khung được ghi ngay khi xử lý xong, nên không có dữ liệu nào bị mất trong bộ nhớ. Thiết kế này phù hợp với yêu cầu của hệ thống bám mục tiêu thời gian thực: dữ liệu partially hoàn chỉnh vẫn hữu ích hơn là không có dữ liệu.
@@ -865,7 +863,7 @@ Trường hợp đáng chú ý là trường hợp WebSocket ngắt giữa chừ
 \centering
 \caption{Tài nguyên hệ thống trong phiên xuất CSV}
 \label{tab:csv-resources}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lc}
 \toprule
 \textbf{Chỉ số} & \textbf{Giá trị} \\
@@ -890,7 +888,7 @@ Mức sử dụng CPU thấp (2-4\%) cho thấy hệ thống đáp ứng yêu c�
 \centering
 \caption{RMSE theo khoảng cách người quan sát (người đi bộ, seed=42)}
 \label{tab:rmse-vs-range}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Khoảng cách} & \textbf{Thô (m)} & \textbf{AB (m)} & \textbf{KF (m)} & \textbf{AB gain (\%)} & \textbf{KF gain (\%)} \\
@@ -915,7 +913,7 @@ Mỗi lần tăng khoảng cách gấp đôi, RMSE đo thô tăng khoảng 25-40
 \centering
 \caption{RMSE theo tần số sampling (xe máy, seed=42)}
 \label{tab:sampling-analysis}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Tần số} & \textbf{Thô (m)} & \textbf{AB (m)} & \textbf{KF (m)} & \textbf{Tổng khung} \\
@@ -939,7 +937,7 @@ RMSE đo thô không thay đổi đáng kể giữa các tần số vì mức nh
 \centering
 \caption{Chi phí tính toán từng bước trong chuỗi xử lý}
 \label{tab:step-cost}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Bước} & \textbf{2D (µs)} & \textbf{3D (µs)} & \textbf{Tỷ lệ (\%)} \\
@@ -965,7 +963,7 @@ Bước cập nhật Kalman chiếm phần lớn thời gian (57-75\%) vì phả
 \centering
 \caption{Dung lượng dữ liệu trong phiên 120 giây, 10 Hz}
 \label{tab:data-volume}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
 \textbf{Loại dữ liệu} & \textbf{Dung lượng} & \textbf{Tỷ lệ (\%)} \\
@@ -992,7 +990,7 @@ Tốc độ truyền 2,9 KB/s thấp hơn nhiều so với băng thông tối th
 \centering
 \caption{Tài nguyên ước tính cho nhiều phiên đồng thời}
 \label{tab:multi-session}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
 \textbf{Số phiên} & \textbf{Bộ nhớ (MB)} & \textbf{CPU (\%)} & \textbf{Băng thông (KB/s)} \\
@@ -1017,7 +1015,7 @@ Hệ thống vận hành ổn định với tối đa 10 phiên đồng thời t
 \centering
 \caption{Độ nhạy RMSE theo tham số cảm biến (xe máy, seed=42)}
 \label{tab:sensitivity}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lccccc}
 \toprule
 \textbf{Tham số} & \textbf{Mặc định} & \textbf{Thử 1} & \textbf{Thử 2} & \textbf{Thử 3} & \textbf{Thử 4} \\
@@ -1048,7 +1046,7 @@ GPS là tham số nhạy cảm nhất: giảm $\sigma_{GPS}$ từ 5,0 m xuống 
 \centering
 \caption{RMSE theo bán kính biên (xe máy, seed=42)}
 \label{tab:boundary-impact}
-\resizebox{\linewidth}{!}{
+\adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
 \textbf{Bán kính (m)} & \textbf{Thô (m)} & \textbf{AB (m)} & \textbf{KF (m)} & \textbf{Số lần chạm biên} \\
