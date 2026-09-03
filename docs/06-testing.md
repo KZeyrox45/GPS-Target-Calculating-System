@@ -101,4 +101,9 @@ npm run build
 
 ## CI/CD
 
-Không có. Không có pre-commit hooks. Không có GitHub Actions.
+GitHub Actions workflow `.github/workflows/ci.yml` — chạy trên push/PR vào `main`/`develop`:
+
+- Job **backend**: `uv sync --group dev` → `uv tool run ruff check app/ tests/` → `uv run pytest tests/ -q`
+- Job **frontend**: `npm ci` → `npm run lint` → `npm run build`
+
+Không có pre-commit hooks. Kiểm tra cục bộ: `Commands/run_tests.bat`.

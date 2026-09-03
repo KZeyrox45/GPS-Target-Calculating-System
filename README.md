@@ -5,6 +5,8 @@
 Đề tài tốt nghiệp - Khoa Kỹ thuật Máy tính, HCMUT  
 Giảng viên hướng dẫn: TS. Võ Tuấn Bình
 
+![CI](https://github.com/KZeyrox45/GPS-Target-Calculating-System/actions/workflows/ci.yml/badge.svg)
+
 ---
 
 ## Tổng quan
@@ -59,7 +61,7 @@ GPS-Target-Calculating-System/
 │   │   │   └── simulation.py       # POST /api/simulation/start + WebSocket
 │   │   ├── models/schemas.py
 │   │   └── main.py
-│   ├── tests/                      # 162 pytest tests
+│   ├── tests/                      # 163 pytest tests
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
@@ -72,6 +74,9 @@ GPS-Target-Calculating-System/
 │   │   ├── store/trackingStore.js  # Zustand global state
 │   │   └── hooks/useWebSocket.js
 │   └── package.json
+├── docs/
+│   ├── 01-architecture.md ... 10-demo-guide.md   # Tài liệu kỹ thuật theo chủ đề
+│   └── codebase/                   # Tài liệu kiến trúc codebase (STACK, STRUCTURE, ...)
 └── README.md
 ```
 
@@ -241,9 +246,6 @@ Hệ thống chưa kết nối được phần cứng thật (laser rangefinder 
 2. **Nhiễu Gaussian**: noise model dùng phân phối chuẩn, trong khi nhiễu thực tế có multipath (GPS phản xạ tòa nhà), scintillation (laser trong mưa), và bias drift theo nhiệt độ.
 3. **Người đi bộ synthetic** vẫn là waypoint ngẫu nhiên tương đối vị trí hiện tại, thiếu yếu tố môi trường (tường, vỉa hè, đám đông).
 
-#### Bước tiếp theo
-Khi có phần cứng: thay module sinh dữ liệu bằng client thu thập thật (xem `raspberry_pi/`), giữ nguyên toàn bộ chuỗi xử lý phía sau.
-
 ---
 
 ## Kết quả đánh giá
@@ -264,7 +266,7 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km), kết quả từ 
 - Python 3.11 + FastAPI + Uvicorn
 - NumPy, SciPy
 - Pydantic v2
-- pytest (162 tests)
+- pytest (163 tests)
 
 **Frontend**
 - React 19 + Vite 8
@@ -272,6 +274,17 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km), kết quả từ 
 - React-Leaflet (bản đồ)
 - Chart.js + react-chartjs-2 (biểu đồ)
 - React Router v6
+
+---
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/ci.yml`) chạy tự động trên mọi push và pull request vào `main`/`develop`:
+
+- **Backend**: `uv sync --group dev` → `ruff check app/ tests/` → `pytest tests/`
+- **Frontend**: `npm ci` → `npm run lint` → `npm run build`
+
+Không có pre-commit hooks — chạy `Commands/run_tests.bat` trước khi commit.
 
 ---
 
