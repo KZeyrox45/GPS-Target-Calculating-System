@@ -126,7 +126,7 @@ cd backend
 uv run pytest tests/ -v
 ```
 
-Kết quả hiện tại: **162 tests passed**.
+Kết quả hiện tại: **163 tests passed**.
 
 Các nhóm test bao gồm:
 - `TestPedestrianTrajectory` - kiểm tra tốc độ, pause, waypoint navigation
