@@ -508,7 +508,7 @@ S(N) = \frac{1}{(1 - p) + \frac{p}{N}}
 
 trong đó $p = 0{,}80$ là tỷ trọng chuỗi tính toán toán học có thể song song hóa độc lập, và $1 - p = 0{,}20$ là phần tuần tự (quản lý kết nối mạng, định tuyến kênh truyền dữ liệu và ghi nhật ký).
 
-Trên vi xử lý 4 nhân ARM Cortex-A72:
+Với giả định một vi xử lý 4 nhân (kiểu ARM Cortex-A72 như trong định hướng thiết kế trạm nhúng):
 \begin{equation}
 S(4) = \frac{1}{0{,}20 + \frac{0{,}80}{4}} = \frac{1}{0{,}20 + 0{,}20} = 2{,}50 \text{ lần}
 \label{eq:amdahl-speedup-4cores}
@@ -586,7 +586,7 @@ Khả năng cơ động thực địa & Cố định (Yêu cầu 220V) & \textbf
 }
 \end{table}
 
-Phương án triển khai trên bo mạch nhúng đơn chip mang lại hiệu quả kinh tế vượt trội khi tiết kiệm tới $92{,}1\%$ chi phí sở hữu 3 năm trong khi bảo toàn trọn vẹn độ chính xác định vị và tính năng bám bắt thời gian thực.
+Phương án triển khai trên bo mạch nhúng đơn chip được ước tính mang lại hiệu quả kinh tế vượt trội với mức tiết kiệm tới $92{,}1\%$ chi phí sở hữu 3 năm. Lưu ý rằng bảng TCO là phân tích kinh tế lý thuyết: độ chính xác RMSE trên bảng giả định phần mềm giữ nguyên hành vi sau chuyển đổi nền tảng, và con số này chưa được kiểm chứng trên phần cứng nhúng thực tế.
 
 \subsection{Mô hình hóa nhiễu đa đường GPS tương quan màu AR(1)}
 
@@ -1155,7 +1155,7 @@ Kỹ thuật Joseph Form bảo đảm hệ thống vận hành vô hạn thời 
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc hiệu năng truy xuất bộ nhớ và thông lượng xử lý giữa bố cục AoS và SoA}
+\caption{Ước tính lý thuyết hiệu năng truy xuất bộ nhớ giữa bố cục AoS và SoA (mô hình vi kiến trúc NEON)}
 \label{tab:soa-vs-aos-performance-comparison}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -1171,13 +1171,13 @@ Mảng các cấu trúc (AoS truyền thống) & $142{,}0$ ns & $84{,}5\%$ & 75 
 }
 \end{table}
 
-Bố cục dữ liệu SoA tăng tỷ lệ trúng dòng Cache L1 lên $98{,}5\%$, giúp chuỗi tính toán vector hóa bám bắt đạt thông lượng tối đa $14{,}2$ GB/s trên vi xử lý nhúng ARM Cortex-A72.
+Theo mô hình vi kiến trúc ước tính, bố cục dữ liệu SoA cho phép tỷ lệ trúng dòng Cache L1 dự kiến lên tới $98{,}5\%$ và thông lượng $14{,}2$ GB/s khi triển khai trên vi xử lý nhúng ARM Cortex-A72; các giá trị này chưa được kiểm chứng trên phần cứng thực tế.
 
 \subsection{Khảo sát độ chính xác dự báo rẽ nhánh vi kiến trúc và chi phí đường ống}
 
 \hspace{0.5cm} Trong chuỗi xử lý nhịp 10 Hz, điều kiện rẽ nhánh (Branch Instruction) xuất hiện chủ yếu tại khối kiểm tra ranh giới thế năng mềm ($r \ge 0{,}8 R_{\text{bound}}$) và cổng kiểm định ngoại lai Mahalanobis ($\chi^2 \ge \gamma_{\text{gate}}$). Trên vi kiến trúc vi xử lý hiện đại, một phỏng đoán nhánh sai (Branch Misprediction) buộc CPU phải xả sạch đường ống lệnh (Pipeline Flush), gây tổn thất từ 12 đến 19 chu kỳ xung nhịp.
 
-Hiệu năng của bảng lịch sử rẽ nhánh (Pattern History Table, PHT) và bộ dự báo hai mức (Two-level Adaptive Branch Predictor) được đo đạc thực nghiệm qua $120.000$ bước lệnh:
+Hiệu năng của bảng lịch sử rẽ nhánh (Pattern History Table, PHT) và bộ dự báo hai mức (Two-level Adaptive Branch Predictor) được ước tính từ mô hình phân tích tĩnh trên $120.000$ lệnh rẽ nhánh giả định trong chuỗi xử lý:
 \begin{equation}
 \text{Tỷ lệ đoán sai nhánh } P_{\text{mis}} = \frac{N_{\text{mispred}}}{N_{\text{branches}}} \times 100\%
 \label{eq:branch-misprediction-formula}
@@ -1185,7 +1185,7 @@ Hiệu năng của bảng lịch sử rẽ nhánh (Pattern History Table, PHT) v
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc tỷ lệ dự báo rẽ nhánh và tổn thất chu kỳ vi kiến trúc trên các khối lệnh điều kiện}
+\caption{Ước tính tỷ lệ dự báo rẽ nhánh và tổn thất chu kỳ vi kiến trúc trên các khối lệnh điều kiện}
 \label{tab:branch-prediction-metrics}
 \begin{tabularx}{\linewidth}{>{\RaggedRight}Xcccc}
 \toprule

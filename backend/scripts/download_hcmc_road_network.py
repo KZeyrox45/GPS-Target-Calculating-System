@@ -33,8 +33,10 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlparse
 
 import networkx as nx
+from defusedxml import ElementTree as SafeET
 
 # Driveable road highway tags (same as OSMnx network_type="drive")
 _DRIVE_HIGHWAYS = frozenset({
@@ -84,11 +86,14 @@ def _download_tile(
     """
     bbox = f"{west},{south},{east},{north}"
     url = f"https://api.openstreetmap.org/api/0.6/map?bbox={bbox}"
+    parsed = urlparse(url)
+    if parsed.scheme != "https" or parsed.hostname != "api.openstreetmap.org":
+        raise ValueError(f"Unexpected download URL: {url}")
     req = urllib.request.Request(url, headers={"User-Agent": "GPS-Tracking-System/1.0"})
 
     for attempt in range(max_retries + 1):
         try:
-            with urllib.request.urlopen(req, timeout=120) as resp:
+            with urllib.request.urlopen(req, timeout=120) as resp:  # noqa: S310 (scheme+host validated above)
                 return resp.read()
         except urllib.error.HTTPError as exc:
             if exc.code == 509 and attempt < max_retries:
@@ -118,7 +123,7 @@ def _parse_osm_xml(xml_data: bytes) -> tuple[dict[int, dict], dict[int, dict]]:
         nodes: {osmid: {"lat": float, "lon": float}}
         ways:  {osmid: {"highway": str, "maxspeed": float|None, "oneway": bool, "nodes": list[int]}}
     """
-    root = ET.fromstring(xml_data)
+    root = SafeET.fromstring(xml_data)  # defusedxml: hardened against XML attacks
 
     nodes: dict[int, dict] = {}
     for nd in root.findall("node"):
@@ -141,9 +146,7 @@ def _parse_osm_xml(xml_data: bytes) -> tuple[dict[int, dict], dict[int, dict]]:
         if highway not in _DRIVE_HIGHWAYS:
             continue
 
-        member_nodes = []
-        for nd_ref in way.findall("nd"):
-            member_nodes.append(int(nd_ref.get("ref")))
+        member_nodes = [int(nd_ref.get("ref")) for nd_ref in way.findall("nd")]
 
         if len(member_nodes) < 2:
             continue
@@ -194,7 +197,7 @@ def _download_recursive(
             _failed_tiles.append((south, north, west, east, str(exc)))
             time.sleep(1.0)
             return
-    except Exception as exc:
+    except (OSError, ValueError, ET.ParseError) as exc:
         print(f"{prefix}FAIL {tile_label}: {type(exc).__name__}: {exc}")
         _failed_tiles.append((south, north, west, east, str(exc)))
         time.sleep(1.0)
@@ -219,7 +222,7 @@ def _build_graph(
     for nid, data in all_nodes.items():
         G.add_node(nid, x=data["lon"], y=data["lat"])
 
-    for way_id, way_data in all_ways.items():
+    for way_data in all_ways.values():
         members = way_data["nodes"]
         highway = way_data["highway"]
         maxspeed = way_data["maxspeed"]

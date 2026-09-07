@@ -19,7 +19,7 @@ def create_session() -> str:
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    resp = urllib.request.urlopen(req, timeout=5)
+    resp = urllib.request.urlopen(req, timeout=5)  # noqa: S310 (hardcoded localhost smoke-test URL)
     data = json.loads(resp.read())
     print(f"[REST] Session: {data['session_id']}")
     print(f"[REST] WS URL : {data['ws_url']}")
@@ -56,7 +56,7 @@ def main():
         sid = create_session()
         asyncio.run(stream(sid))
         print("\nSmoke test PASSED")
-    except Exception as exc:
+    except Exception as exc:  # noqa: BLE001 (top-level CLI error boundary: report any failure)
         print(f"\nSmoke test FAILED: {exc}", file=sys.stderr)
         sys.exit(1)
 

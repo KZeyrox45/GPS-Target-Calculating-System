@@ -853,11 +853,11 @@ Bộ lọc Kalman thích nghi kiểm soát độ vọt sai số vận tốc ở 
     \end{equation}
 \end{enumerate}
 
-Toàn bộ chuỗi tính toán 3D trên được thực thi trong thời gian $68{,}2$ $\mu$s trên vi xử lý tiêu chuẩn, chứng minh tính khả thi tuyệt đối của mô hình bám bắt 3D thời gian thực.
+Toàn bộ chuỗi tính toán 3D trên nằm gọn trong ngân sách thời gian của một chu kỳ bám bắt; trên máy tính phổ thông, chỉ số đo đạc được của toàn chuỗi xử lý là $59{,}0$ $\mu$s mỗi khung, xác nhận tính khả thi của mô hình bám bắt 3D thời gian thực.
 
 \subsection{Khảo sát khả năng tăng tốc trên kiến trúc phần cứng nhúng}
 
-\hspace{0.5cm} Nhằm đánh giá tiềm năng chuyển đổi toàn bộ chuỗi xử lý lên các thiết bị nhúng cầm tay phục vụ tác chiến dã ngoại, phân tích độ phức tạp lệnh và thời gian ước tính trên các dòng vi điều khiển và vi xử lý nhúng phổ biến được tiến hành:
+\hspace{0.5cm} Nhằm đánh giá tiềm năng chuyển đổi toàn bộ chuỗi xử lý lên các thiết bị nhúng cầm tay phục vụ tác chiến dã ngoại, phân tích độ phức tạp lệnh và thời gian thực thi ước tính trên các dòng vi điều khiển và vi xử lý nhúng phổ biến được tiến hành. Các giá trị trong bảng là ngoại suy lý thuyết từ số lệnh của chuỗi xử lý (đã đo đạc $59{,}0$ $\mu$s trên máy tính phổ thông), chưa được kiểm chứng trên phần cứng nhúng thực tế:
 
 \begin{table}[H]
 \centering
@@ -878,7 +878,7 @@ Máy trạm tiêu chuẩn x86-64 & Intel Core i7 / AMD Ryzen & 3{,}60 GHz & 0{,}
 }
 \end{table}
 
-Kết quả khẳng định thuật toán hoàn toàn có thể triển khai mượt mà ngay cả trên vi điều khiển chi phí thấp ARM Cortex-M4 chỉ với 14,5\% tải CPU, mở ra khả năng thương mại hóa và tích hợp trực tiếp vào thiết bị ngắm bắn quang điện tử nhỏ gọn.
+Ước tính cho thấy thuật toán có khả năng triển khai mượt mà ngay cả trên vi điều khiển chi phí thấp ARM Cortex-M4 với tải CPU dự kiến khoảng 14,5\%, mở ra định hướng tích hợp vào thiết bị ngắm bắn quang điện tử nhỏ gọn trong các giai đoạn phát triển tiếp theo.
 
 \subsection{Phân tích khoảng cách Mahalanobis và cơ chế loại bỏ xung nhiễu giả}
 

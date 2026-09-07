@@ -307,11 +307,11 @@ Trễ tầng đối lưu được bù trừ bằng mô hình thủy tĩnh chuẩ
 
 \subsection{Phân tích độ phức tạp thuật toán và ngân sách thời gian thực thi}
 
-\hspace{0.5cm} Bảng \ref{tab:algo-complexity-table} tổng hợp độ phức tạp thuật toán lý thuyết và thời gian thực thi đo đạc thực nghiệm:
+\hspace{0.5cm} Bảng \ref{tab:algo-complexity-table} tổng hợp độ phức tạp thuật toán, thời gian thực thi đo đạc trên máy chủ Intel i7 và thời gian ước lượng cho vi xử lý ARM Cortex-A72 (chưa triển khai thực tế):
 
 \begin{table}[H]
 \centering
-\caption{Độ phức tạp thuật toán và thời gian thực thi đo đạc trên vi xử lý ARM Cortex-A72}
+\caption{Độ phức tạp thuật toán, thời gian thực thi đo đạc trên Intel i7 và thời gian ước lượng trên ARM Cortex-A72}
 \label{tab:algo-complexity-table}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -351,11 +351,11 @@ Nội suy PCHIP 10 Hz & $\mathcal{O}(K)$ & $\mathcal{O}(K)$ & $8{,}5$ $\mu$s & $
 \end{axis}
 \end{tikzpicture}
 }
-\caption{Đo đạc thời gian thực thi của các module thuật toán trong chu kỳ xử lý 100 ms}
+\caption{Kết quả đo thời gian thực thi trên máy chủ của các module thuật toán trong chu kỳ xử lý 100 ms}
 \label{fig:algo-comparison}
 \end{figure}
 
-Tổng thời gian thực thi toàn chuỗi chỉ là $59{,}0$ $\mu$s trên vi xử lý Intel i7 và $105{,}2$ $\mu$s trên vi xử lý đơn lõi ARM Cortex-A72 ($0{,}105\%$ ngân sách thời gian 100 ms), bảo đảm hệ thống bám bắt đạt chuẩn thời gian thực cứng (Hard Real-Time).
+Tổng thời gian thực thi toàn chuỗi chỉ là $59{,}0$ $\mu$s trên vi xử lý Intel i7 (kết quả đo thực tế); con số $105{,}2$ $\mu$s cho vi xử lý đơn lõi ARM Cortex-A72 là ước tính lý thuyết theo mô hình tỷ lệ hiệu năng, chưa được kiểm chứng trên phần cứng. Cả hai giá trị đều nằm trong ngân sách thời gian 100 ms, bảo đảm hệ thống bám bắt đạt chuẩn thời gian thực cứng (Hard Real-Time).
 
 \subsection{So sánh với các công trình nghiên cứu và hệ thống thương mại liên quan}
 
@@ -409,7 +409,7 @@ Hệ thống đề xuất đạt độ chính xác cao ($0{,}26 - 1{,}14$ m) ở
 
 \subsection{Kiến trúc mạch kiểm thử tích hợp phần cứng trong vòng lặp (Hardware-in-the-Loop)}
 
-\hspace{0.5cm} Nhằm bảo đảm tính khả thi tuyệt đối khi chuyển giao sang phần cứng thực tế ngoài thao trường, một băng thử nghiệm phần cứng trong vòng lặp (Hardware-in-the-Loop, HIL Testbench) được thiết kế:
+\hspace{0.5cm} Nhằm định hướng khả năng chuyển giao sang phần cứng thực tế trong tương lai, một băng thử nghiệm phần cứng trong vòng lặp (Hardware-in-the-Loop, HIL Testbench) được thiết kế ở mức đặc tả (chưa chế tạo):
 
 \begin{figure}[H]
 \centering
@@ -446,13 +446,13 @@ Hệ thống đề xuất đạt độ chính xác cao ($0{,}26 - 1{,}14$ m) ở
 
 \end{tikzpicture}%
 }
-\caption{Sơ đồ khối kiến trúc băng thử nghiệm phần cứng trong vòng lặp HIL Testbench}
+\caption{Sơ đồ khối thiết kế băng thử nghiệm phần cứng trong vòng lặp HIL Testbench (định hướng)}
 \label{fig:hil-testbench-architecture}
 \end{figure}
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc độ trễ truyền thông và Jitter dao động trên các bus phần cứng của băng thử HIL}
+\caption{Chỉ tiêu thiết kế độ trễ truyền thông và Jitter trên các bus phần cứng của băng thử HIL (giá trị ước lượng theo đặc tả)}
 \label{tab:hil-hardware-bus-latencies}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -519,7 +519,7 @@ với hệ số khuếch đại tỷ lệ $K_p = 0{,}85$ và hệ số tích ph�
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc độ lệch đồng bộ thời gian giữa các cảm biến đa phân giải sau khi khóa pha SPLL}
+\caption{Ước lượng độ lệch đồng bộ thời gian giữa các cảm biến đa phân giải sau khi khóa pha SPLL (mô hình hóa)}
 \label{tab:pps-spll-clock-synchronization}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
@@ -534,7 +534,7 @@ Laser ToF vs IMU 6-DoF & $4{,}10$ ms & $\mathbf{0{,}006\text{ ms}}$ ($6$ $\mu$s)
 }
 \end{table}
 
-Cơ chế khóa pha SPLL giúp triệt tiêu hoàn toàn sai lệch thời gian giữa các cảm biến, đưa độ lệch pha về dưới $18$ $\mu$s, bảo đảm các phép hợp nhất không gian - thời gian luôn chuẩn xác.
+Theo mô hình khóa pha, cơ chế SPLL dự kiến đưa độ lệch pha giữa các cảm biến về dưới $18$ $\mu$s, tạo cơ sở cho các phép hợp nhất không gian - thời gian chính xác khi triển khai trên phần cứng thực tế.
 
 \subsection{Giải thuật phân rã Cholesky \texorpdfstring{LDL$^T$}{LDLT} tăng cường độ ổn định số học Kalman}
 
@@ -595,7 +595,7 @@ Sai số làm tròn trắc địa Float64 & B & $1{,}4 \times 10^{-9}$ m & Đề
 }
 \end{table}
 
-Chỉ số độ bất định mở rộng $U_{95\%} = 0{,}336$ m khẳng định $95{,}45\%$ số kết quả đo đạc bám bắt của hệ thống có khoảng tin cậy chặt chẽ trong phạm vi $\pm 33{,}6$ cm, hoàn toàn tương thích với các yêu cầu kỹ thuật tác chiến và đo đạc chuẩn xác.
+Chỉ số độ bất định mở rộng $U_{95\%} = 0{,}336$ m khẳng định $95{,}45\%$ số kết quả mô phỏng bám bắt của hệ thống có khoảng tin cậy trong phạm vi $\pm 33{,}6$ cm, tương thích với các yêu cầu kỹ thuật đặt ra.
 
 \subsection{Chiến lược bảo mật và phòng vệ an ninh mạng kênh truyền thời gian thực}
 
@@ -619,7 +619,7 @@ Mã hóa RSA-2048 & $420{,}00$ $\mu$s & +256 byte & Quá nặng cho 10 Hz & Khô
 }
 \end{table}
 
-Thuật toán mã hóa AES-128-GCM tận dụng phần cứng mã hóa chuyên dụng ARM Cryptography Extension, chỉ tiêu tốn $2{,}15$ $\mu$s thời gian vi xử lý, bảo đảm an toàn thông tin tuyệt đối mà không làm suy giảm tần số phát 10 Hz của hệ thống.
+Theo bảng ước lượng lý thuyết, thuật toán mã hóa AES-128-GCM (khi được hỗ trợ bởi bộ mã hóa phần cứng chuyên dụng trên các vi xử lý ARM hiện đại) chỉ chiếm khoảng $2{,}15$ $\mu$s thời gian vi xử lý, không làm suy giảm tần số phát 10 Hz của hệ thống.
 
 \subsection{Cơ chế cấp phát bộ nhớ phẳng phi phân mảnh Slab Arena Memory Allocator}
 
@@ -627,7 +627,7 @@ Thuật toán mã hóa AES-128-GCM tận dụng phần cứng mã hóa chuyên d
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc hiệu năng cấp phát và mức độ phân mảnh giữa cơ chế Heap tiêu chuẩn và Slab Arena Allocator}
+\caption{Ước lượng lý thuyết hiệu năng cấp phát và mức độ phân mảnh giữa cơ chế Heap tiêu chuẩn và Slab Arena Allocator}
 \label{tab:slab-arena-allocator-performance}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -656,7 +656,7 @@ với biến chuẩn hóa $s = (t - t_k)/\Delta t \in [0, 1]$, và $d_k, d_{k+1}
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc sai số nội suy động học giữa các phương pháp đồng bộ hóa đa tốc độ lấy mẫu}
+\caption{Kết quả mô phỏng sai số nội suy động học giữa các phương pháp đồng bộ hóa đa tốc độ lấy mẫu}
 \label{tab:multirate-interpolation-methods-comparison}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -686,7 +686,7 @@ với tần số sóng mang $f_c = 2{,}4$ GHz, và độ lệch chuẩn che khu�
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc thông lượng kênh truyền, độ trễ và tỷ lệ mất gói tin theo khoảng cách phát sóng}
+\caption{Kết quả mô hình hóa thông lượng kênh truyền, độ trễ và tỷ lệ mất gói tin theo khoảng cách phát sóng theo chuẩn 3GPP TR 38.901}
 \label{tab:urban-wireless-channel-measurements}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
@@ -703,7 +703,7 @@ với tần số sóng mang $f_c = 2{,}4$ GHz, và độ lệch chuẩn che khu�
 }
 \end{table}
 
-Ngay cả tại cự ly truyền thông tối đa 1.000 m, tỷ lệ mất gói tin vẫn dưới $0{,}68\%$ và độ trễ RTT chỉ $6{,}5$ ms, bảo đảm luồng dữ liệu 10 Hz được chuyển tiếp liên tục không gián đoạn.
+Kết quả mô hình cho thấy ngay cả tại cự ly truyền thông tối đa 1.000 m, tỷ lệ mất gói tin vẫn dưới $0{,}68\%$ và độ trễ RTT chỉ $6{,}5$ ms, bảo đảm luồng dữ liệu 10 Hz được chuyển tiếp liên tục không gián đoạn.
 
 \subsection{Phân tích độ ổn định tần số vòng kín theo biểu đồ Bode (Phase \texorpdfstring{\&}{và} Gain Margins)}
 
@@ -717,7 +717,7 @@ Biên độ dự trữ (Gain Margin $G_m$) và pha dự trữ (Phase Margin $\Ph
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc biên độ dự trữ và pha dự trữ ổn định tần số của các giải thuật lọc bám bắt}
+\caption{Kết quả phân tích biên độ dự trữ và pha dự trữ ổn định tần số của các giải thuật lọc bám bắt}
 \label{tab:bode-stability-margins-table}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -746,7 +746,7 @@ với cường độ lưu lượng $A = \lambda / \mu$, và số lõi CPU $c = 4
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc hiệu năng máy chủ khi mở rộng số phiên bám bắt kết nối đồng thời}
+\caption{Kết quả mô hình hóa hiệu năng máy chủ khi mở rộng số phiên bám bắt kết nối đồng thời}
 \label{tab:multi-session-stress-testing-results}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
@@ -776,7 +776,7 @@ Ngay cả khi chịu tải 50 phiên đồng thời, hệ thống chỉ chiếm 
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
-\textbf{Chỉ số kỹ thuật cơ khí} & \textbf{Quy chuẩn thiết kế} & \textbf{Đánh giá thực nghiệm} \\
+\textbf{Chỉ số kỹ thuật cơ khí} & \textbf{Quy chuẩn thiết kế} & \textbf{Đánh giá thiết kế} \\
 \midrule
 Tiêu chuẩn bảo vệ môi trường & Chuẩn quốc tế IP67 & Chống ngập nước $1$ m trong 30 phút \\
 Vật liệu vỏ bảo vệ & Nhôm hợp kim Al-6061 Anodized & Tản nhiệt thụ động, chống ăn mòn muối biển \\
@@ -802,7 +802,7 @@ với tham số định hình $m \ge 1/2$, và tham số công suất $\Omega = 
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc sai số bám bắt dưới các điều kiện khí quyển đô thị mô hình hóa theo Nakagami-$m$}
+\caption{Kết quả mô phỏng sai số bám bắt dưới các điều kiện khí quyển đô thị mô hình hóa theo Nakagami-$m$}
 \label{tab:nakagami-atmospheric-conditions-sweep}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -831,12 +831,12 @@ Ngay cả trong điều kiện mưa to nhiệt đới và sương mù dày đặ
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc 5 tham số phương sai Allan của khối cảm biến quán tính 9 trục IMU}
+\caption{Mô hình hóa 5 tham số phương sai Allan của khối cảm biến quán tính 9 trục IMU theo datasheet}
 \label{tab:allan-variance-noise-parameters}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
-\textbf{Nguồn nhiễu nội tại} & \textbf{Ký hiệu} & \textbf{Đơn vị đo} & \textbf{Giá trị đo đạc thực nghiệm} \\
+\textbf{Nguồn nhiễu nội tại} & \textbf{Ký hiệu} & \textbf{Đơn vị đo} & \textbf{Giá trị mô hình hóa} \\
 \midrule
 Nhiễu lượng tử hóa (Quantization Noise) & $Q$ & rad & $1{,}2 \times 10^{-6}$ rad \\
 Góc ngẫu nhiên Walk (Angle Random Walk) & $N$ & $\text{rad/}\sqrt{\text{s}}$ & $2{,}4 \times 10^{-4}\text{ rad/}\sqrt{\text{s}}$ ($0{,}014^\circ/\sqrt{\text{h}}$) \\
@@ -856,7 +856,7 @@ Chỉ số thiên lệch không ổn định đạt $1{,}75^\circ/\text{h}$ kh�
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc thông lượng nạp dữ liệu và thời gian chuyển mạch kênh bộ đệm Ping-Pong DMA}
+\caption{Ước lượng thiết kế thông lượng nạp dữ liệu và thời gian chuyển mạch kênh bộ đệm Ping-Pong DMA}
 \label{tab:dma-ping-pong-performance}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -871,7 +871,7 @@ Ngắt phần cứng đơn (Interrupt) & $12{,}4\%$ & $18{,}5$ $\mu$s & $4{,}5$ 
 }
 \end{table}
 
-Cơ chế Ping-Pong DMA hạ thấp mức chiếm dụng CPU xuống chỉ còn $0{,}4\%$, giải phóng $99{,}6\%$ năng lực tính toán cho các phép lọc và biến đổi trắc địa thời gian thực.
+Theo thiết kế, cơ chế Ping-Pong DMA dự kiến hạ thấp mức chiếm dụng CPU xuống còn khoảng $0{,}4\%$, giải phóng phần lớn năng lực tính toán cho các phép lọc và biến đổi trắc địa thời gian thực.
 
 \subsection{Phân tích độ ổn định ma trận Riccati rời rạc biến thiên theo thời gian (Time-Varying DRE)}
 
@@ -934,7 +934,7 @@ F(z; \mu_G, \beta_G) = \exp \left( - \exp \left( - \frac{z - \mu_G}{\beta_G} \ri
 \label{eq:gumbel-evt-distribution-formula}
 \end{equation}
 
-với tham số vị trí $\mu_G = 0{,}318$ m và tham số tỷ lệ $\beta_G = 0{,}065$ m xác định từ dữ liệu thực nghiệm.
+với tham số vị trí $\mu_G = 0{,}318$ m và tham số tỷ lệ $\beta_G = 0{,}065$ m được ước lượng từ kết quả mô phỏng.
 
 Chu kỳ lặp lại (Return Period) $T_R(z_{\text{th}})$ của sự kiện sai số bám bắt vượt quá ngưỡng $z_{\text{th}}$:
 \begin{equation}
@@ -1110,7 +1110,7 @@ với vector sai số làm tròn $\|\mathbf{e}_{\text{round}, k}\| \le \sqrt{n} 
 
 \begin{table}[H]
 \centering
-\caption{Khảo sát sự tích lũy sai số làm tròn số học sau $100.000$ khung đo lường liên tục ($2{,}77$ giờ)}
+\caption{Khảo sát lý thuyết sự tích lũy sai số làm tròn số học sau $100.000$ khung đo lường theo mô hình lan truyền sai số lượng tử hóa}
 \label{tab:float32-vs-float64-precision-sweep-w15}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -1125,7 +1125,7 @@ Cố định Q16.16 (Fixed-point) & 0{,}261250 m & 0{,}261890 m & $+0{,}640$ mm 
 }
 \end{table}
 
-Sau $100.000$ khung đo lường liên tục ($2{,}77$ giờ bám bắt không gián đoạn), độ trôi sai số tích lũy của định dạng Float32 chỉ là $0{,}004$ mm ($4$ $\mu$m), hoàn toàn không đáng kể so với sai số đo lường thực tế, cho phép hệ thống tận dụng triệt để các tập lệnh tăng tốc vector NEON 32-bit trên vi xử lý ARM.
+Theo mô hình lan truyền sai số lượng tử hóa, sau $100.000$ khung đo lường (tương đương thời lượng bám bắt $2{,}77$ giờ ở tần số 10 Hz nếu vận hành liên tục), độ trôi sai số tích lũy của định dạng Float32 chỉ khoảng $0{,}004$ mm ($4$ $\mu$m), không đáng kể so với sai số đo lường thực tế. Điều này cho phép, trên phương diện lý thuyết, hệ thống tận dụng được các tập lệnh tăng tốc vector NEON 32-bit trên vi xử lý ARM; đây là kết quả mô hình, chưa được kiểm chứng trên phần cứng thực tế.
 
 \subsection{Khảo sát ảnh hưởng của độ lệch thẳng đứng Geoid (Deflection of the Vertical)}
 
@@ -1149,7 +1149,7 @@ Ma trận biến đổi quay hiệu chỉnh góc lệch trọng trường $\math
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc sai số vị trí gây bởi độ lệch thẳng đứng Geoid EGM2008 tại các vùng địa hình}
+\caption{Kết quả tính toán từ mô hình độ lệch thẳng đứng Geoid EGM2008 tại các vùng địa hình}
 \label{tab:geoid-deflection-terrain-sweep-w15}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -1242,7 +1242,7 @@ Với $\nu_{\text{eff}} \approx 89{,}4$, hệ số phủ Student $t_{0{,}95}(89{
 
 \subsection{Đặc tả kiến trúc phần cứng trạm nhúng mục tiêu (Target Embedded Architecture)}
 
-\hspace{0.5cm} Nhằm hiện thực hóa hệ thống trên thiết bị đo đạc thực địa, kiến trúc phần cứng trạm nhúng mục tiêu (Target Embedded Hardware Architecture) được thiết kế đồng bộ với sơ đồ khối phân tầng trong Hình \ref{fig:target-embedded-arch}:
+\hspace{0.5cm} Nhằm định hướng khả năng triển khai hệ thống trên thiết bị thực địa trong tương lai, kiến trúc phần cứng trạm nhúng mục tiêu (Target Embedded Hardware Architecture) được đặc tả ở mức thiết kế (chưa chế tạo), đồng bộ với sơ đồ khối phân tầng trong Hình \ref{fig:target-embedded-arch}:
 
 \begin{figure}[H]
 \centering
@@ -1278,7 +1278,7 @@ Với $\nu_{\text{eff}} \approx 89{,}4$, hệ số phủ Student $t_{0{,}95}(89{
 
 \end{tikzpicture}%
 }
-\caption{Sơ đồ khối kiến trúc phần cứng trạm nhúng mục tiêu đo đạc thực địa (Target Embedded Architecture)}
+\caption{Sơ đồ khối kiến trúc phần cứng trạm nhúng mục tiêu - thiết kế định hướng (Target Embedded Architecture)}
 \label{fig:target-embedded-arch}
 \end{figure}
 
@@ -1370,7 +1370,7 @@ với tham số hình dạng $k = 1{,}85$ và tham số tỷ lệ $\lambda = 2{,
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc độ trễ truyền gói tin và xác suất giật độ trễ qua các kênh liên kết vô tuyến}
+\caption{Kết quả mô hình hóa độ trễ truyền gói tin và xác suất giật độ trễ qua các kênh liên kết vô tuyến}
 \label{tab:wireless-network-latency-w15}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -1386,7 +1386,7 @@ với tham số hình dạng $k = 1{,}85$ và tham số tỷ lệ $\lambda = 2{,
 }
 \end{table}
 
-Kết quả đo đạc khẳng định liên kết 4G LTE và Wi-Fi công nghiệp duy trì $99{,}92\%$ số khung tin có độ trễ dưới $35$ ms, hoàn toàn nằm trong giới hạn chu kỳ trích mẫu $100$ ms ($10$ Hz), bảo đảm hệ thống hiển thị bám bắt tức thời không gián đoạn.
+Kết quả mô hình hóa cho thấy liên kết 4G LTE và Wi-Fi công nghiệp được dự kiến duy trì $99{,}92\%$ số khung tin có độ trễ dưới $35$ ms, nằm trong giới hạn chu kỳ trích mẫu $100$ ms ($10$ Hz), bảo đảm hệ thống hiển thị bám bắt tức thời không gián đoạn.
 
 \subsection{Phân tích cơ chế chuyển mạch tự động dự phòng kênh truyền (Failover Mechanism)}
 
@@ -1398,7 +1398,7 @@ A_{\text{link\_total}} = 1 - (1 - A_{\text{primary}}) (1 - A_{\text{backup}}) = 
 
 \begin{table}[H]
 \centering
-\caption{Đo đạc thời gian phát hiện mất kết nối và chuyển mạch tự động kênh truyền thông}
+\caption{Chỉ tiêu thiết kế thời gian phát hiện mất kết nối và chuyển mạch tự động kênh truyền thông (giá trị ước lượng)}
 \label{tab:dual-link-failover-metrics-w15}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
@@ -1457,7 +1457,7 @@ Giao thức IEEE 1588 PTP v2 khóa pha thời gian giữa các trạm quan sát 
 
 \hspace{0.5cm} Quá trình nghiên cứu, thiết kế và thực nghiệm hệ thống bám bắt mục tiêu di động đa cảm biến đã đạt được các kết quả kỹ thuật then chốt:
 \begin{enumerate}
-    \item Hiện thực hóa thành công chuỗi xử lý bám bắt thời gian thực với chu kỳ chỉ $59{,}0$ $\mu$s, bảo đảm tính tiền định và đáp ứng tần số $10$ Hz trên phần cứng nhúng ARM Cortex-A72.
+    \item Hiện thực hóa chuỗi xử lý bám bắt thời gian thực trên máy chủ với chu kỳ chỉ $59{,}0$ $\mu$s (kết quả đo thực tế), đáp ứng dư địa lớn tần số $10$ Hz; đồng thời hoàn thiện đặc tả thiết kế trạm nhúng ARM Cortex-A72 làm cơ sở cho các hướng phát triển trong tương lai.
     \item Tích hợp giải thuật lọc bám bắt Alpha-Beta Benedict-Bordner tối ưu hóa với độ trễ pha chỉ $12{,}5$ ms và khả năng dập tắt $95{,}1\%$ công suất nhiễu trắc địa dải cao.
     \item Hoàn thiện bảng cân bằng độ bất định đo lường toàn diện theo chuẩn quốc tế GUM ($U_{95\%} = 0{,}336$ m) và thiết lập đặc tả kiến trúc trạm đo nhúng mục tiêu chuyên sâu.
     \item Xác lập lộ trình chuyển giao 4 giai đoạn chuẩn hóa, sẵn sàng cho việc tích hợp mô-đun cảm biến vật lý ngoài thực địa.

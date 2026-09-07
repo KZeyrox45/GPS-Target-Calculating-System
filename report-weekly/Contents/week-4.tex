@@ -456,9 +456,9 @@ Cả hai đạt yêu cầu kỹ thuật & RMSE $<$ 5 m trên mọi kịch bản 
 \end{tabularx}
 \end{table}
 
-Các kết quả này hướng dẫn cho giai đoạn sau: cải thiện mô hình mục tiêu bằng cách thêm các yếu tố cơ động thực tế hơn (gia tốc, đổi hướng), và điều chỉnh tham số Kalman filter theo từng loại mục tiêu để thu hẹp khoảng cách hiệu suất với alpha-beta filter. Đồng thời, cần đánh giá thêm các chỉ tiêu ngoài RMSE như độ trễ (latency), khả năng dự báo (predictive capability), và độ ổn định (stability) trong điều kiện nhiễu cao.
+Các kết quả này định hướng các mở rộng tiềm năng của đề tài: cải thiện mô hình mục tiêu bằng cách thêm các yếu tố cơ động thực tế hơn (gia tốc, đổi hướng), và điều chỉnh tham số Kalman filter theo từng loại mục tiêu để thu hẹp khoảng cách hiệu suất với alpha-beta filter. Đồng thời, cần đánh giá thêm các chỉ tiêu ngoài RMSE như độ trễ (latency), khả năng dự báo (predictive capability), và độ ổn định (stability) trong điều kiện nhiễu cao.
 
-Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hiệu suất trong điều kiện mô phỏng CV lý tưởng (Constant Velocity). Trong thực tế, các mục tiêu thường có gia tốc thay đổi liên tục (xe máy tăng tốc khi đèn xanh, người đi bộ đổi hướng đột ngột, drone thực hiện maneuver). Khi đó, Kalman filter với mô hình phù hợp hơn (CA hoặc IMM) có thể đạt RMSE thấp hơn alpha-beta filter. Việc so sánh hiệu suất trong điều kiện cơ động thực là nội dung chính của giai đoạn sau.
+Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hiệu suất trong điều kiện mô phỏng CV lý tưởng (Constant Velocity). Trong thực tế, các mục tiêu thường có gia tốc thay đổi liên tục (xe máy tăng tốc khi đèn xanh, người đi bộ đổi hướng đột ngột, drone thực hiện maneuver). Khi đó, Kalman filter với mô hình phù hợp hơn (CA hoặc IMM) có thể đạt RMSE thấp hơn alpha-beta filter. Việc so sánh hiệu suất trong điều kiện cơ động thực là một trong những hướng mở rộng đáng chú ý của đề tài.
 
 \subsubsection{Đa seed: kiểm chứng độ ổn định thống kê}
 
@@ -601,7 +601,7 @@ Tỷ lệ KF/AB (RMSE Kalman chia cho RMSE alpha-beta) đo mức độ alpha-bet
 
 \subsubsection{Hướng phát triển từ kết quả benchmark}
 
-\hspace{0.5cm} Kết quả benchmark định hướng ba hướng phát triển chính cho giai đoạn sau.
+\hspace{0.5cm} Kết quả benchmark định hướng ba hướng phát triển chính của đề tài.
 
 Thứ nhất, điều chỉnh tham số Kalman filter theo từng loại mục tiêu. Hiện tại, $\sigma_a$ được đặt thống nhất (0,5 cho người đi bộ, 5,0 cho xe máy và drone). Kết quả cho thấy Kalman filter chưa được điều chỉnh cho từng kịch bản riêng biệt. Việc thay đổi $\sigma_a$ theo vận tốc thực tế của mục tiêu có thể giảm RMSE Kalman đáng kể.
 

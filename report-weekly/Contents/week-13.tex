@@ -966,7 +966,7 @@ với điện dung nhiệt của khối SoC/tản nhiệt $C_{\text{th}} = 12{,}
 
 \begin{table}[H]
 \centering
-\caption{Nhiệt độ đỉnh và độ tăng nhiệt độ SoC khi kích hoạt liên tục các kịch bản sự cố biên}
+\caption{Ước tính nhiệt độ đỉnh và độ tăng nhiệt độ SoC theo mô hình truyền nhiệt lý thuyết khi kích hoạt liên tục các kịch bản sự cố biên}
 \label{tab:transient-thermal-response-table}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
@@ -982,7 +982,7 @@ Tải cực đại 10 phiên gặp lỗi kép & 7{,}8 W & $+30{,}2^\circ\text{C}
 }
 \end{table}
 
-Nhiệt độ hoạt động cực đại đo đạc được ($55{,}2^\circ\text{C}$) vẫn nằm rất xa ngưỡng bảo vệ quá nhiệt phần cứng ($80^\circ\text{C}$), bảo đảm thiết bị nhúng không bao giờ bị giảm xung nhịp khi xử lý các tình huống biên phức tạp.
+Nhiệt độ hoạt động cực đại ước tính từ mô hình truyền nhiệt ($55{,}2^\circ\text{C}$) vẫn nằm rất xa ngưỡng bảo vệ quá nhiệt phần cứng ($80^\circ\text{C}$), cho thấy biên an toàn nhiệt lớn và nguy cơ thiết bị nhúng bị giảm xung nhịp trong các tình huống biên phức tạp là thấp; các giá trị này chưa được kiểm chứng trên phần cứng thực tế.
 
 \subsection{Khảo sát độ nhạy của bộ lọc trước sai lệch khởi tạo ma trận \texorpdfstring{$\mathbf{P}_0$ và $\mathbf{Q}_k$}{P0 và Qk}}
 
@@ -1128,7 +1128,7 @@ với $\tau = m \tau_0$ là thời gian gom cụm trung bình, và $\theta_k = \
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lccc}
 \toprule
-\textbf{Thành phần nhiễu đặc trưng} & \textbf{Độ dốc trên phổ Allan} & \textbf{Hệ số đo đạc thực tế} & \textbf{Ý nghĩa vật lý trong bộ lọc} \\
+\textbf{Thành phần nhiễu đặc trưng} & \textbf{Độ dốc trên phổ Allan} & \textbf{Hệ số đặc trưng (datasheet)} & \textbf{Ý nghĩa vật lý trong bộ lọc} \\
 \midrule
 Nhiễu góc ngẫu nhiên (Angle Random Walk, $N$) & $-1/2$ & $0{,}015^\circ/\sqrt{\text{s}}$ & Nhiễu trắng vận tốc góc $\mathbf{R}_{\text{gyro}}$ \\
 Bất ổn định độ lệch (Bias Instability, $B$) & $0$ (Điểm đáy) & $0{,}004^\circ/\text{s}$ & Độ trôi chậm điểm không (Zero Bias) \\

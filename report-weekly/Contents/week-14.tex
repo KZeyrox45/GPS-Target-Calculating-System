@@ -886,7 +886,7 @@ với $T_0 = 25^\circ\text{C}$, $a_1 = -0{,}04\text{ ppm/}^\circ\text{C}$, và $
 
 \begin{table}[H]
 \centering
-\caption{Khảo sát sai số bám bắt và độ ổn định thời gian thực trên dải nhiệt độ công nghiệp}
+\caption{Khảo sát lý thuyết sai số bám bắt và độ ổn định thời gian thực trên dải nhiệt độ công nghiệp (mô hình trôi theo Datasheet)}
 \label{tab:industrial-temperature-sweep-results}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
@@ -903,7 +903,7 @@ $+70^\circ\text{C}$ (Môi trường dã ngoại cực hạn) & $-8{,}2$ ppm & $-
 }
 \end{table}
 
-Trên toàn bộ dải nhiệt độ công nghiệp từ $-20^\circ\text{C}$ đến $+70^\circ\text{C}$, sai số bám bắt chỉ biến thiên trong biên độ cực hẹp ($0{,}26 - 0{,}29$ m), khẳng định hệ thống hoàn toàn sẵn sàng cho mọi nhiệm vụ tác chiến và giám sát ngoài thực địa.
+Theo mô hình trôi theo Datasheet, trên toàn bộ dải nhiệt độ công nghiệp từ $-20^\circ\text{C}$ đến $+70^\circ\text{C}$, sai số bám bắt ước tính chỉ biến thiên trong biên độ hẹp ($0{,}26 - 0{,}29$ m), cho thấy hệ thống có tiềm năng vận hành ổn định trong các nhiệm vụ tác chiến và giám sát ngoài thực địa; đây là kết quả mô hình lý thuyết, chưa được kiểm chứng trên thiết bị thật.
 
 \subsection{Phân tích chu kỳ lệnh vi kiến trúc ARM Cortex-A72 và tối ưu bộ nhớ đệm Cache}
 
@@ -931,7 +931,7 @@ Chuyển đổi trắc địa ECEF/ENU & 2.100 lệnh & 2.680 chu kỳ & $0{,}15
 }
 \end{table}
 
-Tại tần số xung nhịp $1{,}5$ GHz ($1{,}5 \times 10^9$ chu kỳ/giây), tổng số $11.050$ chu kỳ lệnh chỉ tiêu tốn đúng $7{,}37$ $\mu$s thời gian thực thi của CPU, tương đương $0{,}074\%$ năng lực xử lý của một lõi đơn ARM Cortex-A72. Tỷ lệ trượt bộ nhớ đệm L2 cực thấp ($0{,}01\%$) khẳng định cấu trúc dữ liệu phẳng được thiết kế hoàn hảo, bảo đảm không có hiện tượng nghẽn cổ chai truy xuất bộ nhớ.
+Theo ước tính, tại tần số xung nhịp $1{,}5$ GHz ($1{,}5 \times 10^9$ chu kỳ/giây), tổng số $11.050$ chu kỳ lệnh chỉ tiêu tốn khoảng $7{,}37$ $\mu$s thời gian thực thi của CPU, tương đương $0{,}074\%$ năng lực xử lý của một lõi đơn ARM Cortex-A72. Tỷ lệ trượt bộ nhớ đệm L2 ước tính rất thấp ($0{,}01\%$) cho thấy cấu trúc dữ liệu phẳng hạn chế tốt hiện tượng nghẽn cổ chai truy xuất bộ nhớ trong kịch bản lý thuyết; các số liệu trong bảng chưa được kiểm chứng trên phần cứng thực tế.
 
 \subsection{Giải thuật bám bắt thích ứng theo gia tốc dư thừa (Maneuver-Adaptive Alpha-Beta)}
 

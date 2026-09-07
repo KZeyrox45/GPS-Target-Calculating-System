@@ -1016,7 +1016,7 @@ Thời gian trung bình giữa hai sự cố (Mean Time Between Failures, MTBF) 
 }
 \end{table}
 
-Chỉ số MTBF đạt $14.749$ giờ vận hành liên tục khẳng định trạm quan sát có độ ổn định và tuổi thọ rất cao, bảo đảm khả năng trực chiến bền bỉ trong môi trường thực địa khắc nghiệt.
+Theo mô hình dự báo độ tin cậy với các hệ số danh mục linh kiện tiêu chuẩn, MTBF ước tính đạt $14.749$ giờ vận hành liên tục, cho thấy trạm quan sát được thiết kế với độ ổn định và tuổi thọ cao phục vụ mục tiêu trực chiến trong môi trường thực địa.
 
 \subsection{Kiểm định giả thuyết thống kê tính chuẩn của chuỗi sai số bám bắt}
 
@@ -1080,7 +1080,7 @@ Tổng thời gian thực thi của chuỗi xử lý tính toán cốt lõi là 
 
 \begin{table}[H]
 \centering
-\caption{Ma trận kiểm thử tính khả chuyển và hiệu năng trên các nền tảng hệ điều hành}
+\caption{Ma trận kiểm thử tính khả chuyển và hiệu năng trên các nền tảng hệ điều hành (cột ARM64 là ước tính ngoại suy)}
 \label{tab:os-portability-matrix}
 \begin{tabularx}{\linewidth}{>{\RaggedRight}Xccc}
 \toprule
@@ -1095,7 +1095,7 @@ Chiếm dụng RAM tĩnh khi nạp đồ thị & $245$ MB & $238$ MB & $252$ MB 
 \end{tabularx}
 \end{table}
 
-Trên kiến trúc phần cứng nhúng ARM64, tổng thời gian tính toán một khung chỉ mất $142{,}5$ $\mu$s (chưa đến $0{,}15$ ms), vẫn dư thừa hơn $99{,}8\%$ chu kỳ định kỳ 100 ms của tần số 10 Hz, khẳng định hệ thống hoàn toàn sẵn sàng cho việc nhúng trực tiếp lên các thiết bị phần cứng thực địa trong tương lai.
+Giá trị của cột Embedded Linux (ARM64) trong bảng là ước tính ngoại suy từ mô hình ngân sách số lệnh của chuỗi xử lý, chưa được đo trên phần cứng nhúng thực tế. Theo ước tính này, tổng thời gian tính toán một khung khoảng $142{,}5$ $\mu$s, vẫn dư thừa hơn $99{,}8\%$ chu kỳ định kỳ 100 ms của tần số 10 Hz, cho thấy hệ thống có tiềm năng nhúng lên các thiết bị phần cứng thực địa trong các hướng phát triển tiếp theo.
 
 \subsection{Chiến lược kiểm thử phân tầng chuyên sâu và kim tự tháp kiểm thử phần mềm}
 
