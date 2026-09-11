@@ -1,6 +1,8 @@
-\section{Tuần 8}
+\section{Thuật toán lọc và thích nghi}
 
-\subsection{Cơ chế ma trận hiệp phương sai thích nghi \texorpdfstring{$\mathbf{R}$}{R} trong bộ lọc Kalman}
+\subsection{Ma trận hiệp phương sai thích nghi và phân tích động lực học bộ lọc}
+
+\subsubsection{Cơ chế ma trận hiệp phương sai thích nghi \texorpdfstring{$\mathbf{R}$}{R} trong bộ lọc Kalman}
 
 \hspace{0.5cm} Trong cấu trúc truyền thống của bộ lọc Kalman tuyến tính, ma trận hiệp phương sai nhiễu đo lường $\mathbf{R}$ thường được giả định là hằng số cố định trong suốt quá trình ước lượng. Tuy nhiên, trong bài toán định vị và bám mục tiêu thời gian thực bằng cảm biến hỗn hợp (Laser-IMU-GNSS), độ bất định đo lường vị trí $\sigma_{pos}$ biến thiên phi tuyến theo cự ly $R$ từ trạm quan sát đến mục tiêu. Khi khoảng cách tăng lên, sai số góc phương vị và góc tà của khối cảm biến quán tính (IMU) bị khuếch đại bởi cánh tay đòn hình học $R$, tạo ra độ bất định định vị mặt phẳng tăng theo hàm bậc hai của khoảng cách.
 
@@ -110,39 +112,11 @@ Vết (trace) của ma trận hiệp phương sai mặt phẳng nằm ngang $\op
 
 Kết quả giải tích trên chứng minh rằng độ bất định vị trí trung bình trên mặt phẳng nằm ngang là đẳng hướng và hoàn toàn độc lập với góc phương vị của mục tiêu.
 
-\subsection{Khảo sát định lượng sai số và độ lợi theo khoảng cách}
+\subsubsection{Khảo sát định lượng sai số và độ lợi theo khoảng cách}
 
-\hspace{0.5cm} Bảng \ref{tab:detailed-distance-analysis} trình bày chi tiết các giá trị số học của phương sai đo lường $\sigma_{pos}^2(R)$, độ lợi Kalman $\mathbf{K}_k(R)$, và tỷ lệ suy giảm trọng số đo lường từ cự ly 0 m đến 1000 m.
+\hspace{0.5cm} Tại khoảng cách biên thiết kế $R = 400$ m, phương sai nhiễu đo lường tăng 26,4\% so với mức danh định, làm giảm độ lợi Kalman 10,8\%. Tại điểm giao cắt chi phối $R = 794$ m, phương sai đo lường tăng gấp đôi (đạt $50{,}24$ $\text{m}^2$), độ lợi Kalman giảm 28,6\%. Nếu sử dụng $\mathbf{R}$ cố định, bộ lọc sẽ truyền tới 28,6\% lượng nhiễu dư thừa vào quỹ đạo ước lượng.
 
-\begin{table}[H]
-\centering
-\caption{Bảng tính chi tiết độ bất định vị trí và độ lợi Kalman thích nghi theo cự ly quan sát}
-\label{tab:detailed-distance-analysis}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{cccccc}
-\toprule
-\textbf{Cự ly $R$ (m)} & $\sigma_{pos}$ (m) & $\mathbf{R}_k = \sigma_{pos}^2$ ($\text{m}^2$) & $\mathbf{K}_k$ (Adaptive) & $\mathbf{K}_{\text{fixed}}$ (Cố định) & \textbf{Độ suy giảm gain (\%)} \\
-\midrule
-0    & 5{,}025 & 25{,}25 & 0{,}665 & 0{,}665 & 0{,}0\% \\
-50   & 5{,}035 & 25{,}35 & 0{,}664 & 0{,}665 & $-0{,}2\%$ \\
-100  & 5{,}064 & 25{,}64 & 0{,}660 & 0{,}665 & $-0{,}8\%$ \\
-200  & 5{,}180 & 26{,}83 & 0{,}643 & 0{,}665 & $-3{,}3\%$ \\
-300  & 5{,}368 & 28{,}82 & 0{,}620 & 0{,}665 & $-6{,}8\%$ \\
-400  & 5{,}620 & 31{,}59 & 0{,}593 & 0{,}665 & $-10{,}8\%$ \\
-500  & 5{,}932 & 35{,}19 & 0{,}563 & 0{,}665 & $-15{,}3\%$ \\
-600  & 6{,}297 & 39{,}65 & 0{,}532 & 0{,}665 & $-20{,}0\%$ \\
-700  & 6{,}707 & 44{,}98 & 0{,}501 & 0{,}665 & $-24{,}7\%$ \\
-794  & 7{,}088 & 50{,}24 & 0{,}475 & 0{,}665 & $-28{,}6\%$ \\
-900  & 7{,}558 & 57{,}12 & 0{,}448 & 0{,}665 & $-32{,}6\%$ \\
-1000 & 8{,}053 & 64{,}85 & 0{,}422 & 0{,}665 & $-36{,}5\%$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Tại khoảng cách biên thiết kế $R = 400$ m, phương sai nhiễu đo lường tăng 26,4\% so với mức danh định, làm giảm độ lợi Kalman 10,8\%. Tại điểm giao cắt chi phối $R = 794$ m, phương sai đo lường tăng gấp đôi (đạt $50{,}24$ $\text{m}^2$), độ lợi Kalman giảm 28,6\%. Nếu sử dụng $\mathbf{R}$ cố định, bộ lọc sẽ truyền tới 28,6\% lượng nhiễu dư thừa vào quỹ đạo ước lượng.
-
-\subsection{Phương trình Riccati đại số và hội tụ trạng thái xác lập}
+\subsubsection{Phương trình Riccati đại số và hội tụ trạng thái xác lập}
 
 \hspace{0.5cm} Trong trạng thái xác lập dài hạn (steady-state), ma trận hiệp phương sai sai số tiên nghiệm $\mathbf{P}_{\infty}^-$ thỏa mãn phương trình đại số Riccati thời gian rời rạc (Discrete Algebraic Riccati Equation, DARE):
 \begin{equation}
@@ -180,7 +154,7 @@ Bảng \ref{tab:riccati-steady-state} trình bày sự phụ thuộc của nghi�
 
 Khi khoảng cách tăng từ 100 m lên 1000 m, bán kính bất định lý thuyết ở trạng thái xác lập chỉ tăng từ $0{,}711$ m lên $0{,}897$ m (tăng 26,2\%), chứng minh cơ chế Adaptive R kiểm soát rất tốt sự lan truyền sai số và duy trì độ chính xác cao ngay cả ở cự ly xa.
 
-\subsection{Phân tích hàm truyền đạt miền \texorpdfstring{$Z$}{Z} và đáp ứng tần số}
+\subsubsection{Phân tích hàm truyền đạt miền \texorpdfstring{$Z$}{Z} và đáp ứng tần số}
 
 \hspace{0.5cm} Xét mô hình lọc Kalman trong miền biến đổi $Z$. Với vector độ lợi Kalman $\mathbf{K} = (K_1, K_2)^T$, phương trình trạng thái cập nhật có dạng:
 \begin{equation}
@@ -211,31 +185,9 @@ z_{1,2} = 1 - \frac{K_1 + K_2 \Delta t}{2} \pm \sqrt{\left(\frac{K_1 + K_2 \Delt
 \label{eq:z-poles}
 \end{equation}
 
-Bảng \ref{tab:z-domain-stability} phân tích vị trí các điểm cực và bán kính cực $|z_p|$ theo cự ly quan sát $R$.
-
-\begin{table}[H]
-\centering
-\caption{Vị trí các điểm cực trong miền $Z$ và biên độ dự trữ ổn định theo khoảng cách}
-\label{tab:z-domain-stability}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{cccccc}
-\toprule
-\textbf{Cự ly $R$ (m)} & $K_1$ & $K_2$ & Điểm cực $z_1$ & Điểm cực $z_2$ & \textbf{Bán kính cực $|z_{\max}|$} \\
-\midrule
-100  & 0{,}660 & 1{,}420 & $0{,}512 + j 0{,}185$ & $0{,}512 - j 0{,}185$ & 0{,}544 (Rất ổn định) \\
-200  & 0{,}643 & 1{,}380 & $0{,}525 + j 0{,}192$ & $0{,}525 - j 0{,}192$ & 0{,}559 (Rất ổn định) \\
-400  & 0{,}593 & 1{,}250 & $0{,}562 + j 0{,}210$ & $0{,}562 - j 0{,}210$ & 0{,}600 (Rất ổn định) \\
-600  & 0{,}532 & 1{,}105 & $0{,}608 + j 0{,}228$ & $0{,}608 - j 0{,}228$ & 0{,}649 (Rất ổn định) \\
-800  & 0{,}475 & 0{,}972 & $0{,}651 + j 0{,}241$ & $0{,}651 - j 0{,}241$ & 0{,}694 (Rất ổn định) \\
-1000 & 0{,}422 & 0{,}850 & $0{,}692 + j 0{,}252$ & $0{,}692 - j 0{,}252$ & 0{,}736 (Rất ổn định) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Tại mọi khoảng cách $R \in [0, 1000]$ m, bán kính cực $|z_{\max}| \le 0{,}736 < 1{,}000$, chứng minh rằng hệ thống luôn duy trì tính ổn định tiệm cận tuyệt đối trong toàn bộ không gian hoạt động.
 
-\subsection{Khảo sát đáp ứng quá độ bước nhảy và đáp ứng dốc}
+\subsubsection{Khảo sát đáp ứng quá độ bước nhảy và đáp ứng dốc}
 
 \hspace{0.5cm} Nhằm kiểm tra khả năng bám theo các pha cơ động đột ngột của mục tiêu, hệ thống được khảo sát với hai dạng tín hiệu kích thích chuẩn: (1) Bước nhảy vị trí $\Delta x = 10{,}0$ m (mô phỏng sự thay đổi đột ngột do định vị lại trạm quan sát), và (2) Bước nhảy gia tốc $a_{\text{target}} = 2{,}0\text{ m/s}^2$ (mô phỏng pha tăng tốc đột ngột của xe máy và máy bay không người lái).
 
@@ -251,31 +203,9 @@ e_{\text{ss, accel}} = \frac{a_{\text{target}} \Delta t^2}{K_2 \Delta t} = \frac
 \label{eq:accel-steady-state-error}
 \end{equation}
 
-Bảng \ref{tab:transient-response-analysis} tổng hợp các chỉ số đáp ứng quá độ theo cự ly quan sát.
-
-\begin{table}[H]
-\centering
-\caption{Đặc tính đáp ứng quá độ của bộ lọc Kalman thích nghi theo cự ly quan sát}
-\label{tab:transient-response-analysis}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{ccccc}
-\toprule
-\textbf{Cự ly $R$ (m)} & \textbf{Độ vọt lố (Overshoot)} & \textbf{Thời gian xác lập $t_s$ (s)} & \textbf{Sai số dốc vận tốc $e_{\text{ss}}$ (m)} & \textbf{Sai số gia tốc $e_{\text{ss,acc}}$ (m)} \\
-\midrule
-100  & 8{,}2\% & 0{,}5 s (5 chu kỳ) & 0{,}152 m & 0{,}141 m \\
-200  & 9{,}1\% & 0{,}6 s (6 chu kỳ) & 0{,}156 m & 0{,}145 m \\
-400  & 11{,}4\% & 0{,}8 s (8 chu kỳ) & 0{,}169 m & 0{,}160 m \\
-600  & 14{,}2\% & 1{,}1 s (11 chu kỳ) & 0{,}188 m & 0{,}181 m \\
-800  & 17{,}5\% & 1{,}4 s (14 chu kỳ) & 0{,}211 m & 0{,}206 m \\
-1000 & 21{,}0\% & 1{,}8 s (18 chu kỳ) & 0{,}237 m & 0{,}235 m \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Khi mục tiêu ở xa, thời gian xác lập tăng nhẹ từ $0{,}5$ s lên $1{,}8$ s do độ lợi $\mathbf{K}$ giảm (bộ lọc tăng tính làm mượt). Sai số bám gia tốc tối đa chỉ đạt $0{,}235$ m, hoàn toàn nằm trong giới hạn kiểm soát cho phép.
 
-\subsection{So sánh các chiến lược thích nghi ma trận hiệp phương sai \texorpdfstring{$\mathbf{R}$}{R}}
+\subsubsection{So sánh các chiến lược thích nghi ma trận hiệp phương sai \texorpdfstring{$\mathbf{R}$}{R}}
 
 \hspace{0.5cm} Bốn chiến lược thiết lập ma trận hiệp phương sai đo lường $\mathbf{R}$ được triển khai và đối chiếu thực nghiệm trên 10 seed độc lập:
 \begin{enumerate}
@@ -307,31 +237,11 @@ RMSE Drone 3D (m) & 2{,}350 m & 2{,}100 m & 2{,}180 m & 2{,}130 m \\
 
 Chiến lược thích nghi hình học RSS mang lại sự cân bằng hoàn hảo nhất: đạt độ chính xác cao nhất (RMSE tốt nhất trên mọi kịch bản), duy trì thời gian thực thi siêu nhanh ($48{,}5$ $\mu$s) và loại bỏ hoàn toàn nguy cơ ma trận bị âm xác định vốn thường gặp ở phương pháp IAE.
 
-\subsection{Phân rã chi tiết thời gian chuỗi xử lý và phân bổ năng lực tính toán}
+\subsubsection{Phân rã chi tiết thời gian chuỗi xử lý và phân bổ năng lực tính toán}
 
 \hspace{0.5cm} Toàn bộ chuỗi xử lý từ khi tiếp nhận dữ liệu cảm biến đầu vào đến khi hoàn tất xuất kết quả qua kênh truyền hai chiều được đo đạc chính xác bằng bộ định thời phần cứng độ phân giải cao. Tổng thời gian thực thi một chu kỳ đo lường danh định tại tần số 10 Hz là $59{,}0$ $\mu$s.
 
-Bảng \ref{tab:timing-breakdown-extended} phân rã chi tiết thời gian thực thi, tỷ lệ phần trăm và độ phức tạp tính toán của từng giai đoạn.
-
-\begin{table}[H]
-\centering
-\caption{Phân rã chi tiết thời gian thực thi chuỗi xử lý trên một chu kỳ trích mẫu}
-\label{tab:timing-breakdown-extended}
-\begin{tabularx}{\linewidth}{lXccc}
-\toprule
-\textbf{Giai đoạn xử lý} & \textbf{Nội dung thuật toán} & \textbf{Thời gian ($\mu$s)} & \textbf{Tỷ lệ (\%)} & \textbf{Độ phức tạp} \\
-\midrule
-1. LLA $\to$ ECEF & Chiếu tọa độ ellipsoid WGS-84 & 2{,}1 & 3{,}6\% & $\mathcal{O}(1)$ \\
-2. ECEF $\to$ ENU & Xoay ma trận Euler 3 chiều & 3{,}8 & 6{,}4\% & $\mathcal{O}(1)$ \\
-3. Hợp nhất RSS & Lan truyền sai số và tính $\mathbf{R}_k$ & 1{,}2 & 2{,}0\% & $\mathcal{O}(1)$ \\
-4. Kalman Predict & Dự đoán trạng thái $\mathbf{F}\hat{\mathbf{x}}$ và $\mathbf{P}_k^-$ & 15{,}0 & 25{,}4\% & $\mathcal{O}(n_x^2)$ \\
-5. Kalman Update & Tính độ lợi $\mathbf{K}_k$ và cập nhật trạng thái & 33{,}5 & 56{,}8\% & $\mathcal{O}(n_x^3)$ \\
-6. ENU $\to$ LLA & Chuyển đổi ngược về WGS-84 & 3{,}4 & 5{,}8\% & $\mathcal{O}(1)$ \\
-\midrule
-\textbf{Tổng cộng} & \textbf{Toàn bộ chuỗi xử lý chu kỳ} & \textbf{59{,}0} & \textbf{100{,}0\%} & $\mathcal{O}(n_x^3)$ \\
-\bottomrule
-\end{tabularx}
-\end{table}
+Bảng \ref{tab:pipeline-timing-w12} phân rã chi tiết thời gian thực thi, tỷ lệ phần trăm và độ phức tạp tính toán của từng giai đoạn.
 
 \begin{figure}[H]
 \centering
@@ -368,7 +278,7 @@ Bảng \ref{tab:timing-breakdown-extended} phân rã chi tiết thời gian th�
 
 Tổng thời gian tính toán $59{,}0$ $\mu$s chỉ chiếm đúng $0{,}059\%$ quỹ thời gian cho phép của chu kỳ 100 ms ($100.000$ $\mu$s). Hệ thống dành tới $99{,}941\%$ năng lực xử lý cho các tác vụ hệ thống khác, bảo đảm không bao giờ xảy ra hiện tượng trễ khung hay tắc nghẽn hàng đợi dữ liệu.
 
-\subsection{Mô hình hóa nguồn nhiễu cảm biến và kiểm định giả thiết phân phối}
+\subsubsection{Mô hình hóa nguồn nhiễu cảm biến và kiểm định giả thiết phân phối}
 
 \hspace{0.5cm} Mỗi cảm biến vật lý trong hệ thống được mô hình hóa toán học với các tham số độ lệch chuẩn thực nghiệm đã được hiệu chuẩn:
 \begin{align}
@@ -378,23 +288,7 @@ Tổng thời gian tính toán $59{,}0$ $\mu$s chỉ chiếm đúng $0{,}059\%$ 
 \varepsilon_{range} &\sim \mathcal{N}(0, \; \sigma_{range}^2), \quad \sigma_{range} = 0{,}5 \text{ m} \label{eq:range-noise-model}
 \end{align}
 
-\begin{table}[H]
-\centering
-\caption{Tổng hợp đặc tính kỹ thuật và nguồn gốc sai số của các cảm biến đo lường}
-\label{tab:sensor-specs-detailed}
-\begin{tabularx}{\linewidth}{llccX}
-\toprule
-\textbf{Phân hệ cảm biến} & \textbf{Thiết bị mẫu} & \textbf{Độ lệch $\sigma$} & \textbf{Tần số} & \textbf{Cơ chế phát sinh sai số} \\
-\midrule
-Định vị vệ tinh GNSS & U-blox NEO-M8N & 5{,}0 m & 10 Hz & Chậm tầng điện ly, đa đường dẫn multipath \\
-Con quay hồi chuyển IMU & MPU-9250 MEMS & 0{,}3$^\circ$ & 100 Hz & Trôi điểm không bias drift, nhiễu nhiệt \\
-Gia tốc kế trọng trường & MPU-9250 MEMS & 0{,}2$^\circ$ & 100 Hz & Rung động cơ học, phi tuyến động học \\
-Đo cự ly quang học & Laser LRF-1000 & 0{,}5 m & 10 Hz & Độ phân giải xung thời gian bay TOF \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\subsection{Kiểm định giả thiết độc lập thống kê (IID) và phân tích nhiễu màu}
+\subsubsection{Kiểm định giả thiết độc lập thống kê (IID) và phân tích nhiễu màu}
 
 \hspace{0.5cm} Giả thiết căn bản của bộ lọc Kalman tiêu chuẩn là chuỗi nhiễu đo lường $\mathbf{v}_k$ là các biến ngẫu nhiên độc lập và đồng phân phối (Independent and Identically Distributed, IID):
 \begin{equation}
@@ -404,23 +298,9 @@ Gia tốc kế trọng trường & MPU-9250 MEMS & 0{,}2$^\circ$ & 100 Hz & Rung
 
 Trong môi trường thực tế, sai số đa đường dẫn (multipath) của tín hiệu vệ tinh có thể tạo ra thành phần tương quan thời gian ngắn hạn (nhiễu màu, colored noise) với hệ số tự tương quan $\rho_{\text{mp}}(\tau) = \exp(-\tau / \tau_0)$ với $\tau_0 \approx 2{,}0$ s.
 
-\begin{table}[H]
-\centering
-\caption{Đánh giá tác động của giả thiết IID so với mô hình mở rộng trạng thái nhiễu màu}
-\label{tab:iid-colored-noise-comparison}
-\begin{tabularx}{\linewidth}{lcc>{\RaggedRight}X}
-\toprule
-\textbf{Phương pháp mô hình} & \textbf{Số chiều trạng thái} & \textbf{Thời gian xử lý} & \textbf{Đánh giá hiệu năng RMSE} \\
-\midrule
-Kalman chuẩn (Giả thiết IID) & 4 chiều & 48{,}5 $\mu$s & RMSE = 0{,}86 m (Tối ưu tài nguyên) \\
-Kalman mở rộng trạng thái (Nhiễu màu) & 8 chiều & 135{,}2 $\mu$s & RMSE = 0{,}82 m (Cải thiện 4{,}6\%) \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
 Kết quả cho thấy việc áp dụng giả thiết IID giúp tiết kiệm tới 64,1\% thời gian tính toán trong khi độ chính xác chỉ chênh lệch 4,6\%, hoàn toàn đáp ứng yêu cầu vận hành thời gian thực.
 
-\subsection{Khảo sát cự ly giao cắt chi phối và phân tích độ nhạy đơn biến}
+\subsubsection{Khảo sát cự ly giao cắt chi phối và phân tích độ nhạy đơn biến}
 
 \hspace{0.5cm} Điểm giao cắt chi phối (Cross-over Range) $R_{\text{cross}} = 794{,}5$ m là mốc khoảng cách bản lề của hệ thống định vị hỗn hợp. Để xác định cảm biến nào có ảnh hưởng quyết định nhất đến việc mở rộng phạm vi hoạt động, phân tích độ nhạy đơn biến (One-at-a-time Sensitivity Analysis) được thực hiện bằng cách thay đổi từng thông số cảm biến riêng lẻ.
 
@@ -446,7 +326,7 @@ Laser cự ly xa chính xác cao & 5{,}0 & 0{,}30 & 0{,}10 & 794{,}9 m (Không �
 
 Kết quả phân tích độ nhạy chứng minh rằng độ chính xác góc $\sigma_{az}$ của IMU là nhân tố nhạy nhất: khi nâng cấp IMU từ $0{,}30^\circ$ lên $0{,}10^\circ$, cự ly giao cắt tăng gấp 3 lần (đạt 2383,5 m). Ngược lại, độ chính xác của laser đo xa $\sigma_{range}$ hầu như không ảnh hưởng đến cự ly giao cắt.
 
-\subsection{Cơ chế biên mềm trường thế năng đẩy (Soft Potential Boundary)}
+\subsubsection{Cơ chế biên mềm trường thế năng đẩy (Soft Potential Boundary)}
 
 \hspace{0.5cm} Để tránh hiện tượng mục tiêu bị bật nảy phi thực tế tại biên vùng quan sát, mô hình biên mềm sử dụng trường lực đẩy thế năng tuyến tính tác dụng khi khoảng cách đạt $80\%$ bán kính biên danh định:
 \begin{equation}
@@ -456,27 +336,10 @@ Kết quả phân tích độ nhạy chứng minh rằng độ chính xác góc 
 \end{cases}
 \label{eq:soft-repulsion-formula}
 \end{equation}
+
 với $\mathbf{p} = (e, n)^T$ là vector vị trí tức thời và $\kappa_{\text{bound}} = 2{,}5\text{ m/s}^2$ là hệ số gia tốc đẩy cực đại.
 
-\begin{table}[H]
-\centering
-\caption{So sánh đặc tính quỹ đạo giữa mô hình biên cứng phản xạ và biên mềm thế năng}
-\label{tab:boundary-physics-comparison}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lp{5.5cm}p{5.5cm}}
-\toprule
-\textbf{Tiêu chí đánh giá} & \textbf{Biên cứng phản xạ (Hard Boundary)} & \textbf{Biên mềm thế năng (Soft Boundary)} \\
-\midrule
-Vận tốc tại ranh giới & Đảo chiều tức thời ($a \to \infty$) & Giảm tốc và chuyển hướng mượt mà \\
-Góc bẻ lái $\Delta \theta$ & $180^\circ - 2\theta_{\text{inc}}$ (góc gãy nhọn) & Biến thiên liên tục theo cung tròn \\
-Tính khả vi quỹ đạo & Không khả vi bậc 1 tại điểm chạm & Khả vi bậc 2 toàn phần \\
-Độ phù hợp vật lý & Kém (mô hình quả bóng bida) & Rất cao (mô hình điều khiển người lái) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsection{Thiết kế vector trạng thái động học 2D/3D và ma trận chuyển}
+\subsubsection{Thiết kế vector trạng thái động học 2D/3D và ma trận chuyển}
 
 \hspace{0.5cm} Mô hình động học chuyển động thẳng đều kết hợp nhiễu gia tốc ngẫu nhiên (Constant Velocity, CV) được biểu diễn dưới dạng không gian trạng thái:
 \begin{equation}
@@ -492,24 +355,7 @@ Tính khả vi quỹ đạo & Không khả vi bậc 1 tại điểm chạm & Kh�
 
 Đối với bài toán 3D (máy bay không người lái), vector trạng thái mở rộng thành 6 chiều $\mathbf{x}_{3D} = (e, n, u, \dot{e}, \dot{n}, \dot{u})^T$ với cấu trúc ma trận khối $\mathbf{F}_{6 \times 6}$ và $\mathbf{Q}_{6 \times 6}$ tương thích cấp 3.
 
-\begin{table}[H]
-\centering
-\caption{Đặc tính ma trận trạng thái và thông số phổ nhiễu gia tốc $q$ theo loại mục tiêu}
-\label{tab:target-dynamics-parameters}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Loại mục tiêu} & \textbf{Số chiều trạng thái} & \textbf{Tham số $q$ ($\text{m}^2/\text{s}^3$)} & \textbf{Vận tốc cực đại} & \textbf{Mô hình chuyển động} \\
-\midrule
-Người đi bộ & 4 chiều $(E, N, v_E, v_N)$ & 0{,}50 & 2{,}0 m/s & Quá trình Ornstein-Uhlenbeck \\
-Xe máy & 4 chiều $(E, N, v_E, v_N)$ & 1{,}50 & 15{,}0 m/s & Mô hình mạng đường OSM \\
-Drone 3D & 6 chiều $(E, N, U, v_E, v_N, v_U)$ & 2{,}00 & 15{,}0 m/s & Khung động học Matrice 100 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsection{Cơ chế thích nghi khí quyển và bù gió giật cho mục tiêu không gian 3D}
+\subsubsection{Cơ chế thích nghi khí quyển và bù gió giật cho mục tiêu không gian 3D}
 
 \hspace{0.5cm} Đối với mục tiêu máy bay không người lái (Drone) chuyển động trong không gian ba chiều, sự xuất hiện của các cơn gió giật và nhiễu loạn khí quyển tạo ra gia tốc nhiễu ngẫu nhiên tác động trực tiếp lên trục thẳng đứng (Up). Mô hình nhiễu loạn gió Dryden được áp dụng để khảo sát phản ứng của bộ lọc Kalman 3D:
 \begin{equation}
@@ -519,53 +365,13 @@ Drone 3D & 6 chiều $(E, N, U, v_E, v_N, v_U)$ & 2{,}00 & 15{,}0 m/s & Khung đ
 
 trong đó $L_u \approx 50$ m là chiều dài tỷ lệ nhiễu loạn, $\sigma_w$ là cường độ gió giật, và $\eta(t)$ là nhiễu trắng Gauss đơn vị.
 
-\begin{table}[H]
-\centering
-\caption{Đánh giá sai số bám bắt độ cao của Drone dưới các cấp độ nhiễu loạn gió}
-\label{tab:wind-turbulence-analysis}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Cấp độ gió} & \textbf{Vận tốc gió $\sigma_w$} & \textbf{RMSE độ cao Đo thô (m)} & \textbf{RMSE độ cao KF (m)} & \textbf{Mức cải thiện (\%)} \\
-\midrule
-Gió nhẹ (Light Air) & 1{,}0 m/s & 0{,}842 m & 0{,}312 m & 62{,}9\% \\
-Gió vừa (Moderate Breeze) & 5{,}0 m/s & 1{,}285 m & 0{,}584 m & 54{,}6\% \\
-Gió mạnh giật (Strong Gale) & 10{,}0 m/s & 2{,}140 m & 1{,}025 m & 52{,}1\% \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Ngay cả trong điều kiện gió giật mạnh $10$ m/s, bộ lọc Kalman 3D vẫn duy trì sai số độ cao ở mức $1{,}025$ m, chứng minh khả năng thích nghi môi trường khí quyển vượt trội.
 
-\subsection{Phân tích phân loại chi tiết 162 trường hợp kiểm thử tự động}
+\subsubsection{Phân tích phân loại chi tiết 162 trường hợp kiểm thử tự động}
 
-\hspace{0.5cm} Nhằm bảo đảm độ tin cậy tuyệt đối và tính sẵn sàng vận hành của toàn bộ hệ thống, bộ kiểm thử tự động (Automated Test Suite) bao gồm 162 ca kiểm thử độc lập được thiết kế theo cấu trúc phân tầng. Bảng \ref{tab:complete-test-suite-taxonomy} tổng hợp cấu trúc phân loại chi tiết 162 ca kiểm thử.
+\hspace{0.5cm} Nhằm bảo đảm độ tin cậy tuyệt đối và tính sẵn sàng vận hành của toàn bộ hệ thống, bộ kiểm thử tự động (Automated Test Suite) bao gồm 162 ca kiểm thử độc lập được thiết kế theo cấu trúc phân tầng. Bảng \ref{tab:test-pyramid-distribution} tổng hợp cấu trúc phân loại chi tiết 162 ca kiểm thử.
 
-\begin{table}[H]
-\centering
-\caption{Phân loại chi tiết và chức năng kiểm chứng của 162 ca kiểm thử tự động}
-\label{tab:complete-test-suite-taxonomy}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{llcp{6.0cm}}
-\toprule
-\textbf{Nhóm kiểm thử} & \textbf{Mô-đun kiểm thử} & \textbf{Số test} & \textbf{Nội dung kỹ thuật kiểm chứng} \\
-\midrule
-1. Bộ lọc Alpha-Beta & Động học 2D & 10 & Khởi tạo, bước cập nhật, bảo toàn vận tốc, reset bộ đệm \\
-2. Trắc địa & Geodetics WGS-84 & 25 & Khứ hồi LLA-ECEF-ENU sai số $< 10^{-9}$ m, điểm cực, góc âm \\
-3. Bộ lọc Kalman & Kalman 2D/3D & 17 & Dự đoán, cập nhật, nghiệm Riccati, thích nghi $\mathbf{R}_k$, NEES \\
-4. Hợp nhất cảm biến & Sensor Fusion & 6 & Tính góc phương vị, lan truyền sai số RSS, trích xuất LLA \\
-5. Bộ sinh mô phỏng & Simulation Engine & 49 & Quỹ đạo động học, biên mềm thế năng, kiểm tra trôi dạt \\
-6. Bộ tải dữ liệu & Real-world Loaders & 38 & Bộ tải Geolife, AMIT, mạng đường OSM, nội suy PCHIP \\
-7. Thống kê và xuất & Stats \& Telemetry & 17 & Tính RMSE trực tiếp, xuất tệp dữ liệu, telemetry máy trạm \\
-\midrule
-\textbf{Tổng cộng} & \textbf{Toàn hệ thống} & \textbf{162} & \textbf{100\% ca kiểm thử đạt chuẩn (0 lỗi, 0 cảnh báo)} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsection{Mô hình hóa chuỗi Markov trạng thái bám bắt mục tiêu}
+\subsubsection{Mô hình hóa chuỗi Markov trạng thái bám bắt mục tiêu}
 
 \hspace{0.5cm} Vòng đời bám bắt mục tiêu di động được mô hình hóa thông qua một chuỗi Markov 4 trạng thái rời rạc:
 \begin{enumerate}
@@ -588,13 +394,10 @@ Ma trận xác suất chuyển trạng thái thực nghiệm $\mathbf{T}_{\text{
 
 Thời gian dừng trung bình ở trạng thái bám bắt ổn định đạt $\tau_{\text{track}} = \frac{1}{1 - 0{,}97} \times 0{,}1\text{ s} = 3{,}33$ s cho mỗi chuỗi liên tục, bảo đảm độ sẵn sàng hệ thống đạt $99{,}98\%$.
 
-\subsection{Phân tích so sánh bộ lọc Alpha-Beta và Kalman Filter}
+\subsubsection{Phân tích so sánh bộ lọc Alpha-Beta và Kalman Filter}
 
 \hspace{0.5cm} Bộ lọc Alpha-Beta là một dạng đơn giản hóa của bộ lọc Kalman ở trạng thái dừng với hai tham số cố định $\alpha$ (trọng số cập nhật vị trí) và $\beta$ (trọng số cập nhật vận tốc). Để bảo đảm hệ thống có đáp ứng suy giảm tới hạn (Critically Damped) không sinh dao động giả, hệ số $\beta$ được tính toán theo quan hệ giải tích Benedict-Bordner:
-\begin{equation}
-\beta = (2 - \alpha) - 2\sqrt{1 - \alpha}
-\label{eq:benedict-bordner-math-w8}
-\end{equation}
+
 
 Với giá trị chuẩn danh định $\alpha = 0{,}40$, hệ số $\beta$ được xác định chính xác:
 \begin{equation}
@@ -629,7 +432,7 @@ $\alpha$ & $\beta$ (Benedict-Bordner) & \textbf{RMSE Người (m)} & \textbf{RMS
 
 Tại kịch bản người đi bộ, $\alpha = 0{,}20$ cho RMSE tối ưu nhất ($0{,}214$ m) do quỹ đạo người đi bộ rất mượt mà. Đối với xe máy và drone có cơ động cao, $\alpha = 0{,}40 - 0{,}60$ giúp giảm thiểu trễ pha động học. Giá trị chuẩn danh định $\alpha = 0{,}40$ đại diện cho điểm cân bằng tối ưu toàn cục trên mọi loại mục tiêu.
 
-\subsection{Cơ chế chuyển đổi trắc địa Ellipsoid WGS-84 và kiểm soát sai số tích lũy}
+\subsubsection{Cơ chế chuyển đổi trắc địa Ellipsoid WGS-84 và kiểm soát sai số tích lũy}
 
 \hspace{0.5cm} Chuỗi chuyển đổi tọa độ trắc địa dựa trên mô hình Ellipsoid WGS-84 tiêu chuẩn với bán trục lớn $a = 6378137{,}0$ m, độ dẹt $f = 1/298{,}257223563$, và bình phương tâm sai thứ nhất $e^2 = 2f - f^2 \approx 0{,}00669437999014$.
 
@@ -649,28 +452,9 @@ Z = (N(\phi)(1 - e^2) + h) \sin\phi
 \label{eq:lla-to-ecef-full}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Kiểm định độ chính xác khứ hồi và sai số trôi tích lũy qua 10.000 chu kỳ lặp}
-\label{tab:geodetic-roundtrip-verification}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Vị trí kiểm thử} & \textbf{Vĩ độ ($\phi$)} & \textbf{Kinh độ ($\lambda$)} & \textbf{Độ cao ($h$)} & \textbf{Sai số khứ hồi tối đa (m)} \\
-\midrule
-Trạm quan sát Quận 10 & $10{,}762622^\circ$ & $106{,}660172^\circ$ & $10{,}0$ m & $1{,}42 \times 10^{-11}$ m \\
-Vùng cận Xích đạo & $0{,}000000^\circ$ & $106{,}000000^\circ$ & $0{,}0$ m & $0{,}85 \times 10^{-11}$ m \\
-Vùng vĩ độ trung bình & $45{,}000000^\circ$ & $106{,}000000^\circ$ & $500{,}0$ m & $2{,}10 \times 10^{-11}$ m \\
-Vùng cực Bắc & $89{,}999900^\circ$ & $106{,}000000^\circ$ & $1000{,}0$ m & $3{,}85 \times 10^{-11}$ m \\
-Mục tiêu độ cao âm & $10{,}762622^\circ$ & $106{,}660172^\circ$ & $-50{,}0$ m & $1{,}56 \times 10^{-11}$ m \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Toàn bộ các phép chuyển đổi khứ hồi đều duy trì sai số cực đại dưới $4 \times 10^{-11}$ m, loại bỏ hoàn toàn khả năng phát sinh trôi dạt tọa độ do làm tròn số học.
 
-\subsection{Cấu trúc hàng đợi vòng (Ring Buffer) và quản lý áp lực ngược mạng}
+\subsubsection{Cấu trúc hàng đợi vòng (Ring Buffer) và quản lý áp lực ngược mạng}
 
 \hspace{0.5cm} Nhằm duy trì tính liên tục và ngăn ngừa hiện tượng rò rỉ bộ nhớ trong các phiên mô phỏng dài hạn, cấu trúc dữ liệu hàng đợi vòng (Ring Buffer) có dung lượng cố định $N_{\text{ring}} = 500$ phần tử được triển khai tại cả máy chủ xử lý và máy trạm hiển thị.
 
@@ -680,27 +464,9 @@ Khi tốc độ tiêu thụ dữ liệu của giao diện trình duyệt bị ch
 \label{eq:ring-buffer-write}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Đo đạc dung lượng bộ nhớ RAM và tỷ lệ duy trì khung hình dưới các điều kiện mạng}
-\label{tab:ring-buffer-network-conditions}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Môi trường kết nối} & \textbf{Băng thông} & \textbf{Độ trễ RTT} & \textbf{Bộ nhớ RAM tiêu thụ} & \textbf{Tỷ lệ rớt khung} \\
-\midrule
-Localhost (Nội bộ máy) & $> 1000$ Mbps & $< 0{,}5$ ms & 42 MB & 0{,}00\% (0 khung) \\
-Mạng LAN Gigabit & 1000 Mbps & $1{,}2$ ms & 42 MB & 0{,}00\% (0 khung) \\
-Mạng 4G LTE đô thị & 50 Mbps & $25{,}0$ ms & 42 MB & 0{,}00\% (0 khung) \\
-Mạng 3G suy hao mạnh & $512$ Kbps & $180{,}0$ ms & 42 MB (Cố định) & 4{,}20\% (Loại bỏ an toàn) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Dung lượng bộ nhớ RAM của hệ thống duy trì cố định ở mức 42 MB trong mọi điều kiện, bảo đảm hệ thống không bị tràn bộ nhớ ngay cả khi vận hành liên tục trong nhiều ngày.
 
-\subsection{Thuật toán phân loại và nhận dạng mục tiêu dựa trên đặc trưng vận tốc}
+\subsubsection{Thuật toán phân loại và nhận dạng mục tiêu dựa trên đặc trưng vận tốc}
 
 \hspace{0.5cm} Dựa trên vector vận tốc ước lượng $(\hat{\dot{e}}_k, \hat{\dot{n}}_k, \hat{\dot{u}}_k)$ từ bộ lọc Kalman, hệ thống tích hợp bộ phân loại mục tiêu tự động sử dụng quy tắc ngưỡng động học kết hợp bộ lọc trung bình trượt thời gian 5 giây ($W = 50$ mẫu):
 \begin{equation}
@@ -718,28 +484,9 @@ Quy tắc phân loại:
 \label{eq:target-classification-rule}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Ma trận nhầm lẫn (Confusion Matrix) phân loại mục tiêu trên 300 kịch bản thử nghiệm}
-\label{tab:target-classification-confusion-matrix}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{l|ccc|c}
-\toprule
-\textbf{Thực tế $\backslash$ Dự đoán} & \textbf{Người đi bộ} & \textbf{Xe máy} & \textbf{Drone 3D} & \textbf{Độ chính xác (Recall)} \\
-\midrule
-\textbf{Người đi bộ} & 99 & 1 & 0 & 99{,}0\% \\
-\textbf{Xe máy} & 2 & 98 & 0 & 98{,}0\% \\
-\textbf{Drone 3D} & 0 & 0 & 100 & 100{,}0\% \\
-\midrule
-\textbf{Độ đặc hiệu (Precision)} & 98{,}0\% & 99{,}0\% & 100{,}0\% & \textbf{F1-Score = 99{,}0\%} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Thuật toán đạt độ chính xác F1-Score tổng thể $99{,}0\%$, cho phép hệ thống tự động nhận diện chính xác kiểu chuyển động của mục tiêu chỉ sau 5 giây bám bắt.
 
-\subsection{Phân tích dạng đối xứng Joseph Form bảo vệ tính dương xác định}
+\subsubsection{Phân tích dạng đối xứng Joseph Form bảo vệ tính dương xác định}
 
 \hspace{0.5cm} Trong phương trình cập nhật hiệp phương sai chuẩn của Kalman filter:
 \begin{equation}
@@ -776,7 +523,7 @@ Dạng Joseph bền vững & 42{,}8 $\mu$s & $< 10^{-16}$ (Tuyệt đối) & $+0
 
 Hệ thống kết hợp giải pháp công thức chuẩn với bước đối xứng hóa $\mathbf{P}_k \leftarrow \frac{1}{2}(\mathbf{P}_k + \mathbf{P}_k^T)$, vừa đạt độ đối xứng tuyệt đối $< 10^{-16}$ vừa tiết kiệm 21,7\% thời gian tính toán so với dạng Joseph đầy đủ.
 
-\subsection{Khảo sát tính ổn định ước lượng vận tốc khi GNSS bị nhảy bước vị trí}
+\subsubsection{Khảo sát tính ổn định ước lượng vận tốc khi GNSS bị nhảy bước vị trí}
 
 \hspace{0.5cm} Hiện tượng nhảy bước vị trí ngẫu nhiên (Position Jump) của GNSS thường phát sinh khi bộ thu chuyển đổi chùm vệ tinh quan sát (Constellation Switch) hoặc do vật cản đô thị gây gián đoạn đường truyền thẳng. Thử nghiệm bơm xung nhảy $\Delta p = 3{,}0$ m tại $t = 20{,}0$ s trong kịch bản xe máy được tiến hành để đánh giá phản ứng của vector vận tốc ước lượng.
 
@@ -806,7 +553,7 @@ Kalman thích nghi (Adaptive R) & 10{,}0 m/s & 10{,}8 m/s & $+8{,}0\%$ & 0{,}8 s
 
 Bộ lọc Kalman thích nghi kiểm soát độ vọt sai số vận tốc ở mức chỉ $+8{,}0\%$ ($10{,}8$ m/s so với $10{,}0$ m/s thực tế), loại bỏ hoàn toàn các xung giật nhân tạo có thể gây mất ổn định các hệ thống điều khiển tự động hạ tầng sau.
 
-\subsection{Minh họa chi tiết các bước tính toán số học trên kịch bản Drone 3D}
+\subsubsection{Minh họa chi tiết các bước tính toán số học trên kịch bản Drone 3D}
 
 \hspace{0.5cm} Để minh họa toàn diện quy trình xử lý không gian ba chiều, chuỗi tính toán tại chu kỳ $k = 1$ ($\Delta t = 0{,}1$ s) của kịch bản Drone không gian 3D được mô tả chi tiết:
 
@@ -855,7 +602,7 @@ Bộ lọc Kalman thích nghi kiểm soát độ vọt sai số vận tốc ở 
 
 Toàn bộ chuỗi tính toán 3D trên nằm gọn trong ngân sách thời gian của một chu kỳ bám bắt; trên máy tính phổ thông, chỉ số đo đạc được của toàn chuỗi xử lý là $59{,}0$ $\mu$s mỗi khung, xác nhận tính khả thi của mô hình bám bắt 3D thời gian thực.
 
-\subsection{Khảo sát khả năng tăng tốc trên kiến trúc phần cứng nhúng}
+\subsubsection{Khảo sát khả năng tăng tốc trên kiến trúc phần cứng nhúng}
 
 \hspace{0.5cm} Nhằm đánh giá tiềm năng chuyển đổi toàn bộ chuỗi xử lý lên các thiết bị nhúng cầm tay phục vụ tác chiến dã ngoại, phân tích độ phức tạp lệnh và thời gian thực thi ước tính trên các dòng vi điều khiển và vi xử lý nhúng phổ biến được tiến hành. Các giá trị trong bảng là ngoại suy lý thuyết từ số lệnh của chuỗi xử lý (đã đo đạc $59{,}0$ $\mu$s trên máy tính phổ thông), chưa được kiểm chứng trên phần cứng nhúng thực tế:
 
@@ -880,7 +627,7 @@ Máy trạm tiêu chuẩn x86-64 & Intel Core i7 / AMD Ryzen & 3{,}60 GHz & 0{,}
 
 Ước tính cho thấy thuật toán có khả năng triển khai mượt mà ngay cả trên vi điều khiển chi phí thấp ARM Cortex-M4 với tải CPU dự kiến khoảng 14,5\%, mở ra định hướng tích hợp vào thiết bị ngắm bắn quang điện tử nhỏ gọn trong các giai đoạn phát triển tiếp theo.
 
-\subsection{Phân tích khoảng cách Mahalanobis và cơ chế loại bỏ xung nhiễu giả}
+\subsubsection{Phân tích khoảng cách Mahalanobis và cơ chế loại bỏ xung nhiễu giả}
 
 \hspace{0.5cm} Trong điều kiện vận hành thực tế, chùm tia laser có thể phản xạ nhầm vào tán cây, chim bay hoặc các phương tiện khác trong tầm nhìn, sinh ra các điểm đo ngoại lai (clutter/false alarms). Để bảo vệ bộ lọc Kalman khỏi bị kéo lệch bởi các phép đo sai này, cơ chế lọc cổng thống kê dựa trên bình phương khoảng cách Mahalanobis (Normalized Innovation Squared, NIS) $d_M^2$ được áp dụng:
 \begin{equation}
@@ -916,33 +663,13 @@ Drone không gian (3D) & 3 & 11{,}345 & 99{,}0\% & 99{,}1\% \\
 
 Cơ chế gán cổng Mahalanobis giúp hệ thống loại bỏ thành công $98{,}5\% - 99{,}1\%$ các xung đo lường sai lệch cực đoan mà không làm gián đoạn quỹ đạo bám bắt trơn tru của mục tiêu.
 
-\subsection{So sánh hiệu năng với các thuật toán lọc phi tuyến nâng cao}
+\subsubsection{So sánh hiệu năng với các thuật toán lọc phi tuyến nâng cao}
 
 \hspace{0.5cm} Nhằm khẳng định tính ưu việt của giải pháp kiến trúc đề xuất (Hợp nhất sang ENU kết hợp Bộ lọc Kalman thích nghi), hệ thống được so sánh đối chiếu với hai thuật toán lọc phi tuyến phổ biến trong lý thuyết điều khiển: Bộ lọc Kalman không mùi (Unscented Kalman Filter, UKF) và Bộ lọc hạt (Particle Filter, PF với $N_p = 500$ hạt).
 
-\begin{table}[H]
-\centering
-\caption{So sánh toàn diện giữa Kalman thích nghi đề xuất, UKF và Particle Filter}
-\label{tab:advanced-filters-comparison}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Tiêu chí kỹ thuật} & \textbf{Kalman thích nghi (Đề xuất)} & \textbf{UKF (Unscented)} & \textbf{Particle Filter ($N_p=500$)} \\
-\midrule
-Thời gian thực thi một chu kỳ & 48{,}5 $\mu$s & 185{,}0 $\mu$s & 3250{,}0 $\mu$s \\
-RMSE Người đi bộ ($n=10$) & 0{,}860 $\pm$ 0{,}084 m & 0{,}855 $\pm$ 0{,}082 m & 0{,}872 $\pm$ 0{,}095 m \\
-RMSE Drone 3D ($n=10$) & 2{,}100 $\pm$ 0{,}231 m & 2{,}080 $\pm$ 0{,}225 m & 2{,}120 $\pm$ 0{,}245 m \\
-Tính đơn định (Determinism) & Tuyệt đối (100\%) & Tuyệt đối (100\%) & Ngẫu nhiên (Stochastic) \\
-Bộ nhớ RAM yêu cầu & $< 1$ KB & $\approx 4$ KB & $\approx 150$ KB \\
-Khả năng nhúng vi điều khiển & Rất dễ dàng & Trung bình & Rất khó khăn \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Kết quả chứng minh rằng bộ lọc Kalman thích nghi đạt độ chính xác tương đương UKF (chênh lệch dưới 1\%) nhưng nhanh hơn 3,8 lần và nhanh hơn Particle Filter tới 67 lần, bảo đảm tính tất định và khả năng tích hợp phần cứng nhúng tối ưu nhất.
 
-\subsection{Phân tích tính khả quan sát (Observability) và ma trận Gramian}
+\subsubsection{Phân tích tính khả quan sát (Observability) và ma trận Gramian}
 
 \hspace{0.5cm} Tính khả quan sát bảo đảm rằng trạng thái toàn phần của mục tiêu (cả vị trí và vận tốc) có thể được khôi phục duy nhất từ chuỗi dữ liệu đo lường vị trí hữu hạn. Ma trận khả quan sát $\mathcal{O}$ của hệ thống rời rạc được xác lập:
 \begin{equation}
@@ -963,33 +690,16 @@ Ma trận Gramian khả quan sát thời gian rời rạc qua $N$ chu kỳ:
 \label{eq:observability-gramian}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Giá trị kỳ dị (Singular Values) của ma trận Gramian khả quan sát theo thời gian}
-\label{tab:observability-singular-values}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{ccccc}
-\toprule
-\textbf{Số chu kỳ $N$} & \textbf{Thời gian $t$ (s)} & $\sigma_{\max}(\mathbf{W}_o)$ & $\sigma_{\min}(\mathbf{W}_o)$ & \textbf{Mức độ khả quan sát} \\
-\midrule
-10   & 1{,}0 s & 15{,}42 & 0{,}825 & Khả quan sát tốt \\
-50   & 5{,}0 s & 182{,}50 & 14{,}60 & Rất mạnh \\
-100  & 10{,}0 s & 624{,}10 & 58{,}40 & Rất mạnh \\
-1200 & 120{,}0 s & $7{,}42 \times 10^4$ & $6{,}85 \times 10^3$ & Trạng thái dừng hoàn hảo \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Giá trị kỳ dị nhỏ nhất $\sigma_{\min}(\mathbf{W}_o)$ tăng nhanh theo thời gian, khẳng định vector vận tốc mục tiêu được ước lượng với độ tin cậy ngày càng cao.
 
-\subsection{Đánh giá tiệm cận giới hạn dưới Cramer-Rao (PCRLB)}
+\subsubsection{Đánh giá tiệm cận giới hạn dưới Cramer-Rao (PCRLB)}
 
 \hspace{0.5cm} Giới hạn dưới Cramer-Rao hậu nghiệm (Posterior Cramer-Rao Lower Bound, PCRLB) cung cấp cận dưới lý thuyết tuyệt đối cho phương sai ước lượng của mọi bộ lọc không chệch:
 \begin{equation}
 \mathbb{E}\left[ (\mathbf{x}_k - \hat{\mathbf{x}}_k)(\mathbf{x}_k - \hat{\mathbf{x}}_k)^T \right] \ge \mathbf{J}_k^{-1}
 \label{eq:pcrlb-inequality}
 \end{equation}
+
 trong đó $\mathbf{J}_k$ là ma trận thông tin Fisher (Fisher Information Matrix, FIM) tích lũy theo thời gian rời rạc:
 \begin{equation}
 \mathbf{J}_k = \left( \mathbf{Q} + \mathbf{F} \mathbf{J}_{k-1}^{-1} \mathbf{F}^T \right)^{-1} + \mathbf{H}^T \mathbf{R}_k^{-1} \mathbf{H}
@@ -1002,28 +712,9 @@ Hiệu suất ước lượng thống kê $\eta_{\text{eff}}$ của bộ lọc K
 \label{eq:kalman-efficiency-ratio}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Đối chiếu giữa giới hạn tối ưu lý thuyết PCRLB và hiệp phương sai Kalman thích nghi}
-\label{tab:pcrlb-comparison-table}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{ccccc}
-\toprule
-\textbf{Cự ly $R$ (m)} & $\operatorname{tr}(\mathbf{J}_k^{-1})$ lý thuyết ($\text{m}^2$) & $\operatorname{tr}(\mathbf{P}_k)$ Kalman ($\text{m}^2$) & \textbf{Sai số vị trí lý thuyết (m)} & \textbf{Hiệu suất tiệm cận $\eta_{\text{eff}}$} \\
-\midrule
-100  & 0{,}498 & 0{,}506 & 0{,}705 m & 98{,}4\% \\
-300  & 0{,}532 & 0{,}541 & 0{,}729 m & 98{,}3\% \\
-500  & 0{,}585 & 0{,}596 & 0{,}765 m & 98{,}2\% \\
-800  & 0{,}695 & 0{,}710 & 0{,}834 m & 97{,}9\% \\
-1000 & 0{,}786 & 0{,}805 & 0{,}887 m & 97{,}6\% \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Hiệu suất ước lượng của bộ lọc Kalman thích nghi đạt từ $97{,}6\%$ đến $98{,}4\%$ so với cận dưới lý thuyết tuyệt đối PCRLB, khẳng định thuật toán đã tiệm cận mức tối ưu toán học cao nhất có thể đạt được trong thực tế.
 
-\subsection{Phân tích tương quan chéo và cấu trúc ma trận hiệp phương sai ngoài đường chéo}
+\subsubsection{Phân tích tương quan chéo và cấu trúc ma trận hiệp phương sai ngoài đường chéo}
 
 \hspace{0.5cm} Trong không gian trạng thái động lực học, các phần tử ngoài đường chéo của ma trận $\mathbf{P}_k$ phản ánh mức độ ràng buộc thống kê giữa vị trí và vận tốc cũng như sự liên kết không gian giữa hai trục Đông và Bắc:
 \begin{equation}
@@ -1042,30 +733,11 @@ Hệ số tương quan chuẩn hóa Pearson giữa tọa độ Đông và Bắc 
 \label{eq:pearson-cross-correlation}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Tiến trình biến thiên của các phần tử ma trận hiệp phương sai $\mathbf{P}_k$ theo các pha chuyển động}
-\label{tab:covariance-elements-evolution}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Pha chuyển động mục tiêu} & $\mathbf{P}_{ee}$ ($\text{m}^2$) & $\mathbf{P}_{e\dot{e}}$ ($\text{m}^2/\text{s}$) & $\mathbf{P}_{\dot{e}\dot{e}}$ ($\text{m}^2/\text{s}^2$) & \textbf{Hệ số tương quan $\rho_{en}$} \\
-\midrule
-Khởi tạo ($k=1$) & 20{,}69 & 0{,}00 & 1{,}00 & 0{,}000 (Độc lập) \\
-Bắt đầu chuyển động ($k=10$) & 4{,}82 & 0{,}85 & 0{,}42 & 0{,}015 \\
-Trạng thái xác lập thẳng ($k=100$) & 0{,}58 & 0{,}18 & 0{,}14 & 0{,}008 (Gần như triệt tiêu) \\
-Thực hiện khúc cua $90^\circ$ ($k=250$) & 1{,}42 & 0{,}62 & 0{,}38 & 0{,}342 (Tăng tạm thời) \\
-Tái xác lập sau khúc cua ($k=300$) & 0{,}58 & 0{,}18 & 0{,}14 & 0{,}010 \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Khi mục tiêu thực hiện chuyển hướng cơ động (ví dụ xe máy rẽ tại ngã tư), hệ số tương quan $\rho_{en}$ tăng tạm thời lên $0{,}342$, phản ánh chính xác sự liên kết động học giữa hai trục tọa độ trong pha quay vòng. Khi trở lại chuyển động thẳng, bộ lọc tự động dập tắt tương quan về mức $< 0{,}01$, bảo đảm tính đẳng hướng độc lập của các trục không gian.
 
-\subsection{Tổng kết các giải pháp thiết kế thuật toán}
+\subsubsection{Tổng kết các giải pháp thiết kế thuật toán}
 
-\hspace{0.5cm} Các kết quả nghiên cứu và thiết kế trong tuần 8 đã thiết lập nền tảng toán học và kỹ thuật vững chắc cho hệ thống bám mục tiêu:
+\hspace{0.5cm} Các kết quả nghiên cứu và thiết kế trình bày trong chương này đã thiết lập nền tảng toán học và kỹ thuật vững chắc cho hệ thống bám mục tiêu:
 \begin{enumerate}
     \item Cơ chế thích nghi $\mathbf{R}_k = \sigma_{pos,k}^2 \mathbf{I}$ giải quyết triệt để sự mất cân đối đo lường theo khoảng cách, giúp giảm sai số tới 28,6\% ở cự ly xa.
     \item Chuỗi xử lý thời gian thực đạt tốc độ kỷ lục $59{,}0$ $\mu$s mỗi bước (tương đương 0,059\% chu kỳ 100 ms), bảo đảm khả năng mở rộng đa phiên vượt trội.

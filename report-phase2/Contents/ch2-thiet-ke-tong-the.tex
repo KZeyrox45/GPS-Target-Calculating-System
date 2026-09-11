@@ -1,6 +1,8 @@
-\section{Tuần 2}
+\section{Thiết kế tổng thể hệ thống}
 
-\subsection{Kiến trúc hệ thống}
+\subsection{Thiết kế kiến trúc hệ thống}
+
+\subsubsection{Kiến trúc hệ thống}
 
 \hspace{0.5cm} Hệ thống được thiết kế theo kiến trúc phân lớp (layered architecture), gồm bốn tầng như Hình \ref{fig:architecture}. Mỗi tầng đảm nhận một vai trò riêng biệt và giao tiếp với nhau qua các giao thức chuẩn. Kiến trúc phân lớp giúp tách biệt trách nhiệm giữa các tầng, dễ bảo trì và mở rộng khi cần thay đổi thành phần ở bất kỳ tầng nào mà không ảnh hưởng đến các tầng còn lại.
 
@@ -99,7 +101,7 @@ Vai trò chính của RPi bao gồm: đọc dữ liệu từ GPS qua UART (giao 
     \item \textbf{Điều khiển phiên}: Các nút bật/tắt bám mục tiêu, cấu hình tham số, chọn loại mục tiêu (người đi bộ, xe máy, drone).
 \end{itemize}
 
-\subsection{Thiết kế luồng dữ liệu}
+\subsubsection{Thiết kế luồng dữ liệu}
 
 \hspace{0.5cm} Luồng dữ liệu (data flow) của hệ thống bắt đầu từ cảm biến ở tầng thấp nhất, đi qua xử lý nhúng, lên máy chủ, và cuối cùng đến giao diện. Mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi trước khi sang bước tiếp theo.
 
@@ -143,7 +145,7 @@ distance & số thực & Khoảng cách từ thiết bị đến bề mặt mụ
 
 \hspace{0.5cm} Trước khi xử lý, máy chủ kiểm tra tính hợp lệ của từng trường trong bản tin. Các kiểm tra bao gồm: GPS có hợp lệ không (vĩ độ trong khoảng -90 đến 90, kinh độ -180 đến 180), laser có giá trị dương không, timestamp có hợp lý không (không quá xa so với thời gian hiện tại). Nếu một trong ba cảm biến không hợp lệ, bản tin đó được đánh dấu là không đầy đủ nhưng vẫn được xử lý với dữ liệu còn lại. Nếu tất cả đều không hợp lệ, bản tin bị từ chối.
 
-\subsection{Chuyển đổi tọa độ}
+\subsubsection{Chuyển đổi tọa độ}
 
 \hspace{0.5cm} Chuỗi chuyển đổi tọa độ là khâu bắt buộc của hệ thống. Đầu vào là tọa độ WGS84 của người quan sát. Đầu ra cũng là WGS84 nhưng của mục tiêu. Ở giữa, cần chuyển qua nhiều hệ trung gian như sơ đồ sau:
 
@@ -197,7 +199,7 @@ Bước 3, tính vector định hướng trong hệ ENU. Với $\alpha = 45^\cir
 
 Vị trí mục tiêu trên bản đồ lệch khoảng 199 m về hướng Đông-Bắc và 17,5 m so với mặt phẳng ngang. Sai số từ phép tính này chủ yếu đến từ $\sigma_\alpha$ và $\sigma_\beta$: với $\sigma_\alpha = 0{,}3^\circ$ ở khoảng cách 200 m, sai số ngang là $200 \times \sin(0{,}3^\circ) \approx 1{,}0$ m.
 
-\subsection{Sơ đồ lớp phần mềm}
+\subsubsection{Sơ đồ lớp phần mềm}
 
 \hspace{0.5cm} Sơ đồ lớp (class diagram) mô tả các thực thể phần mềm chính và mối quan hệ giữa chúng được trình bày trong Hình \ref{fig:class}.
 
@@ -224,7 +226,7 @@ Các lớp chính trong sơ đồ bao gồm:
 
 Mối quan hệ giữa các lớp: bộ điều phối trung tâm sở hữu một bộ mô phỏng mục tiêu, một hoặc nhiều bộ lọc (Kalman hoặc alpha-beta), một khối quản lý vùng hoạt động, và một khối chuyển đổi tọa độ. Bộ mô phỏng mục tiêu có thể sử dụng khối dữ liệu mạng lưới đường bộ khi mô phỏng xe máy trên đường thực.
 
-\subsection{Sơ đồ hoạt động (Activity diagram)}
+\subsubsection{Sơ đồ hoạt động (Activity diagram)}
 
 \hspace{0.5cm} Hệ thống có hai quy trình hoạt động chính được mô tả bằng các sơ đồ hoạt động.
 
@@ -258,7 +260,7 @@ Nếu mất tín hiệu cảm biến trong thời gian ngắn, bộ lọc duy tr
 \label{fig:activity-tracking}
 \end{figure}
 
-\subsection{Thiết kế kênh truyền dữ liệu hai chiều}
+\subsubsection{Thiết kế kênh truyền dữ liệu hai chiều}
 
 \hspace{0.5cm} Giao tiếp thời gian thực giữa các tầng là yêu cầu cốt lõi của hệ thống. Có nhiều phương pháp truyền dữ liệu từ thiết bị nhúng lên máy chủ và ngược lại, nhưng không phải phương pháp nào cũng phù hợp cho bài toán theo dõi mục tiêu di động.
 
@@ -287,7 +289,7 @@ Luồng dữ liệu qua WebSocket diễn ra như sau:
 
 Việc sử dụng WebSocket cũng tạo thuận lợi cho việc mở rộng sau này. Khi phần cứng Raspberry Pi được thay bằng thiết bị nhúng khác hoặc khi có nhiều thiết bị gửi dữ liệu cùng lúc, WebSocket xử lý đa kết nối tốt hơn HTTP polling.
 
-\subsection{Quản lý phiên làm việc}
+\subsubsection{Quản lý phiên làm việc}
 
 \hspace{0.5cm} Mỗi lần người dùng bắt đầu theo dõi, hệ thống tạo một phiên (session) mới. Phiên là đơn vị quản lý chính, chứa tất cả trạng thái và dữ liệu liên quan đến một lần theo dõi.
 
@@ -307,7 +309,7 @@ Bộ đệm dạng vòng sử dụng một mảng tĩnh với hai chỉ số: he
 
 Dữ liệu trong bộ đệm được sử dụng cho ba mục đích chính. Thứ nhất, hiển thị quỹ đạo trên bản đồ: 500 frame gần nhất tương ứng 50 giây ở tần số 10 Hz, đủ để hiển thị quãng đường mục tiêu đã đi qua. Thứ hai, tính toán thống kê sai số theo thời gian thực: RMSE, sai số tức thời, và sai số tích lũy được tính trên cửa sổ trượt trong bộ đệm. Thứ ba, xuất dữ liệu CSV khi người dùng yêu cầu: toàn bộ nội dung bộ đệm được serialize thành tệp CSV với các cột tọa độ, sai số, và timestamp.
 
-\subsection{Xử lý nhúng với Raspberry Pi}
+\subsubsection{Xử lý nhúng với Raspberry Pi}
 
 \hspace{0.5cm} Raspberry Pi được chọn làm nền tảng xử lý nhúng vì những lý do sau: phù hợp cho những dự án phức tạp cần xử lý đa tác vụ, hệ điều hành Linux đầy đủ hỗ trợ nhiều ngôn ngữ lập trình, nhiều chân GPIO (UART, I2C, SPI) để kết nối cảm biến, khả năng kết nối Internet qua Wi-Fi và Ethernet, và cộng đồng lớn với tài liệu phong phú.
 
@@ -329,7 +331,7 @@ Phần xử lý nhúng được thiết kế để hoạt động độc lập, 
 
 Phần mềm cũng tích hợp cơ chế tự kiểm tra (health check). Nếu cảm biến nào không phản hồi trong quá thời gian cho phép, phần mềm đánh dấu cảm biến đó là "mất" và tiếp tục hoạt động với các cảm biến còn lại. Nếu tất cả cảm biến mất, phần mềm dừng và báo lỗi.
 
-\subsection{Kiến trúc frontend}
+\subsubsection{Kiến trúc frontend}
 
 \hspace{0.5cm} Giao diện web được xây dựng theo kiến trúc thành phần (component-based) với React. Kiến trúc phân chia thành bốn nhóm thành phần chính: thành phần bản đồ, thành phần biểu đồ, thành phần điều khiển, và thành phần hiển thị thông tin.
 
@@ -385,70 +387,16 @@ Hình \ref{fig:screenshot-homepage} hiển thị trang chủ của hệ thống,
 \label{fig:screenshot-homepage}
 \end{figure}
 
-\subsection{Bảng phân bổ thời gian xử lý}
+\subsubsection{Bảng phân bổ thời gian xử lý}
 
-\hspace{0.5cm} Mỗi chu kỳ xử lý 100 ms (tần số 10 Hz) được phân bổ thời gian cho từng thành phần. Bảng \ref{tab:time-budget} thể hiện phân bổ chi tiết.
+\hspace{0.5cm} Mỗi chu kỳ xử lý 100 ms (tần số 10 Hz) được phân bổ thời gian cho từng thành phần. Bảng \ref{tab:pipeline-timing-w12} thể hiện phân bổ chi tiết.
 
-\begin{table}[H]
-\centering
-\caption{Phân bổ thời gian xử lý trong một chu kỳ 100 ms}
-\label{tab:time-budget}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcc}
-\toprule
-\textbf{Thành phần} & \textbf{Thời gian (ms)} & \textbf{Tỷ lệ (\%)} \\
-\midrule
-Đọc cảm biến (GPS + IMU + Laser) & 50,0 & 50 \\
-Đóng gói và gửi JSON & 1,0 & 1 \\
-Chuyển đổi tọa độ WGS84-ENU & 0,1 & 0,1 \\
-Tính vector định hướng và khoảng cách & 0,05 & 0,05 \\
-Bộ lọc Kalman / alpha-beta & 0,05 & 0,05 \\
-Xử lý WebSocket & 2,0 & 2 \\
-Cập nhật giao diện & 30,0 & 30 \\
-Dự phòng và chi phí phát sinh & 16,85 & 16,85 \\
-\midrule
-\textbf{Tổng} & \textbf{100,0} & \textbf{100} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
 
 Thời gian đọc cảm biến chiếm tỷ trọng lớn nhất (50 ms) vì GPS module có tần số cập nhật giới hạn. Thời gian cập nhật giao diện (30 ms) phản ánh chi phí hiển thị giao diện và vẽ lại bản đồ. Thời gian xử lý thuật toán (chuyển đổi tọa độ và bộ lọc) rất nhỏ, chỉ khoảng 0,2 ms, cho thấy thuật toán có khả năng mở rộng lên tần số cao hơn nếu cần.
 
 Phân bổ thời gian này cũng cho thấy dung lượng dự phòng đáng kể (16,85 ms, tương đương 16,85\% chu kỳ). Dự phòng này đủ để xử lý các tác vụ bổ sung như xuất dữ liệu CSV, tính toán thống kê, và xử lý lỗi kết nối mà không ảnh hưởng đến tần số cập nhật 10 Hz. Trong thực tế, phần xử lý thuật toán chỉ chiếm 0,2\% thời gian chu kỳ, cho thấy hệ thống có thể chạy ở tần số 100 Hz nếu cảm biến hỗ trợ.
 
-\subsection{So sánh khả năng Phase 1 và Phase 2}
-
-\hspace{0.5cm} Bảng \ref{tab:phase-comparison} so sánh khả năng giữa giai đoạn 1 (tính toán điểm đơn) và giai đoạn 2 (tracking thời gian thực).
-
-
-
-\begin{table}[H]
-\centering
-\caption{So sánh đặc tính giữa tính toán điểm tĩnh và bám bắt động thời gian thực}
-\label{tab:phase-comparison}
-\begin{tabularx}{\linewidth}{lXX}
-\toprule
-\textbf{Khía cạnh} & \textbf{Tính toán điểm tĩnh} & \textbf{Bám bắt động thời gian thực} \\
-\midrule
-Bài toán & Tính tọa độ mục tiêu tĩnh từ một lần đo & Theo dõi mục tiêu di động liên tục \\
-Số lần đo & Mỗi lần là độc lập & Liên kết theo chuỗi thời gian \\
-Bộ lọc ước lượng & Không áp dụng & Lọc Kalman thích nghi và Alpha-Beta \\
-Kiến trúc tính toán & Thuật toán đơn điểm & Máy chủ dịch vụ kết hợp giao diện web \\
-Kênh truyền & Không sử dụng & Kênh truyền dữ liệu hai chiều thời gian thực \\
-Quản lý phiên & Không có & Khởi tạo, duy trì và lưu trữ phiên \\
-Mục tiêu khảo sát & Điểm cố định & Người đi bộ, xe máy, drone \\
-Hiển thị bản đồ & Đánh dấu vị trí tức thời & Hiển thị quỹ đạo và vùng bất định \\
-Xuất dữ liệu & Không hỗ trợ & Xuất toàn bộ chuỗi dữ liệu quỹ đạo \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-Sự khác biệt cơ bản giữa hai giai đoạn là bổ sung bộ lọc ước lượng và kiến trúc máy chủ kết hợp trình duyệt. Giai đoạn 1 tính toán từng điểm độc lập, không có khái niệm "thời gian". Giai đoạn 2 liên kết các phép tính theo thời gian, sử dụng lịch sử để cải thiện độ chính xác qua bộ lọc.
-
-Trong giai đoạn 2, mỗi bản tin cảm biến không chỉ được xử lý độc lập mà còn được bộ lọc Kalman hoặc alpha-beta cập nhật trạng thái dựa trên toàn bộ lịch sử quan sát. Bộ đệm dạng vòng lưu trữ 500 frame gần nhất, cho phép hiển thị quỹ đạo và tính toán thống kê sai số theo thời gian thực. Chuỗi xử lý hoàn chỉnh mất trung bình 59 micro giây mỗi frame, trong đó phần Kalman chiếm 48,5 micro giây (82,2\%) và chuyển đổi tọa độ ECEF sang ENU chiếm 3,8 micro giây (6,4\%). Phần còn lại gồm phiên WebSocket, quản lý phiên, và cập nhật giao diện.
-
-\subsection{Mô hình nhiễu cảm biến}
+\subsubsection{Mô hình nhiễu cảm biến}
 
 \hspace{0.5cm} Để kiểm chứng thuật toán, mỗi cảm biến được mô hình hóa với nhiễu thống kê phù hợp. Bảng \ref{tab:noise-model-detail} liệt kê các tham số nhiễu chi tiết cho từng loại cảm biến.
 
@@ -482,34 +430,34 @@ Giá trị $\sigma_{range}$ khác nhau theo loại mục tiêu vì khoảng các
 
 Mô hình nhiễu này cho phép kiểm soát chính xác điều kiện thử nghiệm và lặp lại kết quả. Vị trí GPS được sinh theo quỹ đạo định trước, góc ngắm và khoảng cách được mô phỏng dựa trên vị trí thực của mục tiêu kết hợp với nhiễu Gaussian. Kết quả RMSE thu được phản ánh khả năng thực tế của bộ lọc khi xử lý nhiễu cảm biến ở các mức cường độ khác nhau.
 
-\subsection{Mạng lưới đường bộ và xe máy}
+\subsubsection{Mạng lưới đường bộ và xe máy}
 
 \hspace{0.5cm} Với mục tiêu là xe máy, hệ thống sử dụng mạng lưới đường bộ thực từ dữ liệu OpenStreetMap để mô phỏng quỹ đạo đi theo đường phố. Dữ liệu mạng lưới đường được lưu trữ dưới dạng đồ thị (graph) với các nút (node) là giao lộ và các cạnh (edge) là đoạn đường. Mỗi cạnh có thuộc tính loại đường (đường chính, đường phụ, ngõ hẻm) và tốc độ cho phép tương ứng.
 
-Dữ liệu mạng lưới đường được tải từ API của OpenStreetMap, bao phủ toàn bộ khu vực Thành phố Hồ Chí Minh. Tệp dữ liệu đồ thị có dung lượng khoảng 102 MB, chứa 337\,074 nút và 305\,008 cạnh. Mỗi cạnh lưu trữ thông tin về độ dài, loại đường, và tốc độ tối đa cho phép. Dữ liệu này được tải một lần khi hệ thống khởi động và giữ trong bộ nhớ để truy xuất nhanh.
+Dữ liệu mạng lưới đường được tải từ API của OpenStreetMap \cite{boeing2017osmnx}, bao phủ toàn bộ khu vực Thành phố Hồ Chí Minh. Tệp dữ liệu đồ thị có dung lượng khoảng 102 MB, chứa 337\,074 nút và 305\,008 cạnh. Mỗi cạnh lưu trữ thông tin về độ dài, loại đường, và tốc độ tối đa cho phép. Dữ liệu này được tải một lần khi hệ thống khởi động và giữ trong bộ nhớ để truy xuất nhanh.
 
 Xe máy mô phỏng bắt đầu từ một giao lộ ngẫu nhiên trong vùng hoạt động, đi theo đường bằng thuật toán đi ngẫu nhiên (random walk) trên đồ thị. Ở mỗi giao lộ, xe máy chọn một hướng đi trong các hướng khả dụng, có ưu tiên chọn đường có tốc độ phù hợp. Thiết kế này tạo quỹ đạo thực tế hơn so với đi thẳng hay đi theo đường tròn, vì xe máy thực tế luôn đi theo mạng lưới đường. Tốc độ mô phỏng nằm trong khoảng 5 đến 6 m/s (tương đương 18 đến 22 km/h), phù hợp với vận tốc xe máy trong đô thị.
 
-\subsection{REST API và quản lý tài nguyên máy chủ}
+\subsubsection{REST API và quản lý tài nguyên máy chủ}
 
 \hspace{0.5cm} Ngoài kênh truyền dữ liệu hai chiều, hệ thống cung cấp REST API phục vụ quản lý phiên và truy vấn trạng thái. REST API chạy trên cùng một máy chủ FastAPI, sử dụng phương thức HTTP chuẩn (GET, POST, DELETE) và định dạng JSON.
 
-Bảng \ref{tab:rest-api} liệt kê các endpoint chính. Mỗi endpoint có chức năng riêng biệt: tạo phiên mới, dừng phiên, liệt kê phiên đang hoạt động, truy vấn thống kê, và xuất dữ liệu CSV. REST API không tham gia vào luồng dữ liệu thời gian thực, mà chỉ phục vụ các thao tác quản lý.
+Bảng \ref{tab:rest-api} tóm tắt các chức năng quản lý chính. Mỗi chức năng có nhiệm vụ riêng biệt: tạo phiên mới, dừng phiên, liệt kê phiên đang hoạt động, truy vấn thống kê, và xuất dữ liệu CSV. REST API không tham gia vào luồng dữ liệu thời gian thực, mà chỉ phục vụ các thao tác quản lý.
 
 \begin{table}[H]
 \centering
-\caption{Các endpoint REST API}
+\caption{Các chức năng quản lý phiên qua REST API}
 \label{tab:rest-api}
 \adjustbox{max width=\linewidth}{
-\begin{tabular}{llll}
+\begin{tabular}{lll}
 \toprule
-\textbf{Endpoint} & \textbf{Phương thức} & \textbf{Chức năng} & \textbf{Đầu ra} \\
+\textbf{Chức năng} & \textbf{Mô tả} & \textbf{Đầu ra} \\
 \midrule
-/api/simulation/start & POST & Tạo phiên mô phỏng mới & \{session\_id, ws\_url\} \\
-/api/simulation/stop/\{id\} & POST & Dừng phiên & \{status\} \\
-/api/simulation/sessions & GET & Liệt kê phiên đang hoạt động & Danh sách phiên \\
-/api/simulation/stats/\{id\} & GET & Thống kê RMSE, frame & \{rmse, frame\_count\} \\
-/api/simulation/export/\{id\} & GET & Xuất toàn bộ frame & CSV stream \\
+Tạo phiên mô phỏng mới & Khởi tạo phiên với cấu hình mục tiêu và trả về mã định danh phiên & Mã phiên, đường dẫn kênh truyền \\
+Dừng phiên & Chấm dứt vòng lặp mô phỏng và giải phóng tài nguyên & Trạng thái phiên \\
+Liệt kê phiên đang hoạt động & Truy vấn danh sách các phiên đang chạy & Danh sách phiên \\
+Truy vấn thống kê & Cung cấp sai số RMSE và số khung đo đã xử lý & RMSE, số khung đo \\
+Xuất dữ liệu phiên & Trả về toàn bộ khung đo dưới dạng tệp CSV & Dòng dữ liệu CSV \\
 \bottomrule
 \end{tabular}
 }
@@ -519,7 +467,7 @@ Mỗi phiên mô phỏng chạy trên một luồng xử lý riêng trong FastAP
 
 Khi dừng phiên, hệ thống đóng kênh truyền dữ liệu hai chiều, dừng vòng lặp mô phỏng, và giải phóng tài nguyên. Dữ liệu quỹ đạo được lưu trong bộ nhớ cho đến khi phiên bị xóa. Nếu không có yêu cầu truy vấn nào trong vòng 30 phút, phiên tự động được dọn dẹp để giải phóng bộ nhớ.
 
-\subsection{Xử lý lỗi và tự động kết nối lại}
+\subsubsection{Xử lý lỗi và tự động kết nối lại}
 
 \hspace{0.5cm} Hệ thống được thiết kế để chịu lỗi ở nhiều tầng, đảm bảo hoạt động liên tục trong điều kiện mạng không ổn định hoặc cảm biến gián đoạn.
 
@@ -539,7 +487,7 @@ Trường hợp nghiêm trọng nhất là khi cả ba cảm biến đều khôn
 
 \hspace{0.5cm} Toàn bộ chuỗi xử lý được bao bọc trong cơ chế bắt ngoại lệ (exception handling). Mỗi bước xử lý chính (đọc cảm biến, chuyển đổi tọa độ, chạy bộ lọc, gửi WebSocket) đều có khối "try-except" riêng. Ngoại lệ không mong muốn được ghi nhận vào log và trả về thông báo lỗi thân thiện thay vì crash toàn bộ ứng dụng.
 
-\subsection{Chế độ mô phỏng và nguồn dữ liệu}
+\subsubsection{Chế độ mô phỏng và nguồn dữ liệu}
 
 \hspace{0.5cm} Hệ thống hỗ trợ hai chế độ mô phỏng, cho phép so sánh giữa dữ liệu tổng hợp và dữ liệu thực.
 
@@ -557,7 +505,7 @@ Nguồn thứ hai là mạng lưới đường bộ Thành phố Hồ Chí Minh,
 
 Sự khác biệt giữa hai chế độ cho phép kiểm tra tính thực tế của thuật toán. Ở chế độ tổng hợp, quỹ đạo mượt và nhiễu Gaussian thuần túy. Ở chế độ dữ liệu thực, quỹ đạo có thể đột ngột (giao lộ, rẽ), và nhiễu không hoàn toàn Gaussian.
 
-\subsection{Lưu trữ dữ liệu và xuất báo cáo}
+\subsubsection{Lưu trữ dữ liệu và xuất báo cáo}
 
 \hspace{0.5cm} Hệ thống không sử dụng cơ sở dữ liệu quan hệ. Toàn bộ dữ liệu phiên được lưu trong bộ nhớ RAM của máy chủ trong suốt phiên hoạt động. Thiết kế này phù hợp với bài toán mô phỏng, nơi mỗi phiên chạy độc lập và dữ liệu không cần persistence qua nhiều lần khởi động lại.
 
@@ -565,7 +513,7 @@ Khi phiên kết thúc, người dùng có thể yêu cầu xuất dữ liệu q
 
 Ngoài CSV, hệ thống cũng ghi nhận thống kê tóm tắt khi dừng phiên: sai số trung bình bình phương (RMSE) cho từng phương pháp lọc, số frame đã xử lý, thời gian chạy thực tế. Các thông số này hiển thị trên giao diện và được lưu trong đối tượng phiên để truy xuất qua REST API.
 
-\subsection{Đặc tả giao thức đóng gói bản tin JSON và tối ưu hóa băng thông truyền thông}
+\subsubsection{Đặc tả giao thức đóng gói bản tin JSON và tối ưu hóa băng thông truyền thông}
 
 \hspace{0.5cm} Để truyền tải dữ liệu định vị thời gian thực giữa máy chủ dịch vụ và giao diện người dùng, bản tin trạng thái được cấu trúc dưới định dạng JSON với 19 trường số liệu chuẩn hóa:
 \begin{equation}
@@ -579,31 +527,10 @@ B_{\text{network}} = S_{\text{payload}} \times f_{\text{sample}} = 200\text{ byt
 \label{eq:bandwidth-consumption-formula}
 \end{equation}
 
-\begin{table}[H]
-\centering
-\caption{Bảng phân bổ các trường dữ liệu và kích thước nhị phân trong bản tin JSON 10 Hz}
-\label{tab:json-frame-fields-breakdown}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{llccl}
-\toprule
-\textbf{Nhóm dữ liệu} & \textbf{Các trường thành phần} & \textbf{Kiểu dữ liệu} & \textbf{Kích thước} & \textbf{Ý nghĩa trắc địa và động học} \\
-\midrule
-Định danh phiên & \texttt{frame\_id}, \texttt{timestamp} & Int, Float & 24 byte & Số thứ tự khung và nhãn thời gian UNIX \\
-Tọa độ thực (Truth) & \texttt{true\_east}, \texttt{true\_north}, \texttt{true\_up} & Float64 & 48 byte & Tọa độ ENU thực tế của mục tiêu mô phỏng \\
-Đo thô cảm biến & \texttt{raw\_east}, \texttt{raw\_north}, \texttt{raw\_up} & Float64 & 48 byte & Vị trí hợp nhất từ Laser-IMU-GNSS chưa lọc \\
-Ước lượng Kalman & \texttt{kf\_east}, \texttt{kf\_north}, \texttt{kf\_up}, \texttt{kf\_v...} & Float64 & 48 byte & Tọa độ và vector vận tốc lọc Kalman 3D \\
-Ước lượng Alpha-Beta & \texttt{ab\_east}, \texttt{ab\_north}, \texttt{ab\_up} & Float64 & 48 byte & Tọa độ ước lượng từ bộ lọc Alpha-Beta \\
-Chỉ số thống kê & \texttt{rmse\_kf}, \texttt{rmse\_ab} & Float32 & 16 byte & Sai số tích lũy trực tiếp tại thời điểm hiện tại \\
-\midrule
-\textbf{Tổng cộng gói tin} & \textbf{19 trường số liệu} & \textbf{JSON UTF-8} & \textbf{$\sim 200$ byte} & \textbf{Băng thông $< 0{,}02\%$ mạng LAN 100 Mbps} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
 
 Kích thước gói tin 200 byte giúp việc truyền tải qua kênh truyền dữ liệu hai chiều chiếm dụng băng thông không đáng kể, bảo đảm khả năng mở rộng phục vụ đồng thời hàng trăm phiên bám bắt mà không gây nghẽn mạng.
 
-\subsection{Kiến trúc bộ nhớ đệm dạng vòng xoay và kiểm soát tràn vùng nhớ}
+\subsubsection{Kiến trúc bộ nhớ đệm dạng vòng xoay và kiểm soát tràn vùng nhớ}
 
 \hspace{0.5cm} Để lưu trữ chuỗi lịch sử quỹ đạo bám bắt phục vụ trực quan hóa bản đồ mà không gây cạn kiệt bộ nhớ RAM, cấu trúc dữ liệu Bộ đệm vòng xoay cố định (Fixed Ring Buffer) với dung lượng $N_{\text{max}} = 500$ điểm được hiện thực hóa:
 \begin{equation}
@@ -629,7 +556,7 @@ Mảng động (\texttt{list.append}) & $\mathcal{O}(1)$ amortized & $\mathcal{O
 }
 \end{table}
 
-\subsection{Kiến trúc tích hợp giao diện người dùng React và cơ chế nhịp tim kết nối}
+\subsubsection{Kiến trúc tích hợp giao diện người dùng React và cơ chế nhịp tim kết nối}
 
 \hspace{0.5cm} Tại tầng trình diễn, giao diện người dùng xây dựng trên nền tảng React và thư viện bản đồ số Leaflet kết nối với máy chủ qua kênh truyền hai chiều. Cơ chế nhịp tim kết nối (Heartbeat Keep-Alive Protocol) được thiết lập để phát hiện sự cố mạng:
 \begin{equation}
@@ -661,7 +588,7 @@ Lần 4 & $8{,}0$ s & $15{,}0$ s & Cắt đứt an toàn & Giải phóng tài ng
 }
 \end{table}
 
-\subsection{Tóm tắt thiết kế}
+\subsubsection{Tóm tắt thiết kế}
 
 \hspace{0.5cm} Kiến trúc phân lớp bốn tầng của hệ thống đảm bảo sự tách biệt giữa phần cứng cảm biến, xử lý nhúng, xử lý máy chủ, và hiển thị giao diện. Luồng dữ liệu đi từ cảm biến lên giao diện qua kênh truyền dữ liệu hai chiều, với mỗi bước dữ liệu được đóng gói, xác thực, và chuyển đổi tọa độ.
 

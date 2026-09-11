@@ -1,6 +1,8 @@
-\section{Tuần 3}
+\section{Chuỗi xử lý tọa độ và hợp nhất cảm biến}
 
-\subsection{Chuỗi xử lý chuyển đổi tọa độ LLA-ECEF-ENU}
+\subsection{Chuỗi xử lý tọa độ và thuật toán lọc}
+
+\subsubsection{Chuỗi xử lý chuyển đổi tọa độ LLA-ECEF-ENU}
 
 \hspace{0.5cm} Hệ thống định vị mục tiêu yêu cầu chuyển đổi liên tục giữa ba hệ tọa độ: WGS-84 (kinh, vĩ, độ cao), ECEF (Earth-Centred Earth-Fixed, tọa độ trung tâm Trái Đất) và ENU (East-North-Up, tọa độ cục bộ). Mỗi hệ phục vụ một mục đích riêng trong chuỗi xử lý. WGS-84 là đầu ra từ GPS; ECEF là trung gian cần thiết vì phép tính trên ellipsoid yêu cầu tọa độ Descartes; ENU là không gian hoạt động của bộ lọc vì các phép cộng vector và ma trận chuyển tiếp đều tuyến tính trong hệ này.
 
@@ -65,7 +67,7 @@ Phép chuyển đổi từ WGS-84 sang ECEF:
 
 Trong đó $\phi$ và $\lambda$ phải được chuyển sang radian trước khi tính. Thành phần $(N + h)$ biểu thị khoảng cách từ trục quay đến điểm trên ellipsoid, trong khi $N(1 - e^2)$ trong thành phần $Z$ phản ánh hiệu ứng ellipsoid lên trục dọc.
 
-\paragraph{Ví dụ số liệu.\\} Cho tọa độ người quan sát tại Quận 10, TP.HCM: $\phi = 10{,}7726^\circ$, $\lambda = 106{,}6983^\circ$, $h = 10$ m. Chuyển sang radian: $\phi = 0{,}18806$ rad, $\lambda = 1{,}86232$ rad.
+\textbf{Ví dụ số liệu.\\} Cho tọa độ người quan sát tại Quận 10, TP.HCM: $\phi = 10{,}7726^\circ$, $\lambda = 106{,}6983^\circ$, $h = 10$ m. Chuyển sang radian: $\phi = 0{,}18806$ rad, $\lambda = 1{,}86232$ rad.
 
 \begin{align*}
     N &= \frac{6\,378\,137{,}0}{\sqrt{1 - 0{,}006\,694\,380 \cdot \sin^2(0{,}18806)}} \\
@@ -106,7 +108,7 @@ Vector ENU thu được:
     \mathbf{p}_{enu} = \mathbf{R}_{ecef}^{enu} \cdot \Delta\mathbf{p}_{ecef}
 \end{equation}
 
-\paragraph{Nguồn gốc ma trận xoay.\\} Hàng đầu tiên của $\mathbf{R}_{ecef}^{enu}$ biểu thị trục East, được tạo bởi tích chéo giữa trục Z (hướng cực) và vector vị trí người quan sát trong ECEF. Hàng thứ ba là hướng Up, tức vector đơn vị từ tâm ellipsoid đến điểm quan sát, biểu thị bằng $[\cos\phi_0\cos\lambda_0, \cos\phi_0\sin\lambda_0, \sin\phi_0]^T$. Hàng thứ hai (North) hoàn thành hệ bằng phép tích chéo giữa Up và East.
+\textbf{Nguồn gốc ma trận xoay.\\} Hàng đầu tiên của $\mathbf{R}_{ecef}^{enu}$ biểu thị trục East, được tạo bởi tích chéo giữa trục Z (hướng cực) và vector vị trí người quan sát trong ECEF. Hàng thứ ba là hướng Up, tức vector đơn vị từ tâm ellipsoid đến điểm quan sát, biểu thị bằng $[\cos\phi_0\cos\lambda_0, \cos\phi_0\sin\lambda_0, \sin\phi_0]^T$. Hàng thứ hai (North) hoàn thành hệ bằng phép tích chéo giữa Up và East.
 
 Ma trận $\mathbf{R}_{ecef}^{enu}$ là trực giao, tức $\mathbf{R}^{-1} = \mathbf{R}^T$. Điều này có nghĩa phép chuyển đổi ngược (ENU sang ECEF) chỉ cần nhân với ma trận chuyển vị, không cần tính ma trận nghịch đảo.
 
@@ -114,7 +116,7 @@ Ma trận $\mathbf{R}_{ecef}^{enu}$ là trực giao, tức $\mathbf{R}^{-1} = \m
 
 \hspace{0.5cm} Phép chuyển đổi ngược cần thiết khi ta có vị trí mục tiêu trong ENU và muốn hiển thị tọa độ địa lý trên bản đồ. Quy trình gồm ba bước: chuyển ENU sang hiệu ECEF, cộng với vị trí gốc ECEF, rồi chuyển ECEF sang WGS-84.
 
-\paragraph{Bước 1: ENU sang hiệu ECEF.\\} Sử dụng ma trận nghịch $\mathbf{R}_{enu}^{ecef} = (\mathbf{R}_{ecef}^{enu})^T$:
+\textbf{Bước 1: ENU sang hiệu ECEF.\\} Sử dụng ma trận nghịch $\mathbf{R}_{enu}^{ecef} = (\mathbf{R}_{ecef}^{enu})^T$:
 \begin{equation}
     \Delta\mathbf{p}_{ecef} = \mathbf{R}_{enu}^{ecef} \cdot \mathbf{p}_{enu} = \begin{bmatrix}
         -\sin\lambda_0 & -\sin\phi_0\cos\lambda_0 & \cos\phi_0\cos\lambda_0 \\
@@ -123,12 +125,12 @@ Ma trận $\mathbf{R}_{ecef}^{enu}$ là trực giao, tức $\mathbf{R}^{-1} = \m
     \end{bmatrix} \begin{bmatrix} e \\ n \\ u \end{bmatrix}
 \end{equation}
 
-\paragraph{Bước 2: Cộng vị trí gốc.\\}
+\subsubsection{Bước 2: Cộng vị trí gốc.\\}
 \begin{equation}
     \mathbf{p}_{ecef}^{target} = \mathbf{p}_{ecef}^{origin} + \Delta\mathbf{p}_{ecef}
 \end{equation}
 
-\paragraph{Bước 3: ECEF sang WGS-84.\\} Phép chuyển này phức tạp hơn forward vì vĩ độ $\phi$ xuất hiện ở cả hai vế phương trình. Giải pháp phổ biến là phương pháp lặp Bowring:
+\textbf{Bước 3: ECEF sang WGS-84.\\} Phép chuyển này phức tạp hơn forward vì vĩ độ $\phi$ xuất hiện ở cả hai vế phương trình. Giải pháp phổ biến là phương pháp lặp Bowring:
 \begin{enumerate}
     \item Tính kinh độ trực tiếp: $\lambda = \arctan2(Y, X)$
     \item Tính khoảng cách trục $p = \sqrt{X^2 + Y^2}$
@@ -144,14 +146,12 @@ Trong thực tế, phương pháp Bowring hội tụ sau 3 đến 5 bước lặ
 
 Với phạm vi hoạt động nhỏ hơn 50 km (phạm vi điển hình của cảm biến laser), sai số giữa hai phương pháp là không đáng kể, dưới $0{,}01$ m.
 
-
-
-\subsection{Phân tích truyền sai số RSS}
+\subsubsection{Phân tích truyền sai số RSS}
 
 \hspace{0.5cm} Phân tích định lượng cách sai số từ mỗi cảm biến lan truyền đến kết quả cuối cùng sử dụng phương pháp RSS (Root Sum of Squares, căn bậc hai tổng bình phương). Phương pháp này giả định rằng các sai số từ các cảm biến là độc lập với nhau, tổng phương sai vị trí bằng tổng cộng phương sai của từng thành phần.
 
 \subsubsection{Xác lập công thức RSS}
-\hspace{0.5cm} Cho bốn nguồn sai số độc lập: GPS ($\sigma_{gps}$), laser rangefinder ($\sigma_{range}$), góc ngang IMU ($\sigma_{az}$) và góc đứng IMU ($\sigma_{el}$). Sai số góc tạo ra sai số vị trí tỷ lệ thuận với khoảng cách:
+\hspace{0.5cm} Cho bốn nguồn sai số độc lập: GPS ($\sigma_{gps}$), laser rangefinder ($\sigma_{range}$), góc ngang IMU ($\sigma_{az}$) và góc đứng IMU ($\sigma_{el}$) \cite{titterton2004strapdown}. Sai số góc tạo ra sai số vị trí tỷ lệ thuận với khoảng cách:
 \begin{equation}
     \sigma_{lateral} = R \cdot \sin\sigma_{az}, \qquad \sigma_{elev} = R \cdot \sin\sigma_{el}
 \end{equation}
@@ -188,7 +188,7 @@ Laser rangefinder & $\sigma_{range}$ & 0,5 m \\
 \sigma_{pos} &= \sqrt{5^2 + 0{,}26^2 + 0{,}5^2 + 0{,}17^2} \approx 5{,}0 \text{ m}
 \end{align*}
 
-GPS chiếm khoảng 98\% tổng sai số. Ở cự ly gần, chất lượng GPS là yếu tố quyết định; laser và IMU gần như không đóng góp vào tổng sai số.
+GPS chiếm khoảng 98\% tổng sai số. Ở cự ly gần, chất lượng GPS là yếu tố quyết định; laser và IMU gần như không đóng góp vào tổng sai số \cite{misra2006gps}.
 
 \subsubsection{Khoảng cách 500 m (trung bình)}
 \begin{align*}
@@ -209,8 +209,6 @@ IMU đóng góp khoảng 28\% tổng sai số. Sai số bắt đầu bị chi ph
 IMU đóng góp khoảng 61\% tổng sai số. Ở khoảng cách xa, sai số góc IMU trở thành yếu tố chi phối; GPS chỉ đóng góp một phần nhỏ.
 
 Hình \ref{fig:error-prop} trực quan hóa đóng góp của từng cảm biến qua khoảng cách.
-
-
 
 \begin{figure}[H]
 \centering
@@ -279,13 +277,13 @@ Trong mô phỏng hiện tại, tất cả cảm biến được đồng bộ �
 \subsubsection{Xử lý nhiễu liên quan (correlated errors)}
 \hspace{0.5cm} Phân tích RSS giả định bốn nguồn sai số độc lập. Trong thực tế, có thể tồn tại tương quan giữa các nguồn: ví dụ, khi GPS bị multipath (phản xạ đa đường), sai số GPS tăng đồng thời có thể ảnh hưởng đến ước tính góc (qua cơ chế getPosition bị sai). Trường hợp này yêu cầu ma trận $\mathbf{R}$ đầy đủ (không chỉ đường chéo), trong đó các thành phần ngoài đường chéo biểu thị hiệp phương sai giữa các kênh. Hiện tại, hệ thống chỉ sử dụng $\mathbf{R}$ đường chéo (giả định độc lập), nhưng cấu trúc mã cho phép mở rộng lên $\mathbf{R}$ đầy đủ bằng cách thay đổi một tham số khởi tạo.
 
-\subsection{Bộ lọc Kalman chi tiết}
+\subsubsection{Bộ lọc Kalman chi tiết}
 
-\hspace{0.5cm} Kalman filter (bộ lọc Kalman) là thuật toán ước lượng tuyến tính kinh điển cho các hệ thống có nhiễu Gaussian. Bộ lọc hoạt động trên nguyên tắc dự báo-cập nhật: ở mỗi bước thời gian, nó dự báo vị trí tiếp theo dựa trên mô hình động học, rồi cập nhật dự báo đó bằng phép đo mới. Hệ số cập nhật (Kalman gain) được tính tự động từ ma trận hiệp phương sai (covariance matrix), phản ánh mức độ tin cậy tương đối giữa mô hình dự báo và phép đo.
+\hspace{0.5cm} Kalman filter (bộ lọc Kalman) là thuật toán ước lượng tuyến tính kinh điển \cite{kalman1960new} cho các hệ thống có nhiễu Gaussian. Bộ lọc hoạt động trên nguyên tắc dự báo-cập nhật: ở mỗi bước thời gian, nó dự báo vị trí tiếp theo dựa trên mô hình động học, rồi cập nhật dự báo đó bằng phép đo mới. Hệ số cập nhật (Kalman gain) được tính tự động từ ma trận hiệp phương sai (covariance matrix), phản ánh mức độ tin cậy tương đối giữa mô hình dự báo và phép đo.
 
 \subsubsection{Không gian trạng thái}
 
-\hspace{0.5cm} Mô hình vận tốc không đổi (constant velocity) giả định mục tiêu di chuyển với vận tốc gần như không đổi trong khoảng thời gian ngắn giữa hai lần đo. Mô hình này phù hợp với các loại mục tiêu trong đồ án vì tần số đo 10 Hz đủ cao để sai số từ giả định vận tốc không đổi được hấp thụ bởi nhiễu quá trình.
+\hspace{0.5cm} Mô hình vận tốc không đổi (constant velocity) giả định mục tiêu di chuyển với vận tốc gần như không đổi trong khoảng thời gian ngắn giữa hai lần đo \cite{barshalom2001estimation}. Mô hình này phù hợp với các loại mục tiêu trong đồ án vì tần số đo 10 Hz đủ cao để sai số từ giả định vận tốc không đổi được hấp thụ bởi nhiễu quá trình.
 
 Đối với mục tiêu 2D (người đi bộ, xe máy), vectơ trạng thái bốn chiều:
 \begin{equation}
@@ -381,7 +379,7 @@ Phương pháp khởi tạo này nhanh hơn và ổn định hơn so với giả
 
 \hspace{0.5cm} Mỗi chu trình Kalman filter gồm hai giai đoạn:
 
-\paragraph{Dự báo (predict)\\} Truyền trạng thái và độ bất định về phía trước:
+\textbf{Dự báo (predict)\\} Truyền trạng thái và độ bất định về phía trước:
 \begin{equation}
 \begin{aligned}
     \hat{\mathbf{x}}_k^- &= \mathbf{F} \cdot \hat{\mathbf{x}}_{k-1} \\
@@ -389,7 +387,7 @@ Phương pháp khởi tạo này nhanh hơn và ổn định hơn so với giả
 \end{aligned}
 \end{equation}
 
-\paragraph{Cập nhật (update)\\} Khi phép đo mới $\mathbf{z}_k$ có sẵn, tính Kalman gain $\mathbf{K}_k$, rồi hiệu chỉnh trạng thái:
+\textbf{Cập nhật (update)\\} Khi phép đo mới $\mathbf{z}_k$ có sẵn, tính Kalman gain $\mathbf{K}_k$, rồi hiệu chỉnh trạng thái:
 \begin{equation}
 \begin{aligned}
     \mathbf{S}_k &= \mathbf{H} \cdot \mathbf{P}_k^- \cdot \mathbf{H}^T + \mathbf{R}_k \\
@@ -422,7 +420,7 @@ Phương pháp này ổn định số học hơn nghịch đảo ma trận, đ�
 
 Trong đó $\sigma_{pos,k}^2$ là kết quả từ công thức RSS ở mỗi bước thời gian. Khi nhiễu đo lường tăng (khoảng cách xa, GPS kém), Kalman gain tự động giảm, bộ lọc dựa nhiều hơn vào mô hình dự báo. Cơ chế này giúp bộ lọc thích nghi tự động với điều kiện đo thay đổi mà không cần can thiệp thủ công.
 
-\paragraph{Ví dụ số minh họa Adaptive R\\} Xét hai tình huống với cùng mục tiêu người đi bộ:
+\textbf{Ví dụ số minh họa Adaptive R\\} Xét hai tình huống với cùng mục tiêu người đi bộ:
 
 \textit{Tình huống A: Mục tiêu ở 100 m.} Từ bảng \ref{tab:rss-summary}, $\sigma_{pos} \approx 5{,}1$ m. Ma trận $\mathbf{R}_A = 5{,}1^2 \cdot \mathbf{I} = 26{,}01 \cdot \mathbf{I}$. Kalman gain:
 \begin{equation}
@@ -440,9 +438,9 @@ Cơ chế này hoạt động tự động mà không cần người vận hành
 
 Với mục tiêu 3D, $\mathbf{R}$ là ma trận 3×3 tương ứng với ba phép đo East, North, Up.
 
-\paragraph{Ví dụ số minh họa chu trình Kalman\\} Giả sử mục tiêu người đi bộ ở trạng thái ban đầu $\hat{\mathbf{x}}_0 = [0, 0, 1{,}4, 0]^T$ (vị trí gốc, vận tốc 1,4 m/s theo hướng East), $\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$, $\Delta t = 0{,}1$ s, $\sigma_a = 0{,}5$ m/s$^2$.
+\textbf{Ví dụ số minh họa chu trình Kalman\\} Giả sử mục tiêu người đi bộ ở trạng thái ban đầu $\hat{\mathbf{x}}_0 = [0, 0, 1{,}4, 0]^T$ (vị trí gốc, vận tốc 1,4 m/s theo hướng East), $\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$, $\Delta t = 0{,}1$ s, $\sigma_a = 0{,}5$ m/s$^2$.
 
-\paragraph{Bước 1: Dự báo\\} Ma trận $\mathbf{F}$ với $\Delta t = 0{,}1$:
+\textbf{Bước 1: Dự báo\\} Ma trận $\mathbf{F}$ với $\Delta t = 0{,}1$:
 \begin{equation}
     \mathbf{F} = \begin{bmatrix} 1 & 0 & 0{,}1 & 0 \\ 0 & 1 & 0 & 0{,}1 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}
 \end{equation}
@@ -454,9 +452,9 @@ Phương sai dự báo (chỉ tính thành phần East cho minh họa): $P_{11}^
     P_{11}^- \approx 100 + 0{,}01 \cdot 25 + 0{,}00000625 \approx 100{,}25
 \end{equation}
 
-\paragraph{Bước 2: Phép đo\\} GPS đo vị trí East = $0{,}20$ m (nhiễu $\sigma_{gps} = 5{,}0$ m). Hợp nhất laser-IMU cho $\sigma_{pos} = 5{,}0$ m (cự ly gần, GPS dominates). Ma trận $\mathbf{R} = 5{,}0^2 \cdot \mathbf{I}_{2\times2} = \text{diag}(25, 25)$.
+\textbf{Bước 2: Phép đo\\} GPS đo vị trí East = $0{,}20$ m (nhiễu $\sigma_{gps} = 5{,}0$ m). Hợp nhất laser-IMU cho $\sigma_{pos} = 5{,}0$ m (cự ly gần, GPS dominates). Ma trận $\mathbf{R} = 5{,}0^2 \cdot \mathbf{I}_{2\times2} = \text{diag}(25, 25)$.
 
-\paragraph{Bước 3: Tính Kalman gain\\}
+\subsubsection{Bước 3: Tính Kalman gain\\}
 \begin{align*}
     S_1 &= H P_1^- H^T + R = P_{11}^- + R_{11} = 100{,}25 + 25 = 125{,}25 \\
     K_1 &= P_1^- H^T S_1^{-1} = \frac{P_{11}^-}{S_1} = \frac{100{,}25}{125{,}25} \approx 0{,}80
@@ -464,7 +462,7 @@ Phương sai dự báo (chỉ tính thành phần East cho minh họa): $P_{11}^
 
 $K_1 = 0{,}80$ có nghĩa bộ lọc tin tưởng phép đo 80\% và mô hình dự báo 20\%. Điều này hợp lý vì tại cự ly gần, phép đo GPS khá tin cậy.
 
-\paragraph{Bước 4: Cập nhật\\}
+\subsubsection{Bước 4: Cập nhật\\}
 \begin{align*}
     \hat{e}_1 &= 0{,}14 + 0{,}80 \cdot (0{,}20 - 0{,}14) = 0{,}14 + 0{,}048 = 0{,}188 \text{ m} \\
     P_{11} &= (1 - K_1) \cdot P_{11}^- = 0{,}20 \cdot 100{,}25 \approx 20{,}1
@@ -472,7 +470,7 @@ $K_1 = 0{,}80$ có nghĩa bộ lọc tin tưởng phép đo 80\% và mô hình d
 
 Phương sai giảm từ 100,25 xuống 20,1 (giảm 80\%) chỉ sau một bước cập nhật. Sau nhiều bước, $P$ hội tụ về giá trị ổn định phản ánh nhiễu đo lường thực tế. Nếu $\sigma_{pos} = 8{,}0$ m (cự lyxa, 1000 m), $K$ giảm xuống $\approx 0{,}61$, bộ lọc tin tưởng mô hình hơn vì phép đo nhiễu hơn.
 
-\paragraph{Hội tụ của Kalman gain\\} Trong giai đoạn ổn định (steady state), Kalman gain hội tụ về giá trị không đổi $K_\infty$ phụ thuộc vào tỉ lệ $Q/R$. Khi $Q/R$ nhỏ (nhiễu quá trình thấp so với nhiễu đo), $K_\infty$ nhỏ và bộ lọc chủ yếu dùng mô hình. Khi $Q/R$ lớn, $K_\infty$ lớn và bộ lọc chủ yếu dùng phép đo. Cơ chế adaptive R thay đổi $R$ mỗi bước nên $K$ thực tế không hội tụ cố định mà thay đổi linh hoạt, phản ánh điều kiện đo thực tế.
+\textbf{Hội tụ của Kalman gain\\} Trong giai đoạn ổn định (steady state), Kalman gain hội tụ về giá trị không đổi $K_\infty$ phụ thuộc vào tỉ lệ $Q/R$. Khi $Q/R$ nhỏ (nhiễu quá trình thấp so với nhiễu đo), $K_\infty$ nhỏ và bộ lọc chủ yếu dùng mô hình. Khi $Q/R$ lớn, $K_\infty$ lớn và bộ lọc chủ yếu dùng phép đo. Cơ chế adaptive R thay đổi $R$ mỗi bước nên $K$ thực tế không hội tụ cố định mà thay đổi linh hoạt, phản ánh điều kiện đo thực tế.
 
 \subsubsection{Điều kiện sử dụng}
 
@@ -491,7 +489,7 @@ Hình \ref{fig:kalman-detail} mô tả chu trình dự báo và cập nhật.
 \label{fig:kalman-detail}
 \end{figure}
 
-\subsection{Bộ lọc alpha-beta chi tiết}
+\subsubsection{Bộ lọc alpha-beta chi tiết}
 
 \hspace{0.5cm} Alpha-beta filter (hay g-h filter) là phiên bản đơn giản hóa của Kalman filter với hệ số lọc cố định (fixed-gain). Bộ lọc không cần ma trận hiệp phương sai $\mathbf{P}$ mà chỉ sử dụng hai tham số: $\alpha$ cho vị trí và $\beta$ cho vận tốc. Đây là trường hợp đặc biệt của Kalman filter khi hệ số lọc hội tụ về giá trị ổn định.
 
@@ -499,7 +497,7 @@ Hình \ref{fig:kalman-detail} mô tả chu trình dự báo và cập nhật.
 
 \hspace{0.5cm} Mỗi chu trình alpha-beta filter gồm hai giai đoạn, áp dụng độc lập cho trục East và North:
 
-\paragraph{Dự báo\\}
+\subsubsection{Dự báo\\}
 \begin{equation}
 \begin{aligned}
     x_k^p &= x_{k-1} + \Delta t \cdot \dot{x}_{k-1} \\
@@ -507,12 +505,12 @@ Hình \ref{fig:kalman-detail} mô tả chu trình dự báo và cập nhật.
 \end{aligned}
 \end{equation}
 
-\paragraph{Tính residual (sai lệch innovation)\\}
+\subsubsection{Tính residual (sai lệch innovation)\\}
 \begin{equation}
     r_k = z_k - x_k^p
 \end{equation}
 
-\paragraph{Cập nhật vị trí và vận tốc\\}
+\subsubsection{Cập nhật vị trí và vận tốc\\}
 \begin{equation}
 \begin{aligned}
     x_k &= x_k^p + \alpha \cdot r_k \\
@@ -533,10 +531,8 @@ Giới hạn trên $2\alpha - \alpha^2$ đảm bảo bộ lọc không bị rung
 
 \subsubsection{Công thức Benedict-Bordner giảm xóc hoàn toàn}
 
-\hspace{0.5cm} Benedict-Bordner (1968) đề xuất mối liên hệ giữa $\alpha$ và $\beta$ để đạt điều kiện critically damped (giảm xóc hoàn toàn), tức bộ lọc hội tụ nhanh nhất mà không bị overshoot:
-\begin{equation}
-    \beta = (2 - \alpha) - 2\sqrt{1 - \alpha}
-\end{equation}
+\hspace{0.5cm} Benedict và Bordner (1962) \cite{benedict1962synthesis} đề xuất mối liên hệ giữa $\alpha$ và $\beta$ để đạt điều kiện critically damped (giảm xóc hoàn toàn), tức bộ lọc hội tụ nhanh nhất mà không bị overshoot:
+
 
 Điều kiện tắt dần tới hạn (critically damped) đảm bảo rằng khi mục tiêu đột ngột đổi hướng, phản hồi sai số (error response) giảm về không nhanh nhất có thể mà không dao động. Đây là lựa chọn phù hợp cho bài toán bám mục tiêu khi mục tiêu có thể cơ động đột ngột.
 
@@ -550,22 +546,22 @@ Với giá trị mặc định $\alpha = 0{,}4$:
 
 Hệ số $\beta \approx 0{,}051$ rất nhỏ so với $\alpha = 0{,}4$, phản ánh rằng vận tốc chỉ được cập nhật một phần nhỏ mỗi bước. Điều này phù hợp vì vận tốc thay đổi chậm hơn nhiều so với vị trí trong mô hình vận tốc không đổi.
 
-\paragraph{Ý nghĩa thực tế\\} Giá trị $\alpha$ nhỏ (dưới 0,3) cho bộ lọc lọc mạnh, quỹ đạo mượt nhưng chậm bám theo thay đổi. Giá trị $\alpha$ lớn (trên 0,7) cho bộ lọc bám nhanh nhưng quỹ đạo nhiễu hơn. $\alpha = 0{,}4$ là điểm cân bằng phù hợp cho các loại mục tiêu trong đồ án.
+\textbf{Ý nghĩa thực tế\\} Giá trị $\alpha$ nhỏ (dưới 0,3) cho bộ lọc lọc mạnh, quỹ đạo mượt nhưng chậm bám theo thay đổi. Giá trị $\alpha$ lớn (trên 0,7) cho bộ lọc bám nhanh nhưng quỹ đạo nhiễu hơn. $\alpha = 0{,}4$ là điểm cân bằng phù hợp cho các loại mục tiêu trong đồ án.
 
-\paragraph{Ví dụ số minh họa alpha-beta\\} Giả sử cùng thiết lập với Kalman: mục tiêu người đi bộ vận tốc 1,4 m/s theo East, $\Delta t = 0{,}1$ s, phép đo GPS East = $0{,}20$ m.
+\textbf{Ví dụ số minh họa alpha-beta\\} Giả sử cùng thiết lập với Kalman: mục tiêu người đi bộ vận tốc 1,4 m/s theo East, $\Delta t = 0{,}1$ s, phép đo GPS East = $0{,}20$ m.
 
-\paragraph{Bước 1: Dự báo\\}
+\subsubsection{Bước 1: Dự báo\\}
 \begin{align*}
     x_1^p &= x_0 + \Delta t \cdot \dot{x}_0 = 0 + 0{,}1 \cdot 1{,}4 = 0{,}14 \text{ m} \\
     \dot{x}_1^p &= \dot{x}_0 = 1{,}4 \text{ m/s}
 \end{align*}
 
-\paragraph{Bước 2: Tính residual\\}
+\subsubsection{Bước 2: Tính residual\\}
 \begin{equation}
     r_1 = z_1 - x_1^p = 0{,}20 - 0{,}14 = 0{,}06 \text{ m}
 \end{equation}
 
-\paragraph{Bước 3: Cập nhật\\}
+\subsubsection{Bước 3: Cập nhật\\}
 \begin{align*}
     x_1 &= x_1^p + \alpha \cdot r_1 = 0{,}14 + 0{,}4 \cdot 0{,}06 = 0{,}164 \text{ m} \\
     \dot{x}_1 &= \dot{x}_1^p + \frac{\beta}{\Delta t} \cdot r_1 = 1{,}4 + \frac{0{,}051}{0{,}1} \cdot 0{,}06 = 1{,}4 + 0{,}0306 = 1{,}431 \text{ m/s}
@@ -575,7 +571,7 @@ So sánh: Kalman cho $\hat{e}_1 = 0{,}188$ m, alpha-beta cho $x_1 = 0{,}164$ m. 
 
 Sau 10 bước ($t = 1{,}0$ s), cả hai bộ lọc hội tụ về giá trị gần nhau vì Kalman gain giảm dần khi $P$ giảm. Sự khác biệt lớn nhất nằm ở 3 đến 5 bước đầu tiên, sau đó RMSE của hai bộ lọc chênh lệch không đáng kể trong điều kiện nhiễu ổn định.
 
-\paragraph{Xử lý phép đo bị mất\\} Trong hệ thống thực, dữ liệu cảm biến có thể bị mất (GPS mất tín hiệu, laser bị chắn). Cả hai bộ lọc xử lý bằng cách bỏ qua bước cập nhật và chỉ thực hiện dự báo:
+\textbf{Xử lý phép đo bị mất\\} Trong hệ thống thực, dữ liệu cảm biến có thể bị mất (GPS mất tín hiệu, laser bị chắn). Cả hai bộ lọc xử lý bằng cách bỏ qua bước cập nhật và chỉ thực hiện dự báo:
 
 \begin{itemize}
     \item \textbf{Kalman:} Bước dự báo vẫn chạy, $\mathbf{P}$ tăng lên (độ bất định tăng), trạng thái được extrapolate bằng mô hình vận tốc không đổi. Khi phép đo trở lại, Kalman gain tự động điều chỉnh vì $\mathbf{P}$ đã tăng.
@@ -584,7 +580,7 @@ Sau 10 bước ($t = 1{,}0$ s), cả hai bộ lọc hội tụ về giá trị g
 
 Trong mô phỏng hiện tại, mỗi cảm biến luôn có dữ liệu (được mô phỏng liên tục), nhưng logic xử lý phép đo bị mất vẫn được triển khai trong code để sẵn sàng cho tích hợp phần cứng thực.
 
-\paragraph{Phân tích hiệu năng tính toán\\} Thời gian thực thi trên CPython 3.11 tại 10 Hz:
+\textbf{Phân tích hiệu năng tính toán\\} Thời gian thực thi trên CPython 3.11 tại 10 Hz:
 
 \begin{table}[H]
 \centering
@@ -607,9 +603,9 @@ Kalman 3D (6 trạng thái) & $\sim$48 $\mu$s & 82\% \\
 
 Thời gian 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chiếm 59\% của chu kỳ 100 ms, để lại 41\% dung lượng cho các tác vụ khác (đọc cảm biến, truyền mạng, hiển thị). Với 100 Hz (chu kỳ 10 ms), chuỗi xử lý chiếm 59\% dung lượng, vẫn khả thi nhưng cần cải thiện hiệu năng.
 
-\paragraph{Khả năng mở rộng lên 100 Hz\\} Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với IMU hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với thời gian 59 $\mu$s hiện tại, dung lượng còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% dung lượng. Điều này khẳng định thuật toán đủ nhanh cho thời gian thực ở tần số cao hơn nhiều so với yêu cầu hiện tại.
+\textbf{Khả năng mở rộng lên 100 Hz\\} Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với IMU hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với thời gian 59 $\mu$s hiện tại, dung lượng còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% dung lượng. Điều này khẳng định thuật toán đủ nhanh cho thời gian thực ở tần số cao hơn nhiều so với yêu cầu hiện tại.
 
-\subsection{So sánh chi tiết Kalman và alpha-beta}
+\subsubsection{So sánh chi tiết Kalman và alpha-beta}
 
 \hspace{0.5cm} Hai bộ lọc có những khác biệt quan trọng về hiệu năng, độ phức tạp và phạm vi ứng dụng.
 
@@ -634,7 +630,7 @@ Phù hợp & Mục tiêu cơ động, nhiễu thay đổi & Mục tiêu di chuy�
 
 Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp. Trên thiết bị nhúng, tài nguyên tiết kiệm được có thể dùng cho các tác vụ khác như định tuyến và giao tiếp mạng. Tuy nhiên, bộ lọc này không cung cấp thông tin về độ bất định, vốn là thông tin quan trọng để đánh giá chất lượng bám mục tiêu và đưa ra quyết định trong các hệ thống thực.
 
-\subsection{Điều kiện sử dụng từng bộ lọc}
+\subsubsection{Điều kiện sử dụng từng bộ lọc}
 
 \hspace{0.5cm} Việc lựa chọn bộ lọc phụ thuộc vào yêu cầu cụ thể của bài toán và điều kiện tài nguyên phần cứng.
 
@@ -644,7 +640,7 @@ Sử dụng alpha-beta filter khi: Mục tiêu di chuyển đều với vận t�
 
 Trong đồ án này, cả hai bộ lọc đều được triển khai cho mục đích so sánh. Kalman filter là lựa chọn chính cho hệ thống thực vì nó cung cấp cả ước tính vị trí và độ bất định, đồng thời thích nghi tự động với thay đổi nhiễu. Alpha-beta filter đóng vai trò mốc so sánh (baseline) để đánh giá hiệu năng tương đối của Kalman filter. Kết quả mô phỏng cho thấy Kalman filter tốt hơn từ 5 đến 15\% về RMSE tùy loại mục tiêu, xác nhận lợi thế của cơ chế thích nghi tự động.
 
-\subsection{Phân tích hành vi bộ lọc theo điều kiện đo}
+\subsubsection{Phân tích hành vi bộ lọc theo điều kiện đo}
 
 \hspace{0.5cm} Hiệu năng thực tế của hai bộ lọc phụ thuộc mạnh vào điều kiện đo lường thay đổi theo thời gian. Phần này phân tích hành vi của từng bộ lọc qua ba kịch bản thường gặp trong hệ thống bám mục tiêu.
 
@@ -681,46 +677,19 @@ Alpha-beta vẫn tốt hơn về RMSE vì mô hình vận tốc không đổi + 
 
 Sự khác biệt giữa hai bộ lọc ở drone lớn nhất vì Kalman 3D xử lý cả trục Up (nơi nhiễu cao), trong khi alpha-beta 2D bỏ qua nó. Nếu so sánh chỉ trên East-North, alpha-beta có vẻ tốt hơn; nhưng trong hệ thống thực, việc bỏ qua độ cao là không chấp nhận được vì laser đo khoảng cách xiên, sai số độ cao ảnh hưởng trực tiếp đến ước tính vị trí ngang.
 
-\subsection{Tóm tắt thuật toán lọc}
+\subsubsection{Tóm tắt thuật toán lọc}
 
 \hspace{0.5cm} Kalman filter với cơ chế Adaptive R là lựa chọn phù hợp nhất cho hệ thống bám mục tiêu thờigian thực vì ba lý do: (1) thích nghi tự động với nhiễu thay đổi theo khoảng cách; (2) cung cấp độ bất định để đánh giá chất lượng ước tính; (3) mở rộng tự nhiên lên 3D cho drone. Alpha-beta filter đóng vai trò baseline và phương án dự phòng khi tài nguyên tính toán hạn chế. Cả hai đều được triển khai trong hệ thống để so sánh trực tiếp qua mô phỏng.
 
-\subsection{Phân tích độ nhạy tham số \texorpdfstring{$\alpha$}{alpha}}
+\subsubsection{Phân tích độ nhạy tham số \texorpdfstring{$\alpha$}{alpha}}
 
 \hspace{0.5cm} Tham số $\alpha$ của bộ lọc alpha-beta ảnh hưởng trực tiếp đến hành vi lọc. Giá trị $\alpha$ quyết định tỉ lệ giữa tín hiệu (mô hình vận tốc không đổi) và nhiễu (GPS) trong đầu ra. Phân tích độ nhạy giúp hiểu rõ tại sao $\alpha = 0{,}4$ là lựa chọn phù hợp.
 
-\begin{table}[H]
-\centering
-\caption{Ảnh hưởng của $\alpha$ đến hiệu năng (người đi bộ, seed=42)}
-\label{tab:alpha-sensitivity}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{cccc}
-\toprule
-$\alpha$ & $\beta$ (Benedict-Bordner) & RMSE (m) & Đặc điểm \\
-\midrule
-0,2 & 0,017 & 0,38 & Lọc mạnh, mượt nhưng chậm bám \\
-0,3 & 0,034 & 0,29 & Lọc vừa, mượt \\
-\textbf{0,4} & \textbf{0,051} & \textbf{0,26} & \textbf{Cân bằng} \\
-0,5 & 0,072 & 0,30 & Bám nhanh hơn, nhiễu hơn \\
-0,6 & 0,095 & 0,36 & Nhiễu rõ rệt \\
-0,8 & 0,160 & 0,52 & Gần như dùng phép đo thô \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
 Kết quả cho thấy RMSE cực tiểu tại $\alpha = 0{,}4$. Khi $\alpha$ nhỏ hơn 0,4, bộ lọc lọc quá mạnh và không bám theo thay đổi hướng nhỏ của mục tiêu. Khi $\alpha$ lớn hơn 0,4, bộ lọc phản ứng quá nhạy với nhiễu GPS, đầu ra nhiễu hơn phép đo thô. Giá trị $\alpha = 0{,}4$ nằm ở điểm uốn của đường cong RMSE, nơi lợi ích tăng thêm từ việc lọc giảm nhanh hơn chi phí từ việc mất bám.
 
-Đường cong độ nhạy này được trực quan hóa trong Hình \ref{fig:alpha-sensitivity}. Giá trị $\beta$ đi kèm theo công thức Benedict-Bordner, đảm bảo điều kiện giảm xóc hoàn toàn tại mọi giá trị $\alpha$.
+Đường cong độ nhạy này được trực quan hóa trong Hình \ref{fig:alpha-sensitivity-w7}. Giá trị $\beta$ đi kèm theo công thức Benedict-Bordner, đảm bảo điều kiện giảm xóc hoàn toàn tại mọi giá trị $\alpha$.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.75\textwidth]{figures/alpha_sensitivity.png}
-\caption{Độ nhạy RMSE theo tham số $\alpha$}
-\label{fig:alpha-sensitivity}
-\end{figure}
-
-\subsection{Tổng kết thuật toán lọc và truyền sai số}
+\subsubsection{Tổng kết thuật toán lọc và truyền sai số}
 
 \hspace{0.5cm} Chương trình đi sâu vào chi tiết toán học của hai thuật toán lọc chính và cơ chế truyền sai số. Kết quả phân tích cho phép rút ra ba nhận xét thiết kế quan trọng.
 
@@ -732,26 +701,3 @@ Kết quả cho thấy RMSE cực tiểu tại $\alpha = 0{,}4$. Khi $\alpha$ nh
 
 Bảng sau tóm tắt các tham số thiết kế chính:
 
-\begin{table}[H]
-\centering
-\caption{Tóm tắt tham số thiết kế thuật toán lọc}
-\label{tab:design-params-summary}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lll}
-\toprule
-\textbf{Tham số} & \textbf{Giá trị} & \textbf{Nguồn xác định} \\
-\midrule
-$\alpha$ (alpha-beta) & 0,4 & Phân tích độ nhạy (Bảng \ref{tab:alpha-sensitivity}) \\
-$\beta$ (Benedict-Bordner) & 0,051 & Công thức $\beta = (2-\alpha) - 2\sqrt{1-\alpha}$ \\
-$\sigma_a$ (người đi bộ) & 0,5 m/s$^2$ & Đặc trưng di chuyển chậm \\
-$\sigma_a$ (xe máy, drone) & 5,0 m/s$^2$ & Đặc trưng cơ động cao \\
-$\mathbf{P}_0$ & $\text{diag}(100, 100, 25, 25)$ & Khởi tạo lớn để hội tụ nhanh \\
-Cross-over range & 794 m & RSS với $\sigma_{gps}$ = 5,0 m, $\sigma_{az}$ = 0,3$^\circ$ \\
-Thời gian xử lý & 59 $\mu$s & Đo lường trên CPython 3.11 \\
-Tần số hoạt động & 10 Hz & Phù hợp tần số cảm biến \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Các tham số trên được sử dụng nhất quán trong tất cả các mô phỏng tiếp theo, đảm bảo kết quả có thể tái tạo được.

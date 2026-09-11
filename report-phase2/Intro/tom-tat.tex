@@ -1,0 +1,15 @@
+\section*{Tóm tắt}
+\thispagestyle{empty}
+\addcontentsline{toc}{section}{Tóm tắt}
+
+\hspace{0.5cm} Đồ án xây dựng hệ thống bám bắt mục tiêu di động thời gian thực bằng cách hợp nhất dữ liệu từ ba cảm biến: máy đo khoảng cách laser, cảm biến quán tính chín bậc tự do và máy định vị vệ tinh. Ý nghĩa thực tiễn của việc hợp nhất nằm ở chỗ mỗi cảm biến riêng lẻ đều có điểm yếu: định vị vệ tinh dao động vài mét và mất tín hiệu khi bị che khuất, laser chính xác nhưng chỉ cho một khoảng cách duy nhất theo tia ngắm, còn dữ liệu quán tính trôi dần theo thời gian. Khi kết hợp cả ba nguồn với trọng số phản ánh độ tin cậy từng lúc, hệ thống xác định được vị trí mục tiêu ổn định hơn nhiều so với dùng từng cảm biến đơn lẻ.
+
+Khác với giai đoạn một của đề tài, vốn tính toán tọa độ mục tiêu đứng yên tại từng điểm đo riêng lẻ, hệ thống trong giai đoạn này phải xử lý dòng dữ liệu liên tục ở tần số mười khung mỗi giây, ước lượng vị trí của mục tiêu đang chuyển động và hiển thị quỹ đạo trên bản đồ số theo thời gian thực. Hệ thống được tổ chức theo mô hình máy chủ kết hợp trình duyệt: máy chủ đảm nhận chuỗi xử lý tọa độ, hợp nhất cảm biến và quản lý phiên theo dõi; giao diện trình duyệt hiển thị bản đồ, biểu đồ sai số và các điều khiển phiên.
+
+Ba loại mục tiêu được mô phỏng và đánh giá: người đi bộ, xe máy và máy bay không người lái. Quỹ đạo người đi bộ được tái tạo từ tập dữ liệu định vị thực tế Geolife thu thập tại Bắc Kinh, sau khi lọc còn lại 252 đoạn quỹ đạo hợp lệ. Quỹ đạo xe máy di chuyển trên mạng lưới đường bộ thực tế của Thành phố Hồ Chí Minh gồm 337.074 nút giao và 305.008 đoạn đường, nên hình học đường và tốc độ di chuyển phản ánh đúng điều kiện giao thông địa phương. Mô hình máy bay không người lái tuân theo giới hạn động học được công bố từ dữ liệu bay thật của thiết bị thương mại.
+
+Hai thuật toán lọc được xây dựng và so sánh song song: bộ lọc alpha-beta với cặp hệ số suy ra theo công thức của Benedict và Bordner, và bộ lọc Kalman hai chiều với ma trận hiệp phương sai đầy đủ. Kết quả đánh giá trong điều kiện thử nghiệm chuẩn (giới hạn khu vực 400 m, tần số 10 Hz, thời lượng 120 giây) cho thấy sai số trung bình phương vị gốc của bộ lọc alpha-beta đạt 0{,}26 m với người đi bộ, 1{,}14 m với xe máy trên mạng lưới đường và 1{,}06 m với máy bay không người lái. Bộ lọc Kalman cho kết quả tốt hơn ở giai đoạn khởi động và trong các khung thiếu phép đo, trong khi bộ lọc alpha-beta ổn định hơn trên mục tiêu chuyển động chậm và đều. Phân tích thống kê lặp lại toàn bộ kịch bản với mười hạt ngẫu nhiên khác nhau, xác nhận kết quả ổn định theo phân bố chứ không phụ thuộc vào một lần chạy may mắn.
+
+Về hiệu năng, toàn bộ chuỗi xử lý hoàn thành trong 59 microgiây mỗi khung, chỉ chiếm chưa đến một phần nghìn ngân sách thời gian của tần số 10 Hz. Khoảng dư này đáp ứng yêu cầu thời gian thực với dư địa lớn cho việc triển khai trên phần cứng nhúng ARM Cortex-M, đúng với định hướng kiến trúc của đề tài ngay từ đầu.
+
+\clearpage

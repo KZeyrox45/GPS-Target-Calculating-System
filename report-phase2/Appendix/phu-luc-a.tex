@@ -1,0 +1,92 @@
+\section*{Phụ lục A: Số liệu đánh giá chuẩn}
+\addcontentsline{toc}{section}{Phụ lục A: Số liệu đánh giá chuẩn}
+
+\hspace{0.5cm} Phụ lục này tổng hợp số liệu chuẩn dùng làm mốc đối chiếu cho toàn bộ báo cáo. Mọi bảng kết quả trong các chương đều nhất quán với các giá trị dưới đây.
+
+\subsection*{A.1 Điều kiện thử nghiệm chuẩn}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Tham số} & \textbf{Giá trị} \\
+\midrule
+Hạt giống ngẫu nhiên & 42 \\
+Thời lượng phiên & 120 giây \\
+Tần số xử lý & 10 Hz \\
+Bán kính khu vực mô phỏng & 400 m \\
+Chu kỳ xử lý toàn chuỗi & 59 micro giây mỗi khung \\
+Tỷ trọng bước cập nhật Kalman & 82\% chu kỳ \\
+Tỷ trọng chuyển đổi tọa độ ECEF sang ENU & 6\% chu kỳ \\
+Khoảng cách điểm cân bằng laser/GPS & 794 m \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.2 Sai số RMSE theo loại mục tiêu (hạt giống 42)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Loại mục tiêu} & \textbf{Đo thô (m)} & \textbf{Alpha-beta (m)} & \textbf{Kalman (m)} \\
+\midrule
+Người đi bộ & 0{,}48 & 0{,}26 & 0{,}86 \\
+Xe máy -- động học & 1{,}89 & 1{,}02 & 1{,}80 \\
+Xe máy -- mạng lưới đường & 2{,}14 & 1{,}14 & 1{,}52 \\
+Máy bay không người lái & 1{,}94 & 1{,}06 & 2{,}10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.3 Thống kê nhiều hạt giống (hạt giống 1 đến 10)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{llcccc}
+\toprule
+\textbf{Mục tiêu} & \textbf{Bộ lọc} & \textbf{Trung bình (m)} & \textbf{Độ lệch (m)} & \textbf{Nhỏ nhất (m)} & \textbf{Lớn nhất (m)} \\
+\midrule
+Người đi bộ & Alpha-beta & 0{,}34 & 0{,}08 & 0{,}21 & 0{,}30 \\
+Người đi bộ & Kalman & 0{,}92 & 0{,}22 & 0{,}57 & 1{,}31 \\
+Xe máy & Alpha-beta & 0{,}91 & 0{,}08 & 0{,}68 & 1{,}28 \\
+Xe máy & Kalman & 1{,}53 & 0{,}22 & 1{,}74 & 2{,}93 \\
+Máy bay & Alpha-beta & 1{,}09 & 0{,}23 & 0{,}71 & 0{,}82 \\
+Máy bay & Kalman & 2{,}39 & 0{,}32 & 2{,}27 & 2{,}95 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.4 Độ nhạy hệ số alpha (người đi bộ, hạt giống 42)}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Hệ số $\alpha$} & \textbf{RMSE (m)} \\
+\midrule
+0{,}2 (tối ưu) & 0{,}21 \\
+0{,}4 (mặc định) & 0{,}26 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection*{A.5 Thông số mô hình động học}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Thông số} & \textbf{Giá trị} \\
+\midrule
+Tốc độ ngang tối đa & 15 m/s \\
+Tốc độ tăng cao tối đa & 5 m/s \\
+Hệ số $\beta$ Benedict--Bordner tại $\alpha = 0{,}4$ & 0{,}051 \\
+Số đoạn quỹ đạo người đi bộ hợp lệ (Geolife) & 252 (tỷ lệ nhận 3{,}9\%) \\
+Số nút giao mạng lưới đường TP.HCM & 337.074 \\
+Số đoạn đường & 305.008 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\clearpage
