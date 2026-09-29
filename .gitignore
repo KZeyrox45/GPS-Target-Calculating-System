@@ -28,9 +28,11 @@ Desktop.ini
 *.vrb
 texput.log
 
-# Python cache (root level)
+# Python cache & tooling
 __pycache__/
 *.py[cod]
+.ruff_cache/
+.pytest_cache/
 
 # Environment
 .env
@@ -47,11 +49,14 @@ node_modules/
 report-weekly/main.pdf
 report-new/main.pdf
 
-# Playwright MCP test logs
+# Tool & testing residue
 .playwright-mcp/
+.freebuff/
+.unlazy/
 
 # LaTeX auxiliary (arXiv papers, archived reports)
 *.bbl
 *.blg
 phase1/report-phase1/*.pdf
 defense-prep/*.pdf
+

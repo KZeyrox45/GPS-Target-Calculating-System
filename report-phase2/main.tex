@@ -1,4 +1,5 @@
 \documentclass[a4paper]{article}
+\usepackage[fontsize=12pt]{fontsize}
 
 % ========== ENCODING & LANGUAGE ==========
 \usepackage[utf8]{inputenc}
@@ -201,13 +202,25 @@
 %%%
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{2}
-% ========== SECTION NUMBERING (4 levels) ==========
+% ========== SECTION NUMBERING & SPACING ==========
 \makeatletter
 \newcounter{subsubsubsection}[subsubsection]
 \renewcommand\thesubsubsubsection{\thesubsubsection .\@alph\c@subsubsubsection}
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-2.5ex \@plus -0.8ex \@minus -.2ex}%
+                                   {1.5ex \@plus .2ex}%
+                                   {\normalfont\Large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {-2.0ex\@plus -0.5ex \@minus -.2ex}%
+                                     {1.0ex \@plus .2ex}%
+                                     {\normalfont\large\bfseries}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {-1.8ex\@plus -0.5ex \@minus -.2ex}%
+                                     {0.8ex \@plus .2ex}%
+                                     {\normalfont\normalsize\bfseries}}
 \newcommand\subsubsubsection{\@startsection{subsubsubsection}{4}{\z@}%
-    {-3.25ex\@plus -1ex \@minus -.2ex}%
-    {1.5ex \@plus .2ex}%
+    {-1.5ex\@plus -0.4ex \@minus -.2ex}%
+    {0.6ex \@plus .2ex}%
     {\normalfont\normalsize\bfseries}}
 \newcommand*\l@subsubsubsection{\@dottedtocline{3}{10.0em}{4.1em}}
 \newcommand*{\subsubsubsectionmark}[1]{}
@@ -216,6 +229,12 @@
 % ========== MATH & CAPTION FORMATTING ==========
 \everymath{\color{black}}
 \sloppy
+
+% Display math spacing
+\setlength{\abovedisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\belowdisplayskip}{6pt plus 2pt minus 2pt}
+\setlength{\abovedisplayshortskip}{2pt plus 1pt}
+\setlength{\belowdisplayshortskip}{4pt plus 2pt minus 2pt}
 
 % Caption settings
 \captionsetup[figure]{
@@ -226,18 +245,21 @@
     labelfont={small,bf},
     textfont={small,it},
     belowskip=-1pt,
-    aboveskip=7pt
+    aboveskip=6pt
 }
 
 % Float spacing
-\setlength{\floatsep}{5pt plus 2pt minus 2pt}
-\setlength{\textfloatsep}{5pt plus 2pt minus 2pt}
-\setlength{\intextsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{4pt plus 2pt minus 1pt}
+\setlength{\textfloatsep}{4pt plus 2pt minus 1pt}
+\setlength{\intextsep}{6pt plus 2pt minus 2pt}
+
+% List spacing
+\setlist{itemsep=1pt, topsep=3pt, parsep=0pt}
 
 \thesislayout
 
 % ========== BEGIN DOCUMENT ==========
-\linespread{1.15}
+\linespread{1.10}
 \begin{document}
 
 \hypersetup{pageanchor=false}
@@ -291,11 +313,11 @@
 
 \begin{center}
 \begin{tabular}{ll}
-\hspace{5cm} &  \textbf{\Large GVHD:} {\Large TS Võ Tuấn Bình} \\
+\hspace{2.5cm} &  \textbf{\Large GVHD:} {\Large TS Võ Tuấn Bình} \\
 \\[0.2cm]
-\hspace{5cm} &  \textbf{\Large SVTH1:} {\Large Bùi Nguyễn Thành Luân (2111700)} \\
+\hspace{2.5cm} &  \textbf{\Large SVTH1:} {\Large Bùi Nguyễn Thành Luân (2111700)} \\
 \\[0.2cm]
-\hspace{5cm} &  \textbf{\Large SVTH2:} {\Large Nguyễn Trung Hiếu (2113357)} \\
+\hspace{2.5cm} &  \textbf{\Large SVTH2:} {\Large Nguyễn Trung Hiếu (2113357)} \\
 \end{tabular}
 \end{center}
 

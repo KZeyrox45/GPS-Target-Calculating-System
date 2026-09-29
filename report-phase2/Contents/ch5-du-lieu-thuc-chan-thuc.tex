@@ -4,18 +4,18 @@
 
 \subsubsection{Tổng quan về tích hợp dữ liệu quỹ đạo thực tế}
 
-\hspace{0.5cm} Trong các giai đoạn phát triển ban đầu, hệ thống bám mục tiêu thời gian thực dựa trên cảm biến hỗn hợp Laser-IMU-GNSS được thử nghiệm chủ yếu trên các mô hình quỹ đạo tổng hợp (Synthetic Trajectories). Các mô hình tổng hợp đóng vai trò quan trọng trong việc kiểm chứng tính đúng đắn của giải thuật lọc Kalman và Alpha-Beta trong các điều kiện biên được kiểm soát chặt chẽ. Tuy nhiên, chuyển động thực tế của các đối tượng trong môi trường đô thị luôn mang những đặc tính phi tuyến và ngẫu nhiên phức tạp: người đi bộ có nhịp bước không đều và dừng nghỉ đột ngột; xe máy tuân theo mạng lưới đường giao thông với các khúc cua tại ngã tư; máy bay không người lái (Drone) chịu giới hạn khí động học và sức gió môi trường.
+\hspace{0.5cm} Trong các giai đoạn phát triển ban đầu, hệ thống bám mục tiêu thời gian thực dựa trên cảm biến hỗn hợp Laser-IMU-GNSS được thử nghiệm chủ yếu trên các mô hình quỹ đạo tổng hợp (Synthetic Trajectories). Các mô hình tổng hợp đóng vai trò quan trọng trong việc kiểm chứng tính đúng đắn của giải thuật lọc Kalman và Alpha-Beta trong các điều kiện biên được kiểm soát chặt chẽ. Trong thực tế, chuyển động của các đối tượng trong môi trường đô thị luôn mang những đặc tính phi tuyến và ngẫu nhiên phức tạp: người đi bộ có nhịp bước không đều và dừng nghỉ đột ngột; xe máy tuân theo mạng lưới đường giao thông với các khúc cua tại ngã tư; máy bay không người lái (Drone) chịu giới hạn khí động học và sức gió môi trường.
 
 Để nâng cao độ tin cậy và tính thực tiễn của công trình nghiên cứu, hệ thống mở rộng tích hợp ba nguồn dữ liệu quỹ đạo thực nghiệm đa dạng vào môi trường mô phỏng:
 \begin{enumerate}
     \item Tập dữ liệu GPS người đi bộ Geolife (Microsoft Research Asia) thu thập từ 182 người dùng tại thành phố Bắc Kinh \cite{zheng2008geolife}.
     \item Tập dữ liệu quỹ đạo xe máy AMIT (Asian Motorcycle Intersection Trajectory) ghi nhận từ hệ thống camera UAV tại 6 nút giao thông đô thị phức tạp ở Đài Loan \cite{wong2024amit}.
-    \item Mạng lưới đường bộ thực tế thành phố Hồ Chí Minh trích xuất từ nền tảng OpenStreetMap~\cite{haklay2008openstreetmap} (OSM) với hơn 337.000 nút giao và 305.000 đoạn đường \cite{boeing2017osmnx}.
+    \item Mạng lưới đường bộ thực tế thành phố Hồ Chí Minh trích xuất từ nền tảng OpenStreetMap~\cite{haklay2008openstreetmap} (OSM) với 337.074 nút giao và 305.008 đoạn đường \cite{boeing2017osmnx}.
 \end{enumerate}
 
 \subsubsection{Xử lý và chuẩn hóa tập dữ liệu người đi bộ Geolife}
 
-\hspace{0.5cm} Tập dữ liệu Geolife Trajectories phiên bản 1.3 chứa 17.621 quỹ đạo với tổng chiều dài hơn 1,2 triệu km. Trong 182 người dùng tham gia khảo sát, có 69 người dùng ghi chép chi tiết nhãn phương tiện di chuyển (Transportation Mode Labels), trong đó phân đoạn đi bộ (Walk) chiếm tỷ lệ áp đảo với 6.460 phân đoạn.
+\hspace{0.5cm} Tập dữ liệu Geolife Trajectories phiên bản 1.3 chứa 17.621 quỹ đạo với tổng chiều dài hơn 1,2 triệu km. Trong 182 người dùng tham gia khảo sát, có 69 người dùng ghi chép chi tiết nhãn phương tiện di chuyển (Transportation Mode Labels), trong đó phân đoạn đi bộ (Walk) chiếm số lượng lớn nhất với 6.460 phân đoạn.
 
 \subsubsection{Tiêu chuẩn lọc chất lượng ba lớp}
 
@@ -103,7 +103,7 @@ A06 & Trung tâm Cao Hùng & 4.537 & 8{,}0 m/s & 1{,}7 $\text{m/s}^2$ & 11{,}4 m
 
 \subsubsection{Mô hình chuyển động trên đồ thị mạng đường OpenStreetMap}
 
-\hspace{0.5cm} Để tạo ra các quỹ đạo xe máy bám sát cấu trúc hạ tầng giao thông đô thị Việt Nam, toàn bộ mạng lưới đường bộ thành phố Hồ Chí Minh được nạp từ tệp đồ thị GraphML dung lượng 102,5 MB, bao gồm 337.000 đỉnh (nút giao) và 305.000 cạnh (đoạn đường).
+\hspace{0.5cm} Để tạo ra các quỹ đạo xe máy bám sát cấu trúc hạ tầng giao thông đô thị Việt Nam, toàn bộ mạng lưới đường bộ thành phố Hồ Chí Minh được nạp từ tệp đồ thị GraphML dung lượng 102,5 MB, bao gồm 337.074 đỉnh (nút giao) và 305.008 cạnh (đoạn đường).
 
 Quá trình sinh quỹ đạo xe máy thực hiện thuật toán đi ngẫu nhiên có trọng số (Weighted Random Walk) kết hợp cơ chế quay lui toàn phần (Full-path Backtracking):
 \begin{enumerate}
@@ -169,20 +169,22 @@ Vector gia tốc điều khiển bám đích $\mathbf{a}_{\text{cmd}}$ được 
 \label{fig:drone-altitude-profile}
 \end{figure}
 
-Hình \ref{fig:drone-3d-trajectory} và Hình \ref{fig:drone-altitude-profile} chứng minh mô hình động học Drone mới tái hiện hoàn hảo chu kỳ tăng tốc - bay bằng - giảm tốc khi tiếp cận điểm chuyển hướng, đồng thời duy trì độ cao ổn định trong khoảng $10 - 80$ m.
+Hình \ref{fig:drone-3d-trajectory} và Hình \ref{fig:drone-altitude-profile} chứng minh mô hình động học Drone mới tái hiện tương đối sát chu kỳ tăng tốc - bay bằng - giảm tốc khi tiếp cận điểm chuyển hướng, đồng thời duy trì độ cao ổn định trong khoảng $10 - 80$ m.
 
 \subsubsection{Đánh giá so sánh hiệu năng giữa chế độ Tổng hợp và Dữ liệu thực}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/mode_comparison.png}
-\caption{Biểu đồ đối chiếu sai số RMSE giữa chế độ quỹ đạo Tổng hợp và Dữ liệu thực tế}
+\caption{Biểu đồ đối chiếu sai số RMSE giữa chế độ quỹ đạo Tổng hợp và Dữ liệu thực tế (trung bình 10 seed)}
 \label{fig:mode-comparison-bar}
 \end{figure}
 
-Phân tích số liệu cho thấy:
-1. Đối với người đi bộ, sai số giữa dữ liệu Geolife và mô hình tổng hợp gần như tương đồng tuyệt đối (chênh lệch dưới $3\%$), khẳng định mô hình tổng hợp đã mô phỏng rất sát hành vi đi bộ thực tế.
-2. Đối với xe máy, trên mạng lưới đường thực tế, sai số Kalman tăng lên $2{,}922$ m do các góc cua vuông góc tại ngã tư gây trễ pha quán tính, trong khi Alpha-Beta vẫn duy trì độ chính xác cao $1{,}177$ m. Toàn bộ kết quả đều thỏa mãn vượt mức chỉ tiêu thiết kế $< 5{,}0$ m.
+\hspace{0.5cm} Phân tích số liệu cho thấy:
+\begin{enumerate}
+    \item Đối với người đi bộ, sai số giữa dữ liệu Geolife và mô hình tổng hợp tương đồng chặt chẽ (chênh lệch dưới $3\%$), khẳng định mô hình tổng hợp đã mô phỏng rất sát hành vi đi bộ thực tế.
+    \item Đối với xe máy, trên mạng lưới đường thực tế, sai số Kalman trung bình trên 10 seed tăng lên $2{,}922$ m (trong đó ở phiên chuẩn đơn lẻ seed = 42 đạt $1{,}52$ m) do các góc cua vuông góc tại ngã tư gây trễ pha quán tính đối với mô hình vận tốc không đổi, trong khi Alpha-Beta vẫn duy trì độ chính xác cao $1{,}177$ m (đạt $1{,}14$ m tại seed = 42). Toàn bộ kết quả đều thỏa mãn chỉ tiêu thiết kế $< 5{,}0$ m.
+\end{enumerate}
 
 \subsubsection{Phân tích chuỗi thời gian sai số và hàm phân phối tích lũy CDF}
 
@@ -218,7 +220,7 @@ Mô hình GMM chứng minh người đi bộ dành trung bình $18\%$ thời gia
 
 \subsubsection{Phân tích cấu trúc đồ thị mạng lưới đường Thành phố Hồ Chí Minh}
 
-\hspace{0.5cm} Đồ thị mạng đường OpenStreetMap của thành phố Hồ Chí Minh là đồ thị định hướng đa cạnh (Directed Multigraph) $G = (V, E)$ với $|V| = 337.000$ nút và $|E| = 305.000$ cạnh.
+\hspace{0.5cm} Đồ thị mạng đường OpenStreetMap của thành phố Hồ Chí Minh là đồ thị định hướng đa cạnh (Directed Multigraph) $G = (V, E)$ với $|V| = 337.074$ nút và $|E| = 305.008$ cạnh.
 
 \begin{table}[H]
 \centering
@@ -325,52 +327,7 @@ R_{\min}(v) = \frac{v^2}{a_{\max, h}} = \frac{v^2}{g \tan\phi_{\max}}
 
 Khi bay ở vận tốc tối đa 15 m/s, Drone cần bán kính lượn vòng tới $56{,}25$ m và gần 12 giây để thực hiện quay đầu $180^\circ$, loại bỏ hoàn toàn các khúc cua gãy góc nhọn phi vật lý của các mô hình hình sin trước đây.
 
-\subsubsection{Minh họa chi tiết các bước tính toán số học trên dữ liệu Geolife thực tế}
 
-\hspace{0.5cm} Để làm sáng tỏ quy trình xử lý dữ liệu thực nghiệm, chuỗi tính toán từ tệp log GPS Geolife đến tọa độ ước lượng của bộ lọc được minh họa chi tiết tại bước thời gian ban đầu:
-
-\begin{enumerate}
-    \item \textbf{Dữ liệu GPS thô trích xuất từ tệp PLT}:
-    \begin{itemize}
-        \item Điểm 1: $t_1 = 0{,}0$ s, $\text{lat}_1 = 39{,}984120^\circ$, $\text{lon}_1 = 116{,}307450^\circ$, $\text{alt}_1 = 45{,}0$ m.
-        \item Điểm 2: $t_2 = 1{,}5$ s, $\text{lat}_2 = 39{,}984135^\circ$, $\text{lon}_2 = 116{,}307468^\circ$, $\text{alt}_2 = 45{,}2$ m.
-        \item Tọa độ tâm đoạn: $\text{lat}_{\text{center}} = 39{,}984120^\circ$, $\text{lon}_{\text{center}} = 116{,}307450^\circ$.
-    \end{itemize}
-
-    \item \textbf{Chuyển đổi sang tọa độ Descartes địa phương ENU thô}:
-    \begin{equation}
-    e_1 = 0{,}000 \text{ m}, \quad n_1 = 0{,}000 \text{ m}, \quad u_1 = 0{,}000 \text{ m}
-    \end{equation}
-    \begin{equation}
-    e_2 = 1{,}532 \text{ m}, \quad n_2 = 1{,}668 \text{ m}, \quad u_2 = 0{,}200 \text{ m}
-    \end{equation}
-    \begin{equation}
-    \text{Vận tốc cát tuyến}: s_e = \frac{1{,}532}{1{,}5} = 1{,}021 \text{ m/s}, \quad s_n = \frac{1{,}668}{1{,}5} = 1{,}112 \text{ m/s}
-    \end{equation}
-
-    \item \textbf{Nội suy PCHIP tại chu kỳ đầu tiên $t = 0{,}1$ s ($h = 0{,}1$ s)}:
-    \begin{equation}
-    e_{\text{pchip}}(0{,}1) = 0{,}102 \text{ m}, \quad n_{\text{pchip}}(0{,}1) = 0{,}111 \text{ m}
-    \end{equation}
-
-    \item \textbf{Bơm nhiễu cảm biến hỗn hợp danh định}:
-    \begin{equation}
-    e_{\text{meas}} = 0{,}102 + \varepsilon_e = 0{,}102 + 0{,}452 = 0{,}554 \text{ m}
-    \end{equation}
-    \begin{equation}
-    n_{\text{meas}} = 0{,}111 + \varepsilon_n = 0{,}111 - 0{,}385 = -0{,}274 \text{ m}
-    \end{equation}
-
-    \item \textbf{Cập nhật bộ lọc Alpha-Beta ($\alpha=0{,}40, \beta=0{,}0513$)}:
-    \begin{equation}
-    \hat{e}_{\alpha\beta} = 0 + 0{,}40 \cdot (0{,}554 - 0) = 0{,}222 \text{ m}
-    \end{equation}
-    \begin{equation}
-    \hat{n}_{\alpha\beta} = 0 + 0{,}40 \cdot (-0{,}274 - 0) = -0{,}110 \text{ m}
-    \end{equation}
-\end{enumerate}
-
-Toàn bộ quy trình nạp - nội suy - bơm nhiễu - lọc bám bắt diễn ra tự động và liên tục ở tần số 10 Hz, bảo đảm tính minh bạch tuyệt đối của mô hình thực nghiệm.
 
 \subsubsection{Đánh giá định lượng tính chân thực quỹ đạo (Trajectory Realism)}
 
@@ -398,7 +355,7 @@ Tại điểm đảo chiều $t = T$, vận tốc được giảm dần tuyến 
     \item Tinh lọc thành công 252 phân đoạn người đi bộ Geolife qua bộ lọc ba lớp và giải thuật nội suy PCHIP bảo toàn hình dạng.
     \item Triển khai thành công mô hình xe máy ngẫu nhiên trên đồ thị mạng đường thành phố Hồ Chí Minh với cơ chế quay lui toàn phần chống kẹt tại ngõ cụt.
     \item Hiện thực hóa mô hình máy bay không người lái 3D theo chuẩn khí động học DJI Matrice 100, bảo đảm tính hiện thực toàn diện của môi trường mô phỏng.
-    \item Tích hợp 5 đồ thị khoa học chuẩn xác, khẳng định sự chuyển đổi trơn tru và tương thích tuyệt đối giữa hai chế độ mô phỏng với 162 ca kiểm thử tự động đạt 100\%.
+    \item Tích hợp 5 đồ thị khoa học chuẩn xác, khẳng định sự chuyển đổi trơn tru và tương thích cao giữa hai chế độ mô phỏng với 163 ca kiểm thử tự động đạt 100\%.
 \end{enumerate}
 
 \subsection{Tính chân thực mô hình quỹ đạo và các khắc phục}
@@ -459,7 +416,7 @@ k \pmod{2N - 2} & \text{khi } k \pmod{2N - 2} < N \\
 \label{eq:pingpong-indexing-formula}
 \end{equation}
 
-Kết hợp với đa thức Hermite làm mượt vận tốc tại vùng biên đảo chiều ($\Delta T_{\text{smooth}} = 1{,}0$ s), vector vận tốc tiếp cận 0 một cách êm ái trước khi quay ngược hành trình, loại bỏ hoàn toàn mọi bước nhảy vị trí ảo.
+Kết hợp với đa thức Hermite làm mượt vận tốc tại vùng biên đảo chiều ($\Delta T_{\text{smooth}} = 1{,}0$ s), vector vận tốc tiếp cận 0 êm ái trước khi quay ngược hành trình, loại bỏ hoàn toàn mọi bước nhảy vị trí ảo.
 
 \subsubsection{Khắc phục khiếm khuyết 2: Sinh điểm đích tương đối với vị trí tức thời}
 
@@ -483,13 +440,13 @@ Khi mục tiêu đã di chuyển ra vùng rìa cách gốc tọa độ $350$ m, 
 
 trong đó cự ly bước nhảy $d_{\text{wp}} \sim \mathcal{U}(50\text{ m}, 150\text{ m})$ và góc lệch chuyển hướng $\Delta\psi \sim \mathcal{U}(-60^\circ, +60^\circ)$.
 
-Giải thuật bảo đảm mục tiêu luôn duy trì hướng tiến về phía trước một cách tự nhiên, giảm tỷ lệ quay đầu ngược hướng từ $22{,}4\%$ xuống dưới $1{,}2\%$.
+Giải thuật bảo đảm mục tiêu luôn duy trì hướng tiến về phía trước tự nhiên, giảm tỷ lệ quay đầu ngược hướng từ $22{,}4\%$ xuống dưới $1{,}2\%$.
 
 \subsubsection{Khắc phục khiếm khuyết 3: Tương tác ranh giới bằng trường thế năng mềm}
 
 \subsubsection{Hiện tượng dao động bida phản xạ tại ranh giới biên cứng}
 
-\hspace{0.5cm} Ranh giới bán kính hoạt động $R_{\text{bound}} = 400$ m giữ vai trò hạn chế không gian di chuyển trong tầm đo của trạm quan sát. Mô hình biên cứng (Hard Boundary) xem ranh giới như một bức tường phản xạ cơ học hoàn hảo:
+\hspace{0.5cm} Ranh giới bán kính hoạt động $R_{\text{bound}} = 400$ m giữ vai trò hạn chế không gian di chuyển trong tầm đo của trạm quan sát. Mô hình biên cứng (Hard Boundary) xem ranh giới như một bức tường phản xạ cơ học đàn hồi lý tưởng:
 \begin{equation}
 \mathbf{v}_{\text{reflected}} = \mathbf{v} - 2(\mathbf{v} \cdot \hat{\mathbf{n}}_{\text{wall}}) \hat{\mathbf{n}}_{\text{wall}}
 \label{eq:specular-reflection-law}
@@ -557,22 +514,6 @@ Vector lực đẩy mềm hướng thẳng về tâm trạm quan sát:
 \label{fig:boundary-mechanism-comparison}
 \end{figure}
 
-\subsubsection{Chứng minh tính ổn định tiệm cận Lyapunov của trường thế năng biên}
-
-\hspace{0.5cm} Xét hàm ứng viên Lyapunov toàn phần $V(\mathbf{x}, \mathbf{v})$ bao gồm động năng và thế năng lực đẩy:
-\begin{equation}
-V(\mathbf{x}, \mathbf{v}) = \frac{1}{2} m \|\mathbf{v}\|_2^2 + U_{\text{rep}}(\mathbf{x})
-\label{eq:lyapunov-candidate-function}
-\end{equation}
-
-Đạo hàm theo thời gian dọc theo quỹ đạo trạng thái của phương tiện với hệ số cản nhớt $\gamma > 0$:
-\begin{equation}
-\dot{V}(\mathbf{x}, \mathbf{v}) = m \mathbf{v}^T \dot{\mathbf{v}} + \nabla U_{\text{rep}}(\mathbf{x})^T \mathbf{v} = \mathbf{v}^T (-\gamma \mathbf{v} - \nabla U_{\text{rep}}(\mathbf{x})) + \nabla U_{\text{rep}}(\mathbf{x})^T \mathbf{v} = -\gamma \|\mathbf{v}\|_2^2 \le 0
-\label{eq:lyapunov-derivative-negative}
-\end{equation}
-
-Do $\dot{V} \le 0$ với mọi trạng thái và $\dot{V} = 0 \iff \mathbf{v} = \mathbf{0}$, theo định lý bất biến LaSalle, hệ thống bảo đảm tính ổn định tiệm cận toàn cục: phương tiện không bao giờ vượt qua bán kính tới hạn $R_{\text{bound}}$ và tự động chuyển hướng êm ái trở về vùng an toàn.
-
 \subsubsection{Khắc phục khiếm khuyết 4: Làm mượt biến thiên vận tốc xe máy bằng quy luật thư giãn hàm mũ}
 
 \subsubsection{Bước nhảy vận tốc tức thời không vật lý trong mô hình xe máy}
@@ -604,7 +545,7 @@ v_{k+1} = v_k + \frac{\Delta t}{\tau_v} (v^* - v_k) = 0{,}95 v_k + 0{,}05 v^*
 \label{eq:discrete-velocity-relaxation}
 \end{equation}
 
-Gia tốc tối đa phát sinh được chặn tuyệt đối ở mức:
+Gia tốc tối đa phát sinh được chặn trên ở mức:
 \begin{equation}
 a_{\max} = \frac{|v^* - v_k|_{\max}}{\tau_v} \le \frac{6{,}0\text{ m/s}}{2{,}0\text{ s}} = 3{,}0\text{ m/s}^2
 \label{eq:clamped-max-acceleration}
@@ -624,29 +565,15 @@ hoàn toàn phù hợp với ngưỡng gia tốc thoải mái và an toàn của
 
 Do không có tương quan thời gian giữa các bước ($\mathbb{E}[\xi_k \xi_{k+m}] = 0 \;\forall m \ne 0$), nhiễu trắng gây ra dao động giật cục với độ giật (Jerk) lên tới $30\text{ m/s}^3$, làm rung lắc biểu tượng mục tiêu trên màn hình hiển thị.
 
-\subsubsection{Quá trình ngẫu nhiên màu Ornstein-Uhlenbeck và phương trình Fokker-Planck}
+\subsubsection{Quá trình ngẫu nhiên màu Ornstein-Uhlenbeck}
 
-\hspace{0.5cm} Quá trình Ornstein-Uhlenbeck \cite{uhlenbeck1930brownian} mô hình hóa chính xác sự tác động của luồng gió nhiễu loạn khí quyển và phản ứng bù của hệ thống lái tự động (Autopilot):
+\hspace{0.5cm} Quá trình Ornstein-Uhlenbeck \cite{uhlenbeck1930brownian} mô hình hóa sự tác động của luồng gió và phản ứng bù của hệ thống lái tự động thông qua phương trình truy hồi tự tương quan bậc một thời gian rời rạc với hằng số thời gian $\tau_{\text{ou}} = 1{,}0$ s:
 \begin{equation}
-d\mathbf{v}(t) = -\frac{1}{\tau_{\text{ou}}} (\mathbf{v}(t) - \mathbf{v}_{\text{nom}}) dt + \sigma_{\text{ou}} d\mathbf{W}(t)
-\label{eq:ou-stochastic-diff-eq}
+\mathbf{v}_{k+1} = \mathbf{v}_{\text{nom}} + e^{-\Delta t / \tau_{\text{ou}}} (\mathbf{v}_k - \mathbf{v}_{\text{nom}}) + \sigma_{\text{ou}} \sqrt{1 - e^{-2\Delta t / \tau_{\text{ou}}}} \mathbf{w}_k
+\label{eq:ou-discrete-update}
 \end{equation}
+với $\mathbf{w}_k \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$. Cơ chế tự hồi quy này bảo đảm vận tốc dao động quanh mức danh nghĩa mượt mà, triệt tiêu độ giật cục và hiện tượng rung lắc trên màn hình quan sát.
 
-với hằng số thời gian $\tau_{\text{ou}} = 1{,}0$ s và hàm Wiener chuẩn $\mathbf{W}(t)$.
-
-Hàm mật độ xác suất chuyển tiếp $p(v, t)$ tuân theo phương trình vi phân riêng Fokker-Planck:
-\begin{equation}
-\frac{\partial p(v, t)}{\partial t} = \frac{1}{\tau_{\text{ou}}} \frac{\partial}{\partial v}[(v - v_{\text{nom}}) p(v, t)] + \frac{\sigma_{\text{ou}}^2}{2} \frac{\partial^2 p(v, t)}{\partial v^2}
-\label{eq:fokker-planck-ou-pde}
-\end{equation}
-
-Nghiệm xác lập trạng thái dừng của phân phối vận tốc là phân phối Gauss ổn định:
-\begin{equation}
-p_{\infty}(v) = \frac{1}{\sqrt{2\pi \sigma_{\infty}^2}} \exp\left( -\frac{(v - v_{\text{nom}})^2}{2\sigma_{\infty}^2} \right), \quad \sigma_{\infty}^2 = \frac{\sigma_{\text{ou}}^2 \tau_{\text{ou}}}{2}
-\label{eq:steady-state-ou-variance}
-\end{equation}
-
-Cơ chế mean-reverting này bảo đảm vận tốc luôn dao động tự nhiên quanh mức danh nghĩa mà không bao giờ bị phân kỳ hay rung lắc tức thời.
 
 \subsubsection{Khắc phục khiếm khuyết 6: Khởi tạo vector trạng thái và ma trận hiệp phương sai ban đầu}
 
@@ -719,22 +646,7 @@ Khảo sát quét tham số $\alpha \in [0{,}1, 0{,}9]$ trên kịch bản ngư�
 
 Tại $\alpha = 0{,}20$, sai số RMSE đạt mức tối ưu $0{,}214$ m. Hệ thống lựa chọn giá trị mặc định $\alpha = 0{,}40$ ($\text{RMSE} = 0{,}262$ m) nhằm bảo đảm tính cơ động đáp ứng nhanh khi mục tiêu thực hiện chuyển hướng đột ngột trong khi vẫn duy trì sai số ở mức rất thấp.
 
-\subsubsection{Phân tích độ ổn định thống kê đa giá trị khởi tạo ngẫu nhiên (Multi-seed Analysis)}
 
-\hspace{0.5cm} Để chứng minh các cải tiến mang tính ổn định hệ thống và không phụ thuộc vào bất kỳ chuỗi số ngẫu nhiên cụ thể nào, phân tích đa seed được thực hiện trên 10 giá trị khởi tạo độc lập ($\text{seed} = 1, 2, \dots, 10$):
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/multiseed_rmse.png}
-\caption{Đồ thị phân bố sai số RMSE và thanh sai số chuẩn qua 10 giá trị khởi tạo độc lập}
-\label{fig:multiseed-rmse-barchart}
-\end{figure}
-
-\subsubsection{Đánh giá định lượng hiệu quả triệt tiêu khiếm khuyết qua nghiên cứu loại trừ (Ablation Study)}
-
-\hspace{0.5cm} Nhằm đo lường chính xác sự đóng góp của từng giải pháp cải tiến, một nghiên cứu loại trừ toàn diện (Ablation Study) 8 giai đoạn được tiến hành trên cùng một kịch bản chuẩn ($n=10$ seed, cự ly 400 m, 120 giây, tần số 10 Hz):
-
-Kết quả nghiên cứu loại trừ khẳng định sự kết hợp đồng bộ của 6 giải pháp đã giúp giảm $93{,}5\%$ độ giật gia tốc, loại bỏ $100\%$ hiện tượng dao động bida tại biên và giảm $46{,}7\%$ sai số bám bắt RMSE toàn hệ thống.
 
 \subsubsection{Mô hình động học xe đạp phi tuyến (Bicycle Kinematic Model)}
 
@@ -790,19 +702,5 @@ Ma trận quay $\mathbf{R}_B^I$ chuyển đổi từ hệ tọa độ thân (Bod
 \label{eq:euler-rotation-matrix-3d}
 \end{equation}
 
-\subsubsection{Kiểm định thống kê Chi-squared loại trừ dị biệt (Innovation Gating)}
 
-\hspace{0.5cm} Để ngăn chặn các điểm đo dị biệt (Outliers) hoặc hiện tượng mất dấu mục tiêu đột ngột làm phá hủy ma trận hiệp phương sai, cổng kiểm định khoảng cách Mahalanobis $\chi^2$ được tích hợp vào bước cập nhật Kalman:
-\begin{equation}
-d_{\text{maha}, k}^2 = \boldsymbol{\nu}_k^T \mathbf{S}_k^{-1} \boldsymbol{\nu}_k = (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})^T (\mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^T + \mathbf{R}_k)^{-1} (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})
-\label{eq:mahalanobis-gating-statistic}
-\end{equation}
-
-Với vector đo 2 chiều ($m=2$), thống kê $d_{\text{maha}}^2$ tuân theo phân phối Chi-squared với 2 bậc tự do $d^2 \sim \chi^2(2)$. Ngưỡng chấp nhận $\gamma_{\text{gate}}$ được xác định theo mức ý nghĩa xác suất $\alpha_{\text{gate}} = 0{,}01$:
-\begin{equation}
-P(d^2 \le \gamma_{\text{gate}}) = 1 - \alpha_{\text{gate}} = 0{,}99 \implies \gamma_{\text{gate}} = 9{,}210
-\label{eq:chi-squared-threshold-selection}
-\end{equation}
-
-Cơ chế kiểm định $\chi^2$ bảo đảm $100\%$ các điểm nhiễu đột biến hoặc gián đoạn tín hiệu cảm biến không gây phân kỳ bộ lọc.
 

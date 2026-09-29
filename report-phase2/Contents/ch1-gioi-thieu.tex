@@ -37,99 +37,16 @@ Các ràng buộc chính của bài toán bao gồm:
     \item \textbf{Biên hoạt động}: Phạm vi theo dõi bị giới hạn bởi bán kính cảm biến hiệu dụng, thường trong khoảng 100 đến 1000 m.
 \end{itemize}
 
-\subsubsection{Tổng quan hệ thống Phase 2}
+\subsubsection{Tổng quan kiến trúc phân tầng}
 
-\hspace{0.5cm} Hệ thống được thiết kế theo kiến trúc phân lớp (layered architecture), gồm bốn tầng chính. Mỗi tầng đảm nhận một vai trò riêng biệt và giao tiếp với nhau qua các giao thức chuẩn. Kiến trúc này được thể hiện trong Hình \ref{fig:phase2-arch}.
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-    box/.style={
-        rectangle, draw, rounded corners=3mm, 
-        minimum width=4.5cm, minimum height=1.2cm, 
-        align=center, font=\small\sffamily
-    },
-    labelbox/.style={
-        font=\normalsize\sffamily, align=center, inner sep=4pt
-    },
-    arrow/.style={->, thick, >=stealth, shorten >=3pt, shorten <=3pt},
-    every node/.style={font=\normalsize\sffamily}
-]
-
-% Layer 4: Frontend
-\node[box, fill=blue!15] (frontend) at (0,5.5) {Tầng giao diện\\React + Leaflet + Vite};
-\node[box, fill=blue!8] (browser) at (0,4.1) {Trình duyệt Web};
-
-% Layer 3: Server
-\node[box, fill=green!15] (server) at (0,2.2) {Tầng máy chủ\\FastAPI + WebSocket};
-\node[box, fill=green!8] (api) at (0,0.8) {REST API + DataFrame Buffer};
-
-% Layer 2: Embedded
-\node[box, fill=yellow!15] (embedded) at (0,-1.2) {Tầng xử lý nhúng\\Raspberry Pi};
-\node[box, fill=yellow!8] (firmware) at (0,-2.9) {Firmware đọc cảm biến};
-
-% Layer 1: Sensors
-\node[box, fill=red!15, minimum width=2.8cm] (gps) at (-4,-5.2) {GPS/GNSS};
-\node[box, fill=red!15, minimum width=2.8cm] (imu) at (0,-5.2) {IMU};
-\node[box, fill=red!15, minimum width=2.8cm] (laser) at (4,-5.2) {Laser};
-
-% Arrows
-\draw[arrow] (browser) -- node[midway, right=3pt, font=\footnotesize] {WebSocket} (server);
-\draw[arrow] (api) -- node[midway, right=3pt, font=\footnotesize] {TCP/IP} (embedded);
-\draw[arrow] (embedded) -- (firmware);
-\draw[arrow] (firmware) -- node[midway, left=5pt, font=\footnotesize] {UART/I2C} (gps);
-\draw[arrow] (firmware) -- node[midway, right=2pt, font=\footnotesize] {I2C} (imu);
-\draw[arrow] (firmware) -- node[midway, right=5pt, font=\footnotesize] {UART} (laser);
-
-% Labels
-\node[labelbox, text=blue!50!black] at (6.8,4.8) {Frontend\\(client)};
-\node[labelbox, text=green!50!black] at (6.8,1.45) {Backend\\(server)};
-\node[labelbox, text=yellow!50!black] at (6.8,-1.7) {Embedded\\(field device)};
-\node[labelbox, text=red!50!black] at (6.8,-4.7) {Sensors\\(hardware)};
-
-\end{tikzpicture}
-}
-\caption{Kiến trúc phân lớp bốn tầng của hệ thống Phase 2}
-\label{fig:phase2-arch}
-\end{figure}
-
-\subsubsection{Tầng cảm biến (Sensor Layer)}
-
-\hspace{0.5cm} Đây là tầng thấp nhất, bao gồm phần cứng cảm biến đặt trên thiết bị di động. Ba loại cảm biến chính tạo thành hệ thống đo lường đa nguồn:
-
-\begin{itemize}
-    \item \textbf{Module GPS/GNSS}: Cung cấp tọa độ tuyệt đối (kinh độ, vĩ độ, cao độ) của người quan sát. Tần số cập nhật 1 đến 10 Hz. Độ chính xác 2 đến 5 m ở chế độ dân sự trong điều kiện ngoài trời tốt. Dữ liệu được xuất theo định dạng NMEA-0183 qua giao tiếp UART.
-    \item \textbf{Cảm biến IMU} (Inertial Measurement Unit): Đo góc hướng azimuth, góc nghiêng elevation, roll và pitch. Cảm biến có tần số cao (100 đến 1000 Hz) nhưng bị trôi theo thời gian. Cần kết hợp với GPS để hiệu chỉnh. Thông thường sử dụng MPU6050, ICM-20948 hoặc BNO055 qua giao thức I2C/SPI.
-    \item \textbf{Máy đo khoảng cách laser} (Laser rangefinder): Đo khoảng cách trực tiếp đến mục tiêu bằng phương pháp Time-of-Flight. Độ chính xác cao ($\pm 1$ đến 2 cm) nhưng bị giới hạn bởi tầm xa (40 đến 100 m tùy loại) và yêu cầu tầm nhìn thẳng (Line-of-Sight).
-\end{itemize}
-
-Trong điều kiện lý tưởng, mỗi cảm biến hoạt động độc lập và bổ sung cho nhau. Tuy nhiên, trong thực tế, tín hiệu từ mỗi cảm biến đều bị nhiễu: GPS có nhiễu multipath, IMU có drift nhiệt độ, laser có nhiễu phản xạ bề mặt. Mục tiêu của hợp nhất cảm biến (sensor fusion) là kết hợp ba nguồn thông tin này để giảm thiểu ảnh hưởng của nhiễu riêng từng cảm biến.
-
-\subsubsection{Mô hình nhiễu cảm biến}
-
-\hspace{0.5cm} Mô hình hóa nhiễu là bước tiền đề để thiết kế bộ lọc phù hợp. Mỗi loại cảm biến có đặc tính nhiễu riêng, được mô tả bằng các tham số sau:
-
-
-Giá trị $\sigma_{\text{gps}} = 5{,}0$ m phản ánh độ chính xác trung bình của GPS dân sự (chế độ không PPP, không RTK) trong điều kiện ngoài trời tốt, nơi tín hiệu GNSS phản xạ từ các bề mặt kiến trúc (multipath) gây sai số position 2 đến 5 m. Giá trị $\sigma_{\text{az}} = 0{,}3^\circ$ và $\sigma_{\text{el}} = 0{,}2^\circ$ phản ánh sai số góc của IMU cấp tiêu dùng (MPU6050 hoặc tương đương), bị ảnh hưởng bởi rung động môi trường và sai số calibration. Giá trị $\sigma_{\text{range}} = 0{,}5$ m phản ánh sai số laser rangefinder ở khoảng cách trung bình (100 đến 500 m), bao gồm sai số thời gian bay và phản xạ bề mặt.
-
-Mỗi loại mục tiêu có thể có tham số laser khác nhau tùy khoảng cách điển hình: người đi bộ ở khoảng 50 đến 200 m ($\sigma_{\text{range}} = 0{,}3$ m), xe máy ở khoảng 100 đến 500 m ($\sigma_{\text{range}} = 0{,}5$ m), drone ở khoảng 200 đến 800 m ($\sigma_{\text{range}} = 1{,}0$ m). Trong mô phỏng tiêu chuẩn, giá trị $\sigma_{\text{range}} = 0{,}5$ m được sử dụng cho cả ba loại mục tiêu để đảm bảo tính so sánh được.
-
-\subsubsection{Tầng xử lý nhúng (Embedded Layer)}
-
-\hspace{0.5cm} Raspberry Pi (RPi 3B+ hoặc 4B) đóng vai trò là bộ điều khiển trung tâm (central hub) kết nối các cảm biến. Phần mềm đọc cảm biến được viết bằng Python, chạy trên Raspberry Pi OS (Linux-based).
-
-Vai trò chính của Raspberry Pi bao gồm: đọc dữ liệu từ GPS qua UART (giao tiếp serial), đọc dữ liệu từ IMU qua I2C, đọc dữ liệu từ laser rangefinder qua UART hoặc I2C, đóng gói dữ liệu thành định dạng JSON chuẩn hóa, và gửi dữ liệu lên máy chủ qua kênh truyền dữ liệu hai chiều (Wi-Fi hoặc Ethernet). Ở giai đoạn hiện tại, phần xử lý nhúng được mô phỏng bằng phần mềm trên máy tính; phần cứng Raspberry Pi sẽ được triển khai khi có thiết bị thực tế.
-
-\subsubsection{Tầng máy chủ (Server Layer)}
-
-\hspace{0.5cm} Máy chủ được xây dựng bằng FastAPI (Python), một framework hiện đại hỗ trợ bất đồng bộ (async). Tầng này đảm nhiệm các chức năng cốt lõi của hệ thống: tiếp nhận dữ liệu cảm biến, chuyển đổi tọa độ giữa các hệ quy chiếu (WGS-84, ECEF, ENU), tính toán tọa độ mục tiêu từ vector định hướng và khoảng cách, áp dụng bộ lọc Kalman hoặc alpha-beta để ước lượng vị trí và vận tốc, quản lý phiên làm việc (session), và phát dữ liệu đã xử lý xuống giao diện qua kênh truyền dữ liệu hai chiều.
-
-Tầng máy chủ cung cấp hai loại giao diện: REST API cho các thao tác quản lý (tạo phiên, dừng phiên, truy vấn lịch sử, xuất dữ liệu) và kênh truyền dữ liệu hai chiều cho việc truyền tải dữ liệu thời gian thực.
-
-\subsubsection{Tầng giao diện (Frontend Layer)}
-
-\hspace{0.5cm} Giao diện người dùng được xây dựng bằng React 19 kết hợp với Vite, sử dụng thư viện bản đồ số để hiển thị bản đồ OpenStreetMap. Các chức năng chính gồm: hiển thị bản đồ nền với vị trí người quan sát và mục tiêu, cập nhật vị trí mục tiêu theo thời gian thực, hiển thị lộ trình di chuyển của mục tiêu (quỹ đạo), hiển thị thông số đo lường (tọa độ, góc, khoảng cách, vận tốc), điều khiển phiên (bắt đầu, dừng, cấu hình tham số), và hiển thị biểu đồ sai số theo thời gian.
+\hspace{0.5cm} Nhằm giải quyết đồng thời bài toán thu nhận dữ liệu cảm biến đa nguồn, ước lượng động học thời gian thực và trực quan hóa bản đồ, hệ thống được phân rã thành mô hình kiến trúc bốn tầng phân tách độc lập:
+\begin{enumerate}
+    \item \textbf{Tầng cảm biến}: Thu nhận dữ liệu định vị GNSS, góc ngắm IMU và cự ly laser ToF.
+    \item \textbf{Tầng phần cứng nhúng mục tiêu}: Đóng gói bản tin cảm biến và truyền tải qua giao tiếp mạng.
+    \item \textbf{Tầng máy chủ dịch vụ}: Xử lý chuỗi biến đổi tọa độ, thực thi bộ lọc thích nghi Kalman / $\alpha$-$\beta$ và điều phối phiên.
+    \item \textbf{Tầng giao diện người dùng}: Hiển thị lớp bản đồ số Leaflet, vẽ quỹ đạo và giám sát sai số bám bắt.
+\end{enumerate}
+Thiết kế chi tiết của từng phân tầng và các sơ đồ cấu trúc phần mềm được trình bày toàn diện tại Chương 2.
 
 \subsubsection{Cơ sở lý thuyết mở rộng}
 

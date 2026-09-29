@@ -8,199 +8,10 @@
 
 Công tác tích hợp bảo đảm dữ liệu đo trắc địa được xử lý tuần tự, liên tục ở tần số 10 Hz với độ trễ thấp ($< 60$ $\mu$s mỗi chu kỳ), hoàn toàn không xảy ra hiện tượng mất mát gói tin, xung đột tài nguyên hay tích lũy sai số trôi dạt.
 
-\subsubsection{Kiến trúc tích hợp đa tầng và luồng dữ liệu thời gian thực}
+\subsubsection{Chiến lược kiểm định tích hợp và kiểm thử phân tầng}
 
-\subsubsection{Sơ đồ phân tầng kiến trúc hệ thống}
+\hspace{0.5cm} Dựa trên kiến trúc hệ thống 4 tầng, quy trình quản lý phiên mô phỏng và luồng truyền thông hai chiều WebSocket đã thiết lập tại Chương 2, công tác kiểm thử tích hợp đầu-cuối tập trung đánh giá tính ổn định, độ trễ truyền thông và tính toàn vẹn của dữ liệu bám bắt trên toàn bộ chuỗi mắt xích phần mềm.
 
-\hspace{0.5cm} Hình \ref{fig:e2e-arch} thể hiện kiến trúc tích hợp 4 tầng hoàn chỉnh của hệ thống, định rõ chuẩn giao thức và định dạng dữ liệu truyền thông giữa các thành phần.
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-    box/.style={rectangle, draw=black!80, rounded corners=2mm, minimum width=4.2cm, minimum height=1.0cm, align=center, font=\small\sffamily, thick, inner sep=4pt},
-    smallbox/.style={rectangle, draw=black!70, rounded corners=1.5mm, minimum width=2.8cm, minimum height=0.85cm, align=center, font=\footnotesize\sffamily, inner sep=3pt},
-    arrow/.style={->, thick, >=stealth, shorten >=2pt, shorten <=2pt},
-    every node/.style={font=\normalsize\sffamily}
-]
-
-% Top: Browser
-\node[box, fill=blue!15] (browser) at (0, 6.3) {Web Client UI\\Map Visualization + Charts};
-
-% Server
-\node[box, fill=green!15] (server) at (0, 4.8) {Backend Application Server\\REST Engine + WebSocket Router};
-
-% Store
-\node[smallbox, fill=green!8] (store) at (0, 3.3) {State Store Buffer\\Circular History (500 frames)};
-
-% Simulation Engine
-\node[box, fill=orange!15] (engine) at (0, 1.7) {Simulation Core Engine\\Target + Noise + Fusion + Filters};
-
-% Geodesy & Fusion
-\node[smallbox, fill=orange!8] (geo) at (-4.5, 1.7) {Geodetic Transform\\LLA $\leftrightarrow$ ECEF $\leftrightarrow$ ENU};
-\node[smallbox, fill=orange!8] (fusion) at (4.5, 1.7) {Sensor Fusion\\RSS Weighting Matrix};
-
-% Data Layer
-\node[smallbox, fill=purple!15] (geolife) at (-4.5, 0.0) {Geolife Dataset\\252 Clean Segments};
-\node[smallbox, fill=purple!15] (road) at (0, 0.0) {HCMC Road Graph\\337K Nodes, 305K Edges};
-\node[smallbox, fill=purple!15] (drone) at (4.5, 0.0) {DJI Matrice 100\\6-DoF Kinematics};
-
-% Arrows
-\draw[arrow] ([xshift=1.4cm]server.north) -- node[midway, right=2pt, font=\scriptsize] {Full Frame JSON (10 Hz)} ([xshift=1.4cm]browser.south);
-\draw[arrow] ([xshift=-1.4cm]browser.south) -- node[midway, left=2pt, font=\scriptsize] {Session Control} ([xshift=-1.4cm]server.north);
-
-\draw[arrow] (store) -- (server);
-\draw[arrow] (engine) -- (store);
-\draw[arrow] (engine) -- (geo);
-\draw[arrow] (engine) -- (fusion);
-\draw[arrow] (geolife) -- (engine);
-\draw[arrow] (road) -- (engine);
-\draw[arrow] (drone) -- (engine);
-
-% Side labels
-\node[font=\footnotesize\bfseries, text=blue!60!black, anchor=west] at (6.2, 6.3) {Presentation};
-\node[font=\footnotesize\bfseries, text=green!60!black, anchor=west] at (6.2, 4.8) {Application};
-\node[font=\footnotesize\bfseries, text=orange!60!black, anchor=west] at (6.2, 1.7) {Core Engine};
-\node[font=\footnotesize\bfseries, text=purple!60!black, anchor=west] at (6.2, 0.0) {Data Layer};
-
-\end{tikzpicture}
-}
-\caption{Kiến trúc tích hợp đầu-cuối 4 tầng: từ nguồn dữ liệu thực nghiệm đến giao diện giám sát}
-\label{fig:e2e-arch}
-\end{figure}
-
-\subsubsection{Giao thức truyền thông và định dạng gói tin nhịp 10 Hz}
-
-\hspace{0.5cm} Hệ thống kết hợp hài hòa hai giao thức mạng chuyên dụng:
-\begin{enumerate}
-    \item \textbf{Giao thức REST API}: Phục vụ các tác vụ quản lý vòng đời phiên (khởi tạo, dừng phiên, trích xuất số liệu thống kê thời gian thực và xuất báo cáo CSV).
-    \item \textbf{Kênh truyền dữ liệu hai chiều (WebSocket)}: Truyền tải liên tục các khung dữ liệu bám bắt ở tần số ổn định 10 Hz (chu kỳ danh định 100 ms).
-\end{enumerate}
-
-\begin{table}[H]
-\centering
-\caption{So sánh đặc tính kỹ thuật giữa giao thức điều khiển REST và kênh truyền hai chiều}
-\label{tab:protocols-comparison-table}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lll}
-\toprule
-\textbf{Đặc tính kỹ thuật} & \textbf{Giao thức điều khiển REST} & \textbf{Kênh truyền hai chiều (WebSocket)} \\
-\midrule
-Mô hình truyền thông & Yêu cầu -- Phản hồi (Stateless) & Kết nối thường trực song công (Full-duplex) \\
-Chu kỳ truyền tin & Không đồng bộ (Theo yêu cầu người dùng) & Định kỳ 100 ms (Tần số 10 Hz) \\
-Độ trễ vận chuyển & $15 - 25$ ms (Bao gồm TCP handshake) & $1 - 3$ ms (Kênh mở sẵn) \\
-Định dạng dữ liệu & JSON Schema chuẩn hóa & Khung dữ liệu đối tượng cấu trúc nén \\
-Mục đích chính & Quản trị phiên và cấu hình trạm & Truyền tọa độ và sai số bám bắt tức thời \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsubsection{Máy trạng thái quản lý vòng đời phiên bám bắt (Session State Machine)}
-
-\hspace{0.5cm} Quá trình vận hành một phiên bám bắt được mô hình hóa chặt chẽ theo lý thuyết máy trạng thái hữu hạn (Deterministic Finite State Machine, FSM) gồm 6 trạng thái độc lập và các chuyển trạng thái có điều kiện.
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{%
-\begin{tikzpicture}[
-    state/.style={rectangle, draw=black!80, rounded corners=3mm, minimum width=3.3cm, minimum height=1.15cm, align=center, font=\small\sffamily, thick, inner sep=3pt},
-    arrow/.style={->, >=stealth, thick, line width=1.1pt},
-    lbl/.style={font=\scriptsize\sffamily, fill=white, inner sep=2.5pt, rounded corners=1pt}
-]
-
-% Top row (y = 5.2)
-\node[state, fill=blue!15] (idle) at (0, 5.2) {\textbf{IDLE}\\Trạng thái nghỉ};
-\node[state, fill=green!20] (init) at (6.8, 5.2) {\textbf{INITIALIZING}\\Khởi tạo tài nguyên};
-
-% Middle row (y = 2.4)
-\node[state, fill=orange!20] (paused) at (0, 2.4) {\textbf{PAUSED}\\Tạm dừng phiên};
-\node[state, fill=yellow!25] (running) at (6.8, 2.4) {\textbf{RUNNING}\\Bám bắt thời gian thực};
-
-% Bottom row (y = -0.6)
-\node[state, fill=red!20] (error) at (0, -0.6) {\textbf{TERMINATED}\\Đóng và giải phóng};
-\node[state, fill=teal!20] (completed) at (6.8, -0.6) {\textbf{COMPLETED}\\Hoàn thành phiên};
-
-% Transitions
-% 1. Start & Connection
-\draw[arrow] (idle) -- node[lbl, above=2pt] {START\_REQUEST} (init);
-\draw[arrow] (init) -- node[lbl, right=2pt] {WS\_CONNECTED} (running);
-
-% 2. Pause & Resume
-\draw[arrow] ([yshift=3.5mm]running.west) -- node[lbl, pos=0.3, above=1pt] {PAUSE\_CMD} ([yshift=3.5mm]paused.east);
-\draw[arrow] ([yshift=-3.5mm]paused.east) -- node[lbl, pos=0.3, below=1pt] {RESUME\_CMD} ([yshift=-3.5mm]running.west);
-
-% 3. Running branches
-\draw[arrow] (running) -- node[lbl, right=2pt] {TIME\_LIMIT\_REACHED} (completed);
-\draw[arrow] (running.south west) to[bend left=10] node[lbl, pos=0.5, sloped, above=5pt] {STOP\_CMD / ERROR} (error.north east);
-
-% 4. Pause branches
-\draw[arrow] (paused) -- node[lbl, left=2pt] {STOP\_CMD} (error);
-
-% 5. Init failure (Đi bọc ngoài mép phải và vòng xuống đáy để vào TERMINATED)
-\draw[arrow] (init.east) -- ++(1.6, 0) 
-    |- node[lbl, pos=0.25, right=2pt] {INIT\_FAILED} ([yshift=-5mm]completed.south) 
-    -| (error.south);
-
-% 6. Termination & Reset
-\draw[arrow] (completed.west) -- node[lbl, above=2pt] {CLEANUP} (error.east);
-\draw[arrow] (error.west) to[out=155, in=205, looseness=1.25] node[lbl, left=3pt] {RESET\_STATE} (idle.west);
-
-\end{tikzpicture}%
-}
-\caption{Sơ đồ máy trạng thái hữu hạn quản lý vòng đời phiên mô phỏng bám mục tiêu}
-\label{fig:session-state}
-\end{figure}
-
-Sơ đồ trạng thái tại Hình \ref{fig:session-state} bảo đảm mọi trường hợp ngắt kết nối mạng hoặc yêu cầu dừng đột ngột đều dẫn về trạng thái đóng và giải phóng tài nguyên an toàn mà không làm rò rỉ bộ nhớ đệm.
-
-\subsubsection{Sơ đồ tuần tự tương tác tạo phiên và truyền phát dữ liệu}
-
-\hspace{0.5cm} Hình \ref{fig:sequence} thể hiện biểu đồ tuần tự UML (Sequence Diagram) mô tả chi tiết tương tác giữa giao diện người dùng, máy chủ ứng dụng, khối động học mô phỏng và kênh truyền WebSocket:
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}[
-    participant/.style={rectangle, draw=black!80, fill=blue!10, minimum width=2.5cm, minimum height=0.85cm, align=center, font=\small\sffamily, thick},
-    arrow/.style={->, >=stealth, thick},
-    reply/.style={<-, >=stealth, dashed, thick},
-    lifeline/.style={dashed, gray!70, line width=0.8pt},
-    msg/.style={font=\scriptsize\sffamily, above}
-]
-
-% Participants
-\node[participant] (ui) at (0, 7.2) {Giao diện Web Client};
-\node[participant] (api) at (3.8, 7.2) {Bộ định tuyến REST API};
-\node[participant] (engine) at (7.6, 7.2) {Lõi mô phỏng Simulation};
-\node[participant] (ws) at (11.4, 7.2) {Kênh truyền WebSocket};
-
-% Lifelines
-\draw[lifeline] (ui) -- (0, -0.2);
-\draw[lifeline] (api) -- (3.8, -0.2);
-\draw[lifeline] (engine) -- (7.6, -0.2);
-\draw[lifeline] (ws) -- (11.4, -0.2);
-
-% Messages
-\draw[arrow] (0, 6.2) -- node[msg] {Yêu cầu tạo phiên mô phỏng} (3.8, 6.2);
-\draw[arrow] (3.8, 5.7) -- node[msg] {Khởi tạo đối tượng phiên} (7.6, 5.7);
-\draw[arrow] (7.6, 5.2) -- node[msg, right=2pt] {Cấp phát bộ đệm vòng 500 frame} (7.6, 4.7);
-\draw[reply] (3.8, 4.2) -- node[msg] {Mã phiên ID và đường dẫn WS} (7.6, 4.2);
-\draw[reply] (0, 3.7) -- node[msg] {Phản hồi HTTP 200 OK (mã phiên và đường dẫn kết nối)} (3.8, 3.7);
-
-\draw[arrow] (0, 3.0) -- node[msg] {Bắt tay nâng cấp kênh WebSocket} (11.4, 3.0);
-\draw[reply] (0, 2.5) -- node[msg] {101 Switching Protocols} (11.4, 2.5);
-
-\draw[arrow] (11.4, 2.0) -- node[msg] {Kích hoạt vòng lặp nhịp 10 Hz} (7.6, 2.0);
-\draw[arrow] (7.6, 1.5) -- node[msg] {Đẩy khung dữ liệu TrackingFrame} (11.4, 1.5);
-\draw[arrow] (11.4, 0.9) -- node[msg] {Phát luồng JSON thời gian thực} (0, 0.9);
-\draw[arrow] (0, 0.4) -- node[msg, right=2pt] {Hiển thị bản đồ Leaflet và biểu đồ} (0, 0.0);
-
-\end{tikzpicture}
-}
-\caption{Biểu đồ tuần tự tương tác thời gian thực từ khởi tạo phiên đến truyền phát khung đo}
-\label{fig:sequence}
-\end{figure}
 
 \subsubsection{Chiến lược kiểm thử phân tầng theo mô hình kim tự tháp (Test Pyramid)}
 
@@ -225,7 +36,7 @@ Tầng 3: Đầu-cuối (End-to-End) & Luồng REST-WS, Xuất tệp CSV, Dashbo
 \end{tabularx}
 \end{table}
 
-\hspace{0.5cm} Chi tiết về cấu trúc 163 ca kiểm thử tự động, hệ thống được phân bổ như sau: 125 ca kiểm thử bao phủ toàn diện các mô-đun: bộ lọc Kalman, bộ lọc Alpha-Beta, phép biến đổi tọa độ (Geodetics), hợp nhất cảm biến và cơ chế phản xạ biên mềm. Đồng thời, 38 ca kiểm thử chuyên sâu bảo vệ logic của các trình nạp dữ liệu định tuyến (Geolife, mạng đường giao thông thực tế và động học Drone). Toàn bộ ca kiểm thử liên quan đến nhiễu ngẫu nhiên đều được cố định giá trị khởi tạo (Seed) nhằm duy trì kết quả kiểm thử mang tính xác định (Deterministic) và lặp lại chính xác (Reproducible).
+Chi tiết về cấu trúc 163 ca kiểm thử tự động, hệ thống được phân bổ như sau: 125 ca kiểm thử bao phủ toàn diện các mô-đun: bộ lọc Kalman, bộ lọc Alpha-Beta, phép biến đổi tọa độ (Geodetics), hợp nhất cảm biến và cơ chế phản xạ biên mềm. Đồng thời, 38 ca kiểm thử chuyên sâu bảo vệ logic của các trình nạp dữ liệu định tuyến (Geolife, mạng đường giao thông thực tế và động học Drone). Toàn bộ ca kiểm thử liên quan đến nhiễu ngẫu nhiên đều được cố định giá trị khởi tạo (Seed) nhằm duy trì kết quả kiểm thử mang tính xác định (Deterministic) và lặp lại chính xác (Reproducible).
 
 
 \begin{figure}[H]
@@ -259,11 +70,9 @@ Mức độ bao phủ dòng lệnh trung bình của toàn hệ thống đạt $
 
 \subsubsection{Kiểm tra tải đồng thời và độ ổn định lâu dài (Load and Stress Testing)}
 
-
-
 \hspace{0.5cm} Quá trình kiểm thử tích hợp (Integration Testing) không chỉ dừng lại ở việc xác thực các giá trị đầu ra tại một thời điểm, mà còn phải đánh giá độ ổn định của toàn bộ chuỗi xử lý qua hàng nghìn chu kỳ liên tiếp. Chẳng hạn, trong kịch bản bám bắt xe máy di chuyển trên mạng lưới giao thông thực tế, bộ lọc Alpha-Beta phải thể hiện khả năng giảm chấn tối ưu, không tạo ra hiện tượng vọt lố (overshoot) khi mục tiêu vào cua gấp ở tốc độ cao. Các ca kiểm thử tự động xác minh rằng ma trận hiệp phương sai sai số $\mathbf{P}_k$ duy trì tính đối xứng dương xác định ($\lambda_{\min}(\mathbf{P}_k) \geq 0$) qua mọi bước cập nhật và sai số RMSE ở trạng thái ổn định không vượt ngưỡng 5 m theo yêu cầu đề tài. Nếu sai số vượt quá ngưỡng này, ca kiểm thử sẽ lập tức báo lỗi, bảo đảm hệ thống không bị suy thoái hiệu năng qua các lần nâng cấp mã nguồn.
 
-\hspace{0.5cm} Bên cạnh đó, các mô-đun trình nạp dữ liệu (Data Loaders) cũng được kiểm thử cực hạn (Boundary Testing). Ví dụ, với dữ liệu người đi bộ Geolife, các đoạn có khoảng hở thời gian (gap) kéo dài hơn 3 giây trong quỹ đạo gốc bị bộ nạp dữ liệu từ chối tự động, một điều kiện biên được xác minh liên tục trong các ca kiểm thử dành riêng cho Data Loaders. Kết quả kiểm thử khẳng định PCHIP duy trì tính đơn điệu, không sinh ra các cung tròn ảo như phương pháp Cubic Spline, giúp quỹ đạo ước lượng không vượt ra khỏi ranh giới vỉa hè của người đi bộ.
+Bên cạnh đó, các mô-đun trình nạp dữ liệu (Data Loaders) cũng được kiểm thử cực hạn (Boundary Testing). Ví dụ, với dữ liệu người đi bộ Geolife, các đoạn có khoảng hở thời gian (gap) kéo dài hơn 3 giây trong quỹ đạo gốc bị bộ nạp dữ liệu từ chối tự động, một điều kiện biên được xác minh liên tục trong các ca kiểm thử dành riêng cho Data Loaders. Kết quả kiểm thử khẳng định PCHIP duy trì tính đơn điệu, không sinh ra các cung tròn ảo như phương pháp Cubic Spline, giúp quỹ đạo ước lượng không vượt ra khỏi ranh giới vỉa hè của người đi bộ.
 
 
 \subsubsection{Khảo sát hiệu năng dưới tải đa phiên đồng thời}
@@ -302,8 +111,7 @@ Tại mức tải thiết kế 10 phiên đồng thời, độ trễ trung bình
 
 \hspace{0.5cm} Quá trình kiểm tra độ ổn định vận hành liên tục (Endurance Testing) được tiến hành trong 1 triệu chu kỳ xử lý (tương đương hơn 27 giờ vận hành liên tục ở tần số 10 Hz). Mục tiêu là xác minh tính ổn định số học của ma trận hiệp phương sai sai số $\mathbf{P}_k$ trong thuật toán Kalman, bảo đảm ma trận này không bị phân kỳ hay mất tính đối xứng dương xác định. Kết quả cho thấy hệ thống xử lý ổn định (59 $\mu$s mỗi chu kỳ) và không quan sát thấy tăng trưởng bộ nhớ bất thường qua quá trình theo dõi, khẳng định tính bền bỉ của phần mềm máy chủ quản lý.
 
-
-\hspace{0.5cm} Thử nghiệm vận hành liên tục trong 60 phút ở mức 5 phiên đồng thời (tương đương $180.000$ khung dữ liệu được xử lý) cho thấy bộ nhớ RAM duy trì ổn định tuyệt đối trong dải $72 - 78$ MB mà không phát sinh hiện tượng rò rỉ bộ nhớ (Memory Leak), xác nhận cơ chế quản lý bộ đệm vòng (Ring Buffer) vận hành hoàn hảo.
+Thử nghiệm vận hành liên tục trong 60 phút ở mức 5 phiên đồng thời (tương đương $180.000$ khung dữ liệu được xử lý) cho thấy bộ nhớ RAM duy trì ổn định trong dải $72 - 78$ MB mà không quan sát thấy hiện tượng rò rỉ bộ nhớ (Memory Leak), xác nhận cơ chế quản lý bộ đệm vòng (Ring Buffer) vận hành hiệu quả.
 
 \subsubsection{Xác thực tính toàn vẹn của chuỗi biến đổi tọa độ WGS-84 khứ hồi}
 
@@ -318,10 +126,10 @@ Tại mức tải thiết kế 10 phiên đồng thời, độ trễ trung bình
 \toprule
 \textbf{Chuỗi biến đổi trắc địa} & \textbf{Số mẫu kiểm tra} & \textbf{Sai số vòng tròn cực đại} & \textbf{Đánh giá đạt chuẩn} \\
 \midrule
-LLA $\to$ ECEF $\to$ LLA & 1.000 điểm & $3{,}8 \times 10^{-11}$ độ & Tuyệt đối ($< 10^{-9}$ deg) \\
-ENU $\to$ ECEF $\to$ ENU & 1.000 điểm & $1{,}9 \times 10^{-7}$ m & Tuyệt đối ($< 10^{-6}$ m) \\
+LLA $\to$ ECEF $\to$ LLA & 1.000 điểm & $3{,}8 \times 10^{-11}$ độ & Đạt chuẩn ($< 10^{-9}$ deg) \\
+ENU $\to$ ECEF $\to$ ENU & 1.000 điểm & $1{,}9 \times 10^{-7}$ m & Đạt chuẩn ($< 10^{-6}$ m) \\
 Khoảng cách Haversine so với ENU & 500 đoạn & $0{,}008$ m & Đạt chuẩn ($< 0{,}01$ m) \\
-Góc phương vị Azimuth ENU & 200 hướng & $0{,}001^\circ$ & Hoàn hảo \\
+Góc phương vị Azimuth ENU & 200 hướng & $0{,}001^\circ$ & Đạt chuẩn ($< 0{,}001^\circ$) \\
 \bottomrule
 \end{tabular}
 }
@@ -329,9 +137,9 @@ Góc phương vị Azimuth ENU & 200 hướng & $0{,}001^\circ$ & Hoàn hảo \\
 
 \subsubsection{Phân tích cấu trúc dữ liệu đồ thị mạng đường trong bộ nhớ RAM}
 
-\hspace{0.5cm} Đồ thị mạng đường bộ thành phố Hồ Chí Minh gồm $337.024$ đỉnh và $305.128$ cung đường được lưu trữ dưới dạng cấu trúc danh sách kề nén (Compressed Adjacency List) trong bộ nhớ RAM:
+\hspace{0.5cm} Đồ thị mạng đường bộ thành phố Hồ Chí Minh gồm $337.074$ đỉnh và $305.008$ cung đường được lưu trữ dưới dạng cấu trúc danh sách kề nén (Compressed Adjacency List) trong bộ nhớ RAM:
 \begin{equation}
-\text{Dung lượng trên đĩa (GraphML)} = 102{,}5\text{ MB} \implies \text{Dung lượng cấu trúc trong RAM} = 245{,}0\text{ MB}
+S_{\text{disk}} = 102{,}5\text{ MB (GraphML)} \implies S_{\text{RAM}} = 245{,}0\text{ MB}
 \label{eq:graph-memory-expansion}
 \end{equation}
 
@@ -376,45 +184,7 @@ Toàn bộ quá trình sinh hành trình ngẫu nhiên 120 giây cho xe máy ho�
 \end{tabularx}
 \end{table}
 
-\subsubsection{Xác minh chuỗi biến đổi tọa độ trắc địa elip-xô WGS-84}
 
-\hspace{0.5cm} Chuỗi chuyển đổi tọa độ địa lý là thành phần trung tâm của toàn bộ hệ thống định vị, chịu trách nhiệm chuyển đổi liên tục giữa tọa độ cầu trắc địa WGS-84 (Vĩ độ $\phi$, Kinh độ $\lambda$, Độ cao elip-xô $h$), tọa độ Descartes địa tâm cố định ECEF ($X, Y, Z$) và tọa độ phẳng địa phương ENU ($e, n, u$).
-
-\subsubsection{Cơ sở toán học phép biến đổi LLA sang ECEF}
-
-\hspace{0.5cm} Elip-xô quy chiếu chuẩn WGS-84 được định nghĩa qua bán trục lớn $a = 6.378.137{,}0$ m và độ dẹt $f = 1 / 298{,}257223563$. Bình phương độ lệch tâm thứ nhất của elip-xô:
-\begin{equation}
-e^2 = 2f - f^2 = 0{,}00669437999014
-\label{eq:first-eccentricity-squared}
-\end{equation}
-
-Bán kính độ cong theo mặt phẳng thẳng đứng chính (Prime Vertical Radius of Curvature):
-
-
-Tọa độ không gian ba chiều ECEF được xác định:
-
-
-\subsubsection{Ma trận quay hướng không gian ECEF sang ENU}
-
-\hspace{0.5cm} Gọi $(\phi_0, \lambda_0, h_0)$ là tọa độ trắc địa của trạm quan sát và $(X_0, Y_0, Z_0)$ là tọa độ ECEF tương ứng. Vector chuyển vị $\Delta \mathbf{r} = [X - X_0, Y - Y_0, Z - Z_0]^T$ được quay sang hệ ENU qua ma trận trực giao $\mathbf{R}_{\text{enu}}$:
-\begin{equation}
-\begin{bmatrix} e \\ n \\ u \end{bmatrix} = \begin{bmatrix}
--\sin\lambda_0 & \cos\lambda_0 & 0 \\
--\sin\phi_0\cos\lambda_0 & -\sin\phi_0\sin\lambda_0 & \cos\phi_0 \\
-\cos\phi_0\cos\lambda_0 & \cos\phi_0\sin\lambda_0 & \sin\phi_0
-\end{bmatrix} \begin{bmatrix} X - X_0 \\ Y - Y_0 \\ Z - Z_0 \end{bmatrix}
-\label{eq:ecef-to-enu-rotation-matrix}
-\end{equation}
-
-\subsubsection{Xác minh hiệu năng hợp nhất cảm biến hỗn hợp RSS}
-
-\hspace{0.5cm} Mô-đun hợp nhất cảm biến kết hợp tín hiệu đo cự ly/góc từ Laser-IMU và tín hiệu định vị vệ tinh GNSS dựa trên ma trận nghịch đảo hiệp phương sai sai số:
-\begin{equation}
-w_{\text{laser}}(d) = \frac{1}{1 + (d / d_0)^2}, \quad w_{\text{gps}}(d) = 1 - w_{\text{laser}}(d)
-\label{eq:rss-weighting-law}
-\end{equation}
-
-với cự ly giao thoa ưu thế danh định $d_0 = 794{,}0$ m.
 
 \subsubsection{Kiểm thử chức năng trích xuất và xuất dữ liệu báo cáo định dạng CSV}
 
@@ -438,7 +208,7 @@ với cự ly giao thoa ưu thế danh định $d_0 = 794{,}0$ m.
 }
 \end{table}
 
-Tệp dữ liệu CSV tuân thủ nghiêm ngặt chuẩn mã hóa ký tự UTF-8, cấu trúc đầy đủ 8 trường thông tin trắc địa và tương thích hoàn hảo với các phần mềm phân tích dữ liệu chuyên dụng.
+Tệp dữ liệu CSV tuân thủ nghiêm ngặt chuẩn mã hóa ký tự UTF-8, cấu trúc đầy đủ 8 trường thông tin trắc địa và tương thích tốt với các phần mềm phân tích dữ liệu chuyên dụng.
 
 \subsubsection{Kiểm thử tương thích trình duyệt và cơ chế tự động phục hồi kết nối}
 
@@ -446,53 +216,10 @@ Tệp dữ liệu CSV tuân thủ nghiêm ngặt chuẩn mã hóa ký tự UTF-8
 
 Khi kết nối WebSocket bị gián đoạn do sự cố mạng, cơ chế Exponential Backoff tự động kích hoạt chuỗi thử lại với các khoảng chờ $1\text{ s} \to 2\text{ s} \to 4\text{ s} \to 8\text{ s} \to 10\text{ s}$, bảo đảm $100\%$ các phiên bị đứt kết nối tạm thời đều tự động tái lập mà không cần khởi tạo lại phiên từ đầu.
 
-\subsubsection{Quy trình nạp và tiền xử lý dữ liệu thực nghiệm Geolife và AMIT}
+\subsubsection{Kiểm định tích hợp dữ liệu và độ trễ chuỗi xử lý}
 
-\hspace{0.5cm} Nhằm mang lại tính chân thực cao nhất cho môi trường mô phỏng, hệ thống tích hợp chuỗi nạp và tiền xử lý dữ liệu di động đô thị thực tế từ hai bộ dữ liệu quốc tế: Geolife (Microsoft Research Asia) và AMIT (Giao lộ đô thị UAV).
+\hspace{0.5cm} Các mô-đun nạp dữ liệu thực nghiệm (Geolife, mạng đường giao thông HCMC) cùng chuỗi xử lý vi mô 59 $\mu$s (đã phân tích tại Chương 5 và Chương 6) được tích hợp trực tiếp vào bộ kiểm thử tự động. Các ca kiểm thử xác nhận thuật toán PCHIP duy trì tính đơn điệu, không tạo cực trị giả và toàn bộ chuỗi tính toán hoàn tất trong thời gian quy chuẩn của chu kỳ 100 ms.
 
-\subsubsection{Cấu trúc tệp dữ liệu trắc địa và thuật toán phân đoạn}
-
-\hspace{0.5cm} Tệp dữ liệu quỹ đạo Geolife định dạng văn bản thô chứa các bản ghi vị trí thu thập qua máy thu GPS:
-\begin{equation}
-\text{Bản ghi} = [\phi\text{ (deg)}, \; \lambda\text{ (deg)}, \; 0, \; h_{\text{feet}}, \; t_{\text{float}}, \; \text{Ngày}, \; \text{Giờ}]
-\label{eq:geolife-raw-record-format}
-\end{equation}
-
-Từ $6.460$ nhãn hành trình người đi bộ thu thập từ 182 người dùng, thuật toán trích xuất tự động lọc ra 252 đoạn đi bộ đạt chuẩn chất lượng cao theo bộ tiêu chí nghiêm ngặt:
-\begin{equation}
-\begin{cases}
-60\text{ s} \le \Delta t_{\text{segment}} \le 180\text{ s} \\
-\Delta r_{\text{displacement}} \le 400\text{ m} \\
-\Delta t_{\text{gap}} \le 3{,}0\text{ s}
-\end{cases}
-\label{eq:geolife-filtering-criteria}
-\end{equation}
-
-\subsubsection{Nội suy bảo toàn đơn điệu PCHIP lên tần số chuẩn 10 Hz}
-
-\hspace{0.5cm} Tần số lấy mẫu gốc của máy thu GPS dao động từ 1 đến 3 giây ($0{,}33 - 1{,}0$ Hz). Nhằm nâng tần số lên nhịp chuẩn 10 Hz mà không tạo ra các đỉnh dao động nhân tạo (Runge's Phenomenon), thuật toán nội suy đa thức Hermite bậc ba bảo toàn tính đơn điệu (PCHIP) được áp dụng:
-\begin{equation}
-d_k = \begin{cases}
-\frac{w_1 + w_2}{\frac{w_1}{\Delta_1} + \frac{w_2}{\Delta_2}} & \text{nếu } \text{sgn}(\Delta_1) = \text{sgn}(\Delta_2) \\
-0 & \text{ngược lại}
-\end{cases}
-\label{eq:pchip-derivative-formula-w11}
-\end{equation}
-
-trong đó $\Delta_k = (y_{k+1} - y_k) / (t_{k+1} - t_k)$ và $w_k = 2h_{k+1} + h_k$.
-
-\subsubsection{Phân tích ngân sách thời gian xử lý vi mô (Micro-timing Budget)}
-
-\hspace{0.5cm} Nhằm khẳng định khả năng đáp ứng thời gian thực nghiêm ngặt, ngân sách thời gian thực thi của từng công đoạn trong chuỗi xử lý nhịp 10 Hz được đo lường với độ phân giải micro-giây ($\mu$s):
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.78\textwidth]{figures/pipeline_timing.png}
-\caption{Phân bổ tỷ trọng thời gian thực thi các công đoạn trong chuỗi xử lý nhịp 10 Hz}
-\label{fig:pipeline-micro-timing-w11}
-\end{figure}
-
-Tổng thời gian tính toán chỉ chiếm $59{,}0$ $\mu$s (chưa đến $0{,}06\%$ chu kỳ 100 ms), cho phép máy chủ đơn lõi xử lý cùng lúc hàng trăm kênh bám bắt mà không gây trễ tích lũy.
 
 \subsubsection{Tối ưu hóa giao diện đồ họa đạt tốc độ khung hình 60 FPS}
 
@@ -518,16 +245,16 @@ Số lần vẽ lại không cần thiết (Re-renders) & $120$ lần/giây & $\
 
 \subsubsection{Ma trận kiểm thử hồi quy tự động (Automated Regression Test Suite)}
 
-\hspace{0.5cm} Nhằm bảo đảm tính ổn định liên tục của toàn bộ mã nguồn, bộ kiểm thử hồi quy tự động gồm 162 ca kiểm thử được phân bổ chặt chẽ theo 7 phân hệ chức năng:
+\hspace{0.5cm} Nhằm bảo đảm tính ổn định liên tục của toàn bộ mã nguồn, bộ kiểm thử hồi quy tự động gồm 163 ca kiểm thử được phân bổ chặt chẽ theo 7 phân hệ chức năng:
 
 \subsubsection{Tổng kết các kết quả đạt được}
 
 \hspace{0.5cm} Công tác tích hợp hệ thống đầu-cuối đã đạt được những mốc chất lượng quan trọng:
 \begin{enumerate}
-    \item Hoàn thiện kiến trúc 4 tầng với máy trạng thái FSM 6 trạng thái điều khiển trơn tru mọi luồng vận hành.
-    \item Thiết kế và chuẩn hóa toàn bộ các sơ đồ tương tác UML và máy trạng thái với ký hiệu tiếng Anh chuyên nghiệp.
+    \item Hoàn thiện kiến trúc 4 tầng kết hợp quản lý phiên thời gian thực, điều khiển trơn tru mọi luồng vận hành giữa máy chủ và giao diện.
+    \item Chuẩn hóa cấu trúc truyền thông WebSocket 10 Hz và định dạng gói tin JSON gọn nhẹ bảo đảm tính toàn vẹn dữ liệu.
     \item Chứng minh năng lực chịu tải 10 phiên đồng thời với độ trễ $15{,}7$ ms và độ ổn định liên tục trong 60 phút không rò rỉ bộ nhớ.
-    \item Đạt 100\% tỷ lệ thành công trên toàn bộ 163 ca kiểm thử tự động, xác nhận độ tin cậy tuyệt đối của hệ thống bám mục tiêu.
+    \item Đạt 100\% tỷ lệ thành công trên toàn bộ 163 ca kiểm thử tự động, xác nhận độ ổn định và độ tin cậy của mã nguồn hệ thống.
 \end{enumerate}
 
 \subsection{Độ tin cậy và xử lý trường hợp biên}
@@ -609,8 +336,7 @@ Ma trận hiệp phương sai sai số ước lượng $\mathbf{P}_{k+m|k}$ tíc
 
 \hspace{0.5cm} Mô hình nhiễu ngẫu nhiên quá trình của IMU là nguyên nhân chính dẫn đến trôi dạt khi hệ thống phải chuyển sang chế độ suy đoán vị trí hoàn toàn. Thực nghiệm cho thấy, khi tín hiệu định vị vệ tinh bị ngắt, sai số tích lũy tăng phi tuyến theo thời gian. Khả năng tái hội tụ khi tín hiệu phục hồi phụ thuộc lớn vào việc điều chỉnh lại ma trận trọng số trong thuật toán hợp nhất, giúp kéo hệ thống về lại đúng quỹ đạo thực tế \cite{groves2013principles}.
 
-
-\hspace{0.5cm} Khi tín hiệu GPS tái lập, do ma trận hiệp phương sai $\mathbf{P}$ đã tăng lớn trong giai đoạn mất tín hiệu, ma trận độ lợi Kalman Gain $\mathbf{K}_k = \mathbf{P}_{k|k-1} \mathbf{H}^T (\mathbf{H} \mathbf{P}_{k|k-1} \mathbf{H}^T + \mathbf{R}_k)^{-1}$ tự động mở rộng biên độ tiệm cận giá trị 1. Nhờ đó, phép đo mới lập tức kéo vector trạng thái về sát vị trí thực chỉ sau 2 đến 3 chu kỳ lấy mẫu ($0{,}2 - 0{,}3$ giây).
+Khi tín hiệu GPS tái lập, do ma trận hiệp phương sai $\mathbf{P}$ đã tăng lớn trong giai đoạn mất tín hiệu, ma trận độ lợi Kalman Gain $\mathbf{K}_k = \mathbf{P}_{k|k-1} \mathbf{H}^T (\mathbf{H} \mathbf{P}_{k|k-1} \mathbf{H}^T + \mathbf{R}_k)^{-1}$ tự động mở rộng biên độ tiệm cận giá trị 1. Nhờ đó, phép đo mới lập tức kéo vector trạng thái về sát vị trí thực chỉ sau 2 đến 3 chu kỳ lấy mẫu ($0{,}2 - 0{,}3$ giây).
 
 \subsubsection{Thực nghiệm phục hồi sau sự cố cảm biến kép (Dual Sensor Fault)}
 
@@ -644,7 +370,7 @@ Ma trận hiệp phương sai sai số ước lượng $\mathbf{P}_{k+m|k}$ tíc
 \label{fig:sensor-recovery}
 \end{figure}
 
-Trong tình huống sự cố kép, sai số đỉnh tạm thời vọt lên mức $6{,}50$ m do hệ thống phải dựa hoàn toàn vào tích phân quán tính IMU. Tuy nhiên, ngay khi tín hiệu quang học hoặc vệ tinh được tái lập, bộ lọc phục hồi ổn định trong vòng $1{,}2$ giây và đưa sai số trở lại mức $1{,}10$ m, khẳng định độ tin cậy vượt bậc của cấu trúc hợp nhất đa nguồn.
+Trong tình huống sự cố kép, sai số đỉnh tạm thời vọt lên mức $6{,}50$ m do hệ thống phải dựa hoàn toàn vào tích phân quán tính IMU. Dù vậy, ngay khi tín hiệu quang học hoặc vệ tinh được tái lập, bộ lọc phục hồi ổn định trong vòng $1{,}2$ giây và đưa sai số trở lại mức $1{,}10$ m, khẳng định độ tin cậy vượt bậc của cấu trúc hợp nhất đa nguồn.
 
 \subsubsection{Cơ chế loại trừ điểm đo ngoại lai bằng cổng kiểm định Mahalanobis \texorpdfstring{$\chi^2$}{Chi-Square}}
 
@@ -669,6 +395,8 @@ d_M^2 > \gamma \implies \text{Loại bỏ ngoại lai, gán } \hat{\mathbf{x}}_{
 \label{eq:mahalanobis-decision-rule}
 \end{equation}
 
+Trong kịch bản đánh giá mô phỏng xung nhiễu đột biến, các điểm đo lệch vượt quá khoảng cách cổng $\gamma = 11{,}345$ được phát hiện và loại bỏ với tỷ lệ loại trừ đạt $99{,}4\%$ (phù hợp với mức danh định lý thuyết $99{,}0\%$ của phân phối $\chi^2(3)$ ở mức ý nghĩa $\alpha = 0{,}01$). Việc loại bỏ ngoại lai giúp bảo vệ chuỗi đổi mới, ngăn chặn hiện tượng nhảy vọt tọa độ và bảo toàn tính ổn định của ma trận $\mathbf{P}_k$.
+
 \begin{table}[H]
 \centering
 \caption{Hiệu quả loại trừ nhiễu đột biến và bảo toàn quỹ đạo của cổng Mahalanobis $\chi^2$}
@@ -680,8 +408,8 @@ d_M^2 > \gamma \implies \text{Loại bỏ ngoại lai, gán } \hat{\mathbf{x}}_{
 \midrule
 Nhiễu phản xạ Laser đột biến 15 m & RMSE đỉnh $= 7{,}42$ m & $\mathbf{RMSE\text{ đỉnh} = 1{,}08\text{ m}}$ & Giảm $85{,}4\%$ \\
 GPS trôi dạt đột ngột 25 m & RMSE đỉnh $= 12{,}80$ m & $\mathbf{RMSE\text{ đỉnh} = 1{,}15\text{ m}}$ & Giảm $91{,}0\%$ \\
-Hiện tượng giật quỹ đạo (Jitter) & Rất nghiêm trọng & \textbf{Hoàn toàn triệt tiêu} & Mượt mà tuyệt đối \\
-Tỷ lệ nhận diện đúng ngoại lai & -- & $\mathbf{99{,}4\%}$ & Độ chính xác cao \\
+Hiện tượng giật quỹ đạo (Jitter) & Rất nghiêm trọng & \textbf{Giảm thiểu đáng kể} & Quỹ đạo mượt hơn \\
+Tỷ lệ loại trừ xung ngoại lai & -- & $\mathbf{99{,}4\%}$ & Ngưỡng lý thuyết $99{,}0\%$ \\
 \bottomrule
 \end{tabular}
 }
@@ -691,14 +419,15 @@ Tỷ lệ nhận diện đúng ngoại lai & -- & $\mathbf{99{,}4\%}$ & Độ ch
 
 \hspace{0.5cm} Để kiểm chứng tính ổn định của giải thuật ước lượng trước các sai lệch cấu hình ban đầu, ma trận hiệp phương sai khởi tạo $\mathbf{P}_0$ được thay đổi trên dải 6 bậc độ lớn từ $10^{-2} \mathbf{P}_0^{\text{opt}}$ đến $10^4 \mathbf{P}_0^{\text{opt}}$:
 
-Nhờ cơ chế khởi tạo vận tốc từ sai phân hữu hạn hai điểm đo đầu tiên kết hợp cập nhật Kalman thích ứng, sai số toàn phiên duy trì bất biến ở mức $0{,}26$ m trên mọi giá trị khởi tạo $\mathbf{P}_0$, khẳng định tính bền bỉ tuyệt đối của giải thuật.
+Nhờ cơ chế khởi tạo vận tốc từ sai phân hữu hạn hai điểm đo đầu tiên kết hợp cập nhật Kalman thích ứng, sai số toàn phiên duy trì bất biến ở mức $0{,}26$ m trên mọi giá trị khởi tạo $\mathbf{P}_0$, khẳng định tính ổn định của giải thuật.
 
 \subsubsection{Tổng kết độ tin cậy và khả năng phục hồi lỗi}
 
-\hspace{0.5cm} Công tác đánh giá độ tin cậy và xử lý trường hợp biên đã hoàn thành xuất sắc các mục tiêu đề ra:
+\hspace{0.5cm} Công tác đánh giá độ tin cậy và xử lý trường hợp biên đã hoàn thành các mục tiêu đề ra:
 \begin{enumerate}
     \item Thiết lập ma trận đánh giá 7 trường hợp biên và cơ chế bù suy đoán vị trí khi mất tín hiệu GPS.
-    \item Xây dựng hoàn chỉnh mô hình độ tin cậy toán học: phân phối Bernoulli/Nhị thức, kiến trúc biểu quyết 2-out-of-3 nâng độ tin cậy 10s lên $92{,}0\%$, và xích Markov 4 trạng thái chứng minh hệ thống sẵn sàng hoạt động tới $99{,}98\%$ thời gian.
-    \item Chứng minh hệ thống thỏa mãn tuyệt đối tiêu chuẩn thời gian thực Rate Monotonic Scheduling với biên độ an toàn gấp 84 lần.
-    \item Thiết lập chuỗi quy trình tự động hóa kiểm soát chất lượng CI/CD phân tầng 163 ca kiểm thử, bảo đảm chất lượng phần mềm không bao giờ bị hồi quy.
+    \item Đánh giá thực nghiệm đặc tuyến suy thoái và khả năng tự phục hồi của bộ lọc khi xảy ra sự cố mất GPS hoặc lỗi cảm biến kép (Hình \ref{fig:sensor-recovery}), khôi phục trạng thái ổn định trong vòng $1{,}2$ giây.
+    \item Triển khai cổng kiểm định ngoại lai Mahalanobis $\chi^2$ giúp triệt tiêu hiện tượng giật bước quỹ đạo và hạ thấp sai số đỉnh khi cảm biến chịu xung nhiễu đột biến lớn.
+    \item Khảo sát độ nhạy chứng minh tính bền vững số học của bộ lọc trước sai lệch khởi tạo ma trận hiệp phương sai ban đầu.
+    \item Thiết lập chuỗi quy trình tự động hóa kiểm soát chất lượng CI/CD phân tầng 163 ca kiểm thử, bảo đảm chất lượng phần mềm hạn chế nguy cơ bị hồi quy.
 \end{enumerate}

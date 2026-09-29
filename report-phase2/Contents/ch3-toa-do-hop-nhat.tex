@@ -116,7 +116,9 @@ Ma trận $\mathbf{R}_{ecef}^{enu}$ là trực giao, tức $\mathbf{R}^{-1} = \m
 
 \hspace{0.5cm} Phép chuyển đổi ngược cần thiết khi ta có vị trí mục tiêu trong ENU và muốn hiển thị tọa độ địa lý trên bản đồ. Quy trình gồm ba bước: chuyển ENU sang hiệu ECEF, cộng với vị trí gốc ECEF, rồi chuyển ECEF sang WGS-84.
 
-\textbf{Bước 1: ENU sang hiệu ECEF.\\} Sử dụng ma trận nghịch $\mathbf{R}_{enu}^{ecef} = (\mathbf{R}_{ecef}^{enu})^T$:
+\textbf{Bước 1: ENU sang hiệu ECEF.}
+
+Sử dụng ma trận nghịch $\mathbf{R}_{enu}^{ecef} = (\mathbf{R}_{ecef}^{enu})^T$:
 \begin{equation}
     \Delta\mathbf{p}_{ecef} = \mathbf{R}_{enu}^{ecef} \cdot \mathbf{p}_{enu} = \begin{bmatrix}
         -\sin\lambda_0 & -\sin\phi_0\cos\lambda_0 & \cos\phi_0\cos\lambda_0 \\
@@ -379,7 +381,9 @@ Phương pháp khởi tạo này nhanh hơn và ổn định hơn so với giả
 
 \hspace{0.5cm} Mỗi chu trình Kalman filter gồm hai giai đoạn:
 
-\textbf{Dự báo (predict)\\} Truyền trạng thái và độ bất định về phía trước:
+\textbf{Dự báo (predict)}
+
+Truyền trạng thái và độ bất định về phía trước:
 \begin{equation}
 \begin{aligned}
     \hat{\mathbf{x}}_k^- &= \mathbf{F} \cdot \hat{\mathbf{x}}_{k-1} \\
@@ -387,7 +391,9 @@ Phương pháp khởi tạo này nhanh hơn và ổn định hơn so với giả
 \end{aligned}
 \end{equation}
 
-\textbf{Cập nhật (update)\\} Khi phép đo mới $\mathbf{z}_k$ có sẵn, tính Kalman gain $\mathbf{K}_k$, rồi hiệu chỉnh trạng thái:
+\textbf{Cập nhật (update)}
+
+Khi phép đo mới $\mathbf{z}_k$ có sẵn, tính Kalman gain $\mathbf{K}_k$, rồi hiệu chỉnh trạng thái:
 \begin{equation}
 \begin{aligned}
     \mathbf{S}_k &= \mathbf{H} \cdot \mathbf{P}_k^- \cdot \mathbf{H}^T + \mathbf{R}_k \\
@@ -420,7 +426,9 @@ Phương pháp này ổn định số học hơn nghịch đảo ma trận, đ�
 
 Trong đó $\sigma_{pos,k}^2$ là kết quả từ công thức RSS ở mỗi bước thời gian. Khi nhiễu đo lường tăng (khoảng cách xa, GPS kém), Kalman gain tự động giảm, bộ lọc dựa nhiều hơn vào mô hình dự báo. Cơ chế này giúp bộ lọc thích nghi tự động với điều kiện đo thay đổi mà không cần can thiệp thủ công.
 
-\textbf{Ví dụ số minh họa Adaptive R\\} Xét hai tình huống với cùng mục tiêu người đi bộ:
+\textbf{Ví dụ số minh họa Adaptive R}
+
+Xét hai tình huống với cùng mục tiêu người đi bộ:
 
 \textit{Tình huống A: Mục tiêu ở 100 m.} Từ bảng \ref{tab:rss-summary}, $\sigma_{pos} \approx 5{,}1$ m. Ma trận $\mathbf{R}_A = 5{,}1^2 \cdot \mathbf{I} = 26{,}01 \cdot \mathbf{I}$. Kalman gain:
 \begin{equation}
@@ -438,9 +446,13 @@ Cơ chế này hoạt động tự động mà không cần người vận hành
 
 Với mục tiêu 3D, $\mathbf{R}$ là ma trận 3×3 tương ứng với ba phép đo East, North, Up.
 
-\textbf{Ví dụ số minh họa chu trình Kalman\\} Giả sử mục tiêu người đi bộ ở trạng thái ban đầu $\hat{\mathbf{x}}_0 = [0, 0, 1{,}4, 0]^T$ (vị trí gốc, vận tốc 1,4 m/s theo hướng East), $\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$, $\Delta t = 0{,}1$ s, $\sigma_a = 0{,}5$ m/s$^2$.
+\textbf{Ví dụ số minh họa chu trình Kalman}
 
-\textbf{Bước 1: Dự báo\\} Ma trận $\mathbf{F}$ với $\Delta t = 0{,}1$:
+Giả sử mục tiêu người đi bộ ở trạng thái ban đầu $\hat{\mathbf{x}}_0 = [0, 0, 1{,}4, 0]^T$ (vị trí gốc, vận tốc 1,4 m/s theo hướng East), $\mathbf{P}_0 = \text{diag}(100, 100, 25, 25)$, $\Delta t = 0{,}1$ s, $\sigma_a = 0{,}5$ m/s$^2$.
+
+\textbf{Bước 1: Dự báo}
+
+Ma trận $\mathbf{F}$ với $\Delta t = 0{,}1$:
 \begin{equation}
     \mathbf{F} = \begin{bmatrix} 1 & 0 & 0{,}1 & 0 \\ 0 & 1 & 0 & 0{,}1 \\ 0 & 0 & 1 & 0 \\ 0 & 0 & 0 & 1 \end{bmatrix}
 \end{equation}
@@ -452,7 +464,9 @@ Phương sai dự báo (chỉ tính thành phần East cho minh họa): $P_{11}^
     P_{11}^- \approx 100 + 0{,}01 \cdot 25 + 0{,}00000625 \approx 100{,}25
 \end{equation}
 
-\textbf{Bước 2: Phép đo\\} GPS đo vị trí East = $0{,}20$ m (nhiễu $\sigma_{gps} = 5{,}0$ m). Hợp nhất laser-IMU cho $\sigma_{pos} = 5{,}0$ m (cự ly gần, GPS dominates). Ma trận $\mathbf{R} = 5{,}0^2 \cdot \mathbf{I}_{2\times2} = \text{diag}(25, 25)$.
+\textbf{Bước 2: Phép đo}
+
+GPS đo vị trí East = $0{,}20$ m (nhiễu $\sigma_{gps} = 5{,}0$ m). Hợp nhất laser-IMU cho $\sigma_{pos} = 5{,}0$ m (cự ly gần, GPS dominates). Ma trận $\mathbf{R} = 5{,}0^2 \cdot \mathbf{I}_{2\times2} = \text{diag}(25, 25)$.
 
 \subsubsection{Bước 3: Tính Kalman gain\\}
 \begin{align*}
@@ -601,9 +615,9 @@ Kalman 3D (6 trạng thái) & $\sim$48 $\mu$s & 82\% \\
 }
 \end{table}
 
-Thời gian 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chiếm 59\% của chu kỳ 100 ms, để lại 41\% dung lượng cho các tác vụ khác (đọc cảm biến, truyền mạng, hiển thị). Với 100 Hz (chu kỳ 10 ms), chuỗi xử lý chiếm 59\% dung lượng, vẫn khả thi nhưng cần cải thiện hiệu năng.
+Thời gian 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% của chu kỳ 100 ms (tần số 10 Hz), để lại 99,941\% dung lượng thời gian cho các tác vụ khác (đọc cảm biến, truyền dữ liệu mạng, hiển thị bản đồ). Với tần số 100 Hz (chu kỳ 10 ms), chuỗi xử lý chỉ chiếm 0,59\% dung lượng thời gian, cho thấy khả năng mở rộng rất lớn.
 
-\textbf{Khả năng mở rộng lên 100 Hz\\} Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với IMU hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với thời gian 59 $\mu$s hiện tại, dung lượng còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% dung lượng. Điều này khẳng định thuật toán đủ nhanh cho thời gian thực ở tần số cao hơn nhiều so với yêu cầu hiện tại.
+\textbf{Khả năng mở rộng lên 100 Hz\\} Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với các dòng IMU công nghiệp hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với thời gian 59 $\mu$s hiện tại, dung lượng thời gian còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% ngân sách chu kỳ. Điều này khẳng định chuỗi thuật toán hoàn toàn đáp ứng thời gian thực ở các dải tần số cao hơn nhiều so với tần số thiết kế ban đầu.
 
 \subsubsection{So sánh chi tiết Kalman và alpha-beta}
 
@@ -628,7 +642,7 @@ Phù hợp & Mục tiêu cơ động, nhiễu thay đổi & Mục tiêu di chuy�
 \end{tabularx}
 \end{table}
 
-Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp. Trên thiết bị nhúng, tài nguyên tiết kiệm được có thể dùng cho các tác vụ khác như định tuyến và giao tiếp mạng. Tuy nhiên, bộ lọc này không cung cấp thông tin về độ bất định, vốn là thông tin quan trọng để đánh giá chất lượng bám mục tiêu và đưa ra quyết định trong các hệ thống thực.
+Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp. Trên thiết bị nhúng, tài nguyên tiết kiệm được có thể dùng cho các tác vụ khác như định tuyến và giao tiếp mạng. Mặt khác, bộ lọc này không cung cấp thông tin về độ bất định, vốn là thông tin quan trọng để đánh giá chất lượng bám mục tiêu và đưa ra quyết định trong các hệ thống thực.
 
 \subsubsection{Điều kiện sử dụng từng bộ lọc}
 
@@ -638,7 +652,7 @@ Sử dụng Kalman filter khi: Mục tiêu có khả năng cơ động cao (dron
 
 Sử dụng alpha-beta filter khi: Mục tiêu di chuyển đều với vận tốc gần không đổi (người đi bộ trên quãng đường thẳng); tài nguyên tính toán hạn chế (microcontroller, IoT device); cần độ trễ xử lý cực thấp (real-time cứng); chỉ cần ước tính vị trí mà không cần đánh giá độ bất định.
 
-Trong đồ án này, cả hai bộ lọc đều được triển khai cho mục đích so sánh. Kalman filter là lựa chọn chính cho hệ thống thực vì nó cung cấp cả ước tính vị trí và độ bất định, đồng thời thích nghi tự động với thay đổi nhiễu. Alpha-beta filter đóng vai trò mốc so sánh (baseline) để đánh giá hiệu năng tương đối của Kalman filter. Kết quả mô phỏng cho thấy Kalman filter tốt hơn từ 5 đến 15\% về RMSE tùy loại mục tiêu, xác nhận lợi thế của cơ chế thích nghi tự động.
+Trong đồ án này, cả hai bộ lọc đều được triển khai cho mục đích so sánh. Kalman filter cung cấp cả ước tính vị trí và ma trận hiệp phương sai độ bất định, đồng thời có khả năng thích nghi với thay đổi nhiễu đo lường. Alpha-beta filter đóng vai trò mốc so sánh với cấu trúc tính toán tinh giản. Trong các kịch bản thử nghiệm giả định vận tốc không đổi (CV), alpha-beta filter đạt RMSE thấp hơn Kalman filter, trong khi Kalman filter thể hiện ưu thế về ước lượng độ bất định và khả năng thích ứng khi cự ly quan sát tăng xa.
 
 \subsubsection{Phân tích hành vi bộ lọc theo điều kiện đo}
 
@@ -664,7 +678,7 @@ Trong đồ án này, cả hai bộ lọc đều được triển khai cho mục
     \item \textbf{Alpha-beta:} $\alpha = 0{,}4$ cố định, không phản ứng với $\mathbf{R}$ thay đổi. residual lớn hơn (mục tiêu cơ động, sai lệch dự báo lớn), nhưng $\alpha$ cố định nên bám chậm. RMSE $\approx 1{,}02$ m.
 \end{itemize}
 
-Alpha-beta vẫn tốt hơn về RMSE vì mô hình vận tốc không đổi + nhiễu Gaussian vẫn là mô hình hợp lý ở 10 Hz. Tuy nhiên, Kalman cung cấp \textit{độ bất định} (uncertainty\_m) tăng lên khi mục tiêu cơ động, cho phép hệ thống con trên biết rằng ước tính đang kém tin cậy hơn.
+Alpha-beta vẫn tốt hơn về RMSE vì mô hình vận tốc không đổi + nhiễu Gaussian vẫn là mô hình hợp lý ở 10 Hz. Bù lại, Kalman cung cấp \textit{độ bất định} (uncertainty\_m) tăng lên khi mục tiêu cơ động, cho phép hệ thống con trên biết rằng ước tính đang kém tin cậy hơn.
 
 \subsubsection{Kịch bản 3: Drone bay lộn xộn ở độ cao lớn}
 
@@ -695,9 +709,9 @@ Kết quả cho thấy RMSE cực tiểu tại $\alpha = 0{,}4$. Khi $\alpha$ nh
 
 \textbf{Thứ nhất,} cross-over range 794 m xác định rõ phạm vi hoạt động tối ưu của hệ thống. Trong thiết lập mặc định (bán kính 400 m), GPS luôn là yếu tố chi phối sai số, vì vậy laser và IMU không cần nâng cấp ở giai đoạn này. Khi mở rộng phạm vi trên 794 m trong tương lai, việc nâng cấp IMU (giảm $\sigma_{az}$ từ 0,3$^\circ$ xuống 0,1$^\circ$) sẽ dịch cross-over lên khoảng 2\,380 m, mở rộng đáng kể vùng GPS-dominant.
 
-\textbf{Thứ hai,} Kalman filter với Adaptive R hoạt động tốt hơn alpha-beta filter từ 5 đến 15\% về RMSE trong hầu hết kịch bản. Sự khác biệt lớn nhất xuất hiện ở mục tiêu drone (xử lý 3D) và mục tiêu xe máy (cơ động đột ngột), nơi cơ chế thích nghi tự động phát huy tác dụng. Với mục tiêu người đi bộ (di chuyển đều, cự ly ngắn), alpha-beta cho kết quả tốt hơn vì bộ lọc cố định ít phản ứng với nhiễu GPS ngẫu nhiên.
+\textbf{Thứ hai,} trong điều kiện thử nghiệm với mô hình vận tốc không đổi (Constant Velocity), bộ lọc alpha-beta đạt sai số RMSE thấp hơn bộ lọc Kalman (0,26 m so với 0,86 m ở người đi bộ; 1,02 m so với 1,80 m ở xe máy động học; 1,06 m so với 2,10 m ở drone). Điều này xuất phát từ đặc tính đáp ứng tức thời của cấu trúc Benedict-Bordner không bị trễ pha hội tụ hiệp phương sai. Dẫu vậy, bộ lọc Kalman đóng vai trò trung tâm cho các bài toán phức tạp nhờ khả năng ước lượng ma trận hiệp phương sai bất định $\mathbf{P}_k$ theo thời gian thực và thích nghi động ma trận $\mathbf{R}_k$ theo cự ly quan sát.
 
-\textbf{Thứ ba,} thời gian xử lý 59 $\mu$s cho toàn bộ chuỗi (chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chiếm 59\% dung lượng chu kỳ 100 ms, để lại 41\% cho các tác vụ khác. Điều này xác nhận hệ thống đủ nhanh cho thời gian thực ở tần số 10 Hz và có thể mở rộng lên 100 Hz (chỉ chiếm 0,59\% dung lượng chu kỳ 10 ms).
+\textbf{Thứ ba,} thời gian xử lý 59 $\mu$s cho toàn bộ chuỗi thuật toán (chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% dung lượng chu kỳ 100 ms (10 Hz), để lại 99,941\% cho các tác vụ hệ thống khác. Điều này xác nhận hệ thống hoàn toàn đáp ứng thời gian thực ở tần số 10 Hz và có thể mở rộng lên 100 Hz (khi đó chuỗi xử lý chỉ chiếm 0,59\% dung lượng chu kỳ 10 ms).
 
 Bảng sau tóm tắt các tham số thiết kế chính:
 

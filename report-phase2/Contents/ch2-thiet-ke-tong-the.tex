@@ -174,31 +174,6 @@ Mỗi bước chuyển đổi có sai số riêng. Sai số từ bước (1) và
 
 Sai số mục tiêu tăng tuyến tính theo khoảng cách $d$, nghĩa là ở khoảng cách xa, sai số đo góc trở thành yếu tố chi phối.
 
-\subsubsection{Ví dụ số liệu chuyển đổi tọa độ}
-
-\hspace{0.5cm} Để minh họa quy trình chuyển đổi, xét ví dụ cụ thể sau. Người quan sát đứng tại vĩ độ $\varphi = 10{,}7726^\circ$, kinh độ $\lambda = 106{,}6983^\circ$, cao độ $h = 10$ m. Laser đo khoảng cách $d = 200$ m, azimuth $\alpha = 45^\circ$, elevation $\beta = 5^\circ$.
-
-Bước 1, chuyển WGS84 sang ECEF. Sử dụng ellipsoid WGS84 với bán trục lớn $a = 6\,378\,137{,}0$ m và độ dẹt $f = 1/298{,}257\,223\,563$, tính bán trục nhỏ $b = a(1-f) = 6\,356\,752{,}314\,245$ m. Độ lệch tâm viễn giác $e^2 = (a^2 - b^2)/a^2 = 0{,}006\,694\,380\,022\,90$. Bán kính tuyến tính $N = a/\sqrt{1 - e^2 \sin^2\varphi}$. Với $\varphi = 10{,}7726^\circ$, $\sin\varphi \approx 0{,}1870$, $N \approx 6\,378\,200$ m. Kết quả ECEF:
-\begin{itemize}
-    \item $X = (N + h)\cos\varphi\cos\lambda \approx 5\,753\,842$ m
-    \item $Y = (N + h)\cos\varphi\sin\lambda \approx 2\,675\,415$ m
-    \item $Z = [N(1-e^2) + h]\sin\varphi \approx 1\,197\,893$ m
-\end{itemize}
-
-Bước 2, xây dựng ma trận xoay từ ECEF sang ENU tại vị trí người quan sát. Ma trận xoay $R$ gồm ba vector đơn vị:
-\begin{equation}
-R = \begin{bmatrix} -\sin\lambda & \cos\lambda & 0 \\ -\sin\varphi\cos\lambda & -\sin\varphi\sin\lambda & \cos\varphi \\ \cos\varphi\cos\lambda & \cos\varphi\sin\lambda & \sin\varphi \end{bmatrix}
-\end{equation}
-
-Bước 3, tính vector định hướng trong hệ ENU. Với $\alpha = 45^\circ$, $\beta = 5^\circ$, $d = 200$ m:
-\begin{itemize}
-    \item $\Delta e = d \cos\beta \sin\alpha = 200 \times 0{,}9962 \times 0{,}7071 \approx 140{,}7$ m (hướng Đông)
-    \item $\Delta n = d \cos\beta \cos\alpha = 200 \times 0{,}9962 \times 0{,}7071 \approx 140{,}7$ m (hướng Bắc)
-    \item $\Delta u = d \sin\beta = 200 \times 0{,}0872 \approx 17{,}5$ m (hướng lên)
-\end{itemize}
-
-Vị trí mục tiêu trên bản đồ lệch khoảng 199 m về hướng Đông-Bắc và 17,5 m so với mặt phẳng ngang. Sai số từ phép tính này chủ yếu đến từ $\sigma_\alpha$ và $\sigma_\beta$: với $\sigma_\alpha = 0{,}3^\circ$ ở khoảng cách 200 m, sai số ngang là $200 \times \sin(0{,}3^\circ) \approx 1{,}0$ m.
-
 \subsubsection{Sơ đồ lớp phần mềm}
 
 \hspace{0.5cm} Sơ đồ lớp (class diagram) mô tả các thực thể phần mềm chính và mối quan hệ giữa chúng được trình bày trong Hình \ref{fig:class}.
@@ -268,7 +243,7 @@ Nếu mất tín hiệu cảm biến trong thời gian ngắn, bộ lọc duy tr
 
 \hspace{0.5cm} Phương pháp đầu tiên là HTTP polling (truy vấn định kỳ). Raspberry Pi gửi request POST mỗi chu kỳ, máy chủ nhận và xử lý. Ưu điểm là đơn giản, tương thích tốt với mọi proxy và firewall. Nhược điểm là mỗi lần trao đổi dữ liệu đều thiết lập lại kết nối TCP,cộng thêm header HTTP, tạo chi phí bổ sung. Với tần số 10 Hz, mỗi giây có 10 lần kết nối mới, mỗi lần thêm khoảng 10-50 ms độ trễ từ chi phí phụ. Tổng chi phí có thể chiếm 10-30\% thời gian chu kỳ.
 
-Phương pháp thứ hai là Server-Sent Events (SSE). Máy chủ có thể gửi dữ liệu xuống máy khách (client) liên tục qua một kết nối HTTP duy trì. Tuy nhiên, SSE chỉ hỗ trợ truyền một chiều từ server xuống client. Raspberry Pi không thể gửi dữ liệu lên qua SSE mà cần một kênh riêng, tạo sự phức tạp trong thiết kế.
+Phương pháp thứ hai là Server-Sent Events (SSE). Máy chủ có thể gửi dữ liệu xuống máy khách (client) liên tục qua một kết nối HTTP duy trì. Dù vậy, SSE chỉ hỗ trợ truyền một chiều từ server xuống client. Raspberry Pi không thể gửi dữ liệu lên qua SSE mà cần một kênh riêng, tạo sự phức tạp trong thiết kế.
 
 Phương pháp thứ ba là WebSocket (kênh truyền dữ liệu hai chiều). WebSocket giữ một kết nối TCP mở duy nhất, trao đổi dữ liệu hai chiều mà không cần thiết lập lại kết nối mỗi lần. Sau khi bắt đầu phiên (handshake HTTP ban đầu), tất cả dữ liệu tiếp theo đi qua kết nối này với độ trễ thấp (micro giây đến mili giây).
 
@@ -309,27 +284,9 @@ Bộ đệm dạng vòng sử dụng một mảng tĩnh với hai chỉ số: he
 
 Dữ liệu trong bộ đệm được sử dụng cho ba mục đích chính. Thứ nhất, hiển thị quỹ đạo trên bản đồ: 500 frame gần nhất tương ứng 50 giây ở tần số 10 Hz, đủ để hiển thị quãng đường mục tiêu đã đi qua. Thứ hai, tính toán thống kê sai số theo thời gian thực: RMSE, sai số tức thời, và sai số tích lũy được tính trên cửa sổ trượt trong bộ đệm. Thứ ba, xuất dữ liệu CSV khi người dùng yêu cầu: toàn bộ nội dung bộ đệm được serialize thành tệp CSV với các cột tọa độ, sai số, và timestamp.
 
-\subsubsection{Xử lý nhúng với Raspberry Pi}
+\subsubsection{Định hướng phần cứng nhúng mục tiêu}
 
-\hspace{0.5cm} Raspberry Pi được chọn làm nền tảng xử lý nhúng vì những lý do sau: phù hợp cho những dự án phức tạp cần xử lý đa tác vụ, hệ điều hành Linux đầy đủ hỗ trợ nhiều ngôn ngữ lập trình, nhiều chân GPIO (UART, I2C, SPI) để kết nối cảm biến, khả năng kết nối Internet qua Wi-Fi và Ethernet, và cộng đồng lớn với tài liệu phong phú.
-
-\subsubsection{Kết nối phần cứng}
-
-\hspace{0.5cm} Thiết kế kết nối cụ thể giữa Raspberry Pi và các cảm biến như sau:
-
-\begin{itemize}
-    \item \textbf{GPS module}: Kết nối qua chân UART (pin GPIO 14/15). Đọc dữ liệu NMEA bằng thư viện giao tiếp serial với tốc độ baud 9600 hoặc 115200. Dữ liệu NMEA được phân tích để trích xuất thông tin vĩ độ, kinh độ, cao độ.
-    \item \textbf{IMU}: Kết nối qua I2C (pin GPIO 2/3). Đọc dữ liệu bằng thư viện I2C. Địa chỉ I2C mặc định của MPU6050 là 0x68, BNO055 là 0x28. Dữ liệu accelerometer và gyroscope đọc được từ thanh ghi (register) gốc, sau đó xử lý thành góc azimuth và elevation.
-    \item \textbf{Laser rangefinder}: Kết nối qua UART hoặc I2C tùy loại. LIDAR-Lite v3 sử dụng I2C với địa chỉ 0x62. Khoảng cách đọc được tính bằng mét, với sai số khoảng 2 cm ở khoảng cách ngắn.
-\end{itemize}
-
-\subsubsection{Phần mềm nhúng}
-
-\hspace{0.5cm} Ứng dụng Python chạy trên Raspberry Pi thực hiện vòng lặp chính: đọc GPS, đọc IMU, đọc laser, đóng gói JSON, gửi qua WebSocket. Vòng lặp chạy theo tần số cố định (mặc định 10 Hz), sử dụng timer để đảm bảo khoảng thời gian đều đặn giữa các lần đọc.
-
-Phần xử lý nhúng được thiết kế để hoạt động độc lập, không cần máy tính. Người dùng mang Raspberry Pi gắn trên bảng điều khiển, tripod hoặc túi đeo ra hiện trường, bật nguồn là hệ thống tự động chạy. Dữ liệu được gửi về máy chủ trung tâm qua mạng Wi-Fi hoặc 4G nếu có thiết bị phát sóng di động (USB dongle).
-
-Phần mềm cũng tích hợp cơ chế tự kiểm tra (health check). Nếu cảm biến nào không phản hồi trong quá thời gian cho phép, phần mềm đánh dấu cảm biến đó là "mất" và tiếp tục hoạt động với các cảm biến còn lại. Nếu tất cả cảm biến mất, phần mềm dừng và báo lỗi.
+\hspace{0.5cm} Về định hướng triển khai thực địa trong tương lai, hệ thống được thiết kế hướng tới các máy tính đơn bo (SBC) hoặc vi điều khiển nhúng. Tầng phần cứng này đảm nhiệm việc thu nhận dữ liệu cảm biến ngoại vi qua giao tiếp chuẩn (UART cho GNSS, I2C cho IMU, UART/I2C cho Laser ToF), đóng gói dữ liệu và truyền tải về máy chủ trung tâm. Trong phạm vi đồ án, toàn bộ chuỗi xử lý và thuật toán được kiểm chứng và thẩm định hoàn chỉnh trên môi trường mô phỏng phần mềm máy trạm x86-64.
 
 \subsubsection{Kiến trúc frontend}
 
@@ -386,16 +343,6 @@ Hình \ref{fig:screenshot-homepage} hiển thị trang chủ của hệ thống,
 \caption{Trang chủ hệ thống GPS Target Calculating}
 \label{fig:screenshot-homepage}
 \end{figure}
-
-\subsubsection{Bảng phân bổ thời gian xử lý}
-
-\hspace{0.5cm} Mỗi chu kỳ xử lý 100 ms (tần số 10 Hz) được phân bổ thời gian cho từng thành phần. Bảng \ref{tab:pipeline-timing-w12} thể hiện phân bổ chi tiết.
-
-
-Thời gian đọc cảm biến chiếm tỷ trọng lớn nhất (50 ms) vì GPS module có tần số cập nhật giới hạn. Thời gian cập nhật giao diện (30 ms) phản ánh chi phí hiển thị giao diện và vẽ lại bản đồ. Thời gian xử lý thuật toán (chuyển đổi tọa độ và bộ lọc) rất nhỏ, chỉ khoảng 0,2 ms, cho thấy thuật toán có khả năng mở rộng lên tần số cao hơn nếu cần.
-
-Phân bổ thời gian này cũng cho thấy dung lượng dự phòng đáng kể (16,85 ms, tương đương 16,85\% chu kỳ). Dự phòng này đủ để xử lý các tác vụ bổ sung như xuất dữ liệu CSV, tính toán thống kê, và xử lý lỗi kết nối mà không ảnh hưởng đến tần số cập nhật 10 Hz. Trong thực tế, phần xử lý thuật toán chỉ chiếm 0,2\% thời gian chu kỳ, cho thấy hệ thống có thể chạy ở tần số 100 Hz nếu cảm biến hỗ trợ.
-
 \subsubsection{Mô hình nhiễu cảm biến}
 
 \hspace{0.5cm} Để kiểm chứng thuật toán, mỗi cảm biến được mô hình hóa với nhiễu thống kê phù hợp. Bảng \ref{tab:noise-model-detail} liệt kê các tham số nhiễu chi tiết cho từng loại cảm biến.
@@ -513,48 +460,9 @@ Khi phiên kết thúc, người dùng có thể yêu cầu xuất dữ liệu q
 
 Ngoài CSV, hệ thống cũng ghi nhận thống kê tóm tắt khi dừng phiên: sai số trung bình bình phương (RMSE) cho từng phương pháp lọc, số frame đã xử lý, thời gian chạy thực tế. Các thông số này hiển thị trên giao diện và được lưu trong đối tượng phiên để truy xuất qua REST API.
 
-\subsubsection{Đặc tả giao thức đóng gói bản tin JSON và tối ưu hóa băng thông truyền thông}
+\subsubsection{Đặc tả gói tin trạng thái và bộ đệm vòng}
 
-\hspace{0.5cm} Để truyền tải dữ liệu định vị thời gian thực giữa máy chủ dịch vụ và giao diện người dùng, bản tin trạng thái được cấu trúc dưới định dạng JSON với 19 trường số liệu chuẩn hóa:
-\begin{equation}
-S_{\text{payload}} = \sum_{i=1}^{19} S(\text{field}_i) + S_{\text{syntax}} \approx 180 \sim 220\text{ byte/frame}
-\label{eq:json-payload-size-formula}
-\end{equation}
-
-Băng thông mạng tiêu thụ tại tần số phát sóng danh định 10 Hz:
-\begin{equation}
-B_{\text{network}} = S_{\text{payload}} \times f_{\text{sample}} = 200\text{ byte} \times 10\text{ Hz} = 2{,}0\text{ KB/s} = 16{,}0\text{ kbps}
-\label{eq:bandwidth-consumption-formula}
-\end{equation}
-
-
-Kích thước gói tin 200 byte giúp việc truyền tải qua kênh truyền dữ liệu hai chiều chiếm dụng băng thông không đáng kể, bảo đảm khả năng mở rộng phục vụ đồng thời hàng trăm phiên bám bắt mà không gây nghẽn mạng.
-
-\subsubsection{Kiến trúc bộ nhớ đệm dạng vòng xoay và kiểm soát tràn vùng nhớ}
-
-\hspace{0.5cm} Để lưu trữ chuỗi lịch sử quỹ đạo bám bắt phục vụ trực quan hóa bản đồ mà không gây cạn kiệt bộ nhớ RAM, cấu trúc dữ liệu Bộ đệm vòng xoay cố định (Fixed Ring Buffer) với dung lượng $N_{\text{max}} = 500$ điểm được hiện thực hóa:
-\begin{equation}
-\text{Con trỏ ghi: } \text{head} = (k - 1) \pmod{N_{\text{max}}}
-\label{eq:ring-buffer-head-pointer}
-\end{equation}
-
-Khi số lượng khung vượt quá $500$ ($t > 50$ s), dữ liệu mới nhất sẽ tự động ghi đè lên phần tử cũ nhất mà không cần thực hiện thao tác dịch chuyển mảng, bảo đảm độ phức tạp tính toán luôn đạt $\mathcal{O}(1)$:
-
-\begin{table}[H]
-\centering
-\caption{So sánh hiệu năng giữa mảng động tự co giãn và bộ đệm vòng xoay cố định}
-\label{tab:ring-buffer-vs-dynamic-array}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Cấu trúc lưu trữ} & \textbf{Độ phức tạp thêm mới} & \textbf{Độ phức tạp truy xuất} & \textbf{Chiếm dụng RAM sau 1h} & \textbf{Nguy cơ tràn bộ nhớ} \\
-\midrule
-Mảng động (\texttt{list.append}) & $\mathcal{O}(1)$ amortized & $\mathcal{O}(1)$ & $4{,}6$ MB ($36.000$ điểm) & Tăng tuyến tính theo thời gian \\
-\textbf{Bộ đệm vòng ($N=500$)} & $\mathbf{\mathcal{O}(1)\text{ hằng số}}$ & $\mathbf{\mathcal{O}(1)}$ & $\mathbf{64\text{ KB (Cố định)}}$ & \textbf{Hoàn toàn triệt tiêu ($0\%$)} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+\hspace{0.5cm} Nhằm tối ưu hóa băng thông mạng và giới hạn mức tiêu thụ tài nguyên máy chủ, bản tin trạng thái định vị thời gian thực được đóng gói dưới định dạng JSON gọn nhẹ gồm 19 trường dữ liệu chuẩn hóa, tương đương khoảng $200$ byte mỗi khung (chiếm dụng băng thông $16$ kbps ở tần số $10$ Hz). Tại máy chủ và giao diện, cấu trúc bộ đệm vòng cố định ($N_{\max} = 500$ điểm) được thiết lập để lưu trữ vệt quỹ đạo gần nhất với chi phí thao tác $\mathcal{O}(1)$ và loại trừ hoàn toàn nguy cơ rò rỉ bộ nhớ. Toàn bộ kiến trúc truyền tin và phân tích tài nguyên chuyên sâu được phân tích tại Chương 6.
 
 \subsubsection{Kiến trúc tích hợp giao diện người dùng React và cơ chế nhịp tim kết nối}
 

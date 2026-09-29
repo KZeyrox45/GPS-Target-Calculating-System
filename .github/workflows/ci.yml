@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [main, develop]
   pull_request:
     branches: [main, develop]
 
@@ -15,11 +14,14 @@ jobs:
         working-directory: backend
     steps:
       - uses: actions/checkout@v4
+        with:
+          lfs: true
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.11"
+          enable-cache: true
       - name: Install dependencies
-        run: uv sync --group dev
+        run: uv sync --frozen --group dev
       - name: Lint (ruff)
         run: uv tool run ruff check app/ tests/
       - name: Run tests

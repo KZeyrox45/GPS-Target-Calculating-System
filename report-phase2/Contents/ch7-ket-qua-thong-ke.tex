@@ -93,101 +93,7 @@ Ba loại mục tiêu được mô phỏng tương ứng với ba trường hợ
 
 Mối quan hệ giữa loại mục tiêu và loại Kalman filter là do đặc tính chuyển động: người đi bộ và xe máy di chuyển trên mặt phẳng ngang (2D), nên Kalman filter chỉ cần trạng thái $(x, y, v_x, v_y)$. Drone bay trong không gian 3D với thay đổi độ cao liên tục, nên cần thêm trạng thái $(z, v_z)$ để mô tả thành phần thẳng đứng. Sự khác biệt về chiều không gian ảnh hưởng đến kích thước ma trận trạng thái ($4 \times 4$ cho 2D, $6 \times 6$ cho 3D), ma trận đo lường, và ma trận nhiễu quá trình, tạo ra sự phức tạp hơn đáng kể cho Kalman 3D.
 
-\subsubsection{Mô hình mục tiêu người đi bộ}
-
-\hspace{0.5cm} Mô hình người đi bộ mô phỏng chuyển động của một người đi bộ với các đặc điểm vi mô vật lý. Mô hình tạo quỹ đạo tuyến tính cơ bản và bổ sung các yếu tố động học thực tế như nhiễu góc heading theo quá trình Ornstein-Uhlenbeck (OU), điều chỉnh nhịp bước (gait modulation), và các sự kiện dừng lại (pause events). Tổng hợp ba yếu tố này tạo ra quỹ đạo có độ tin cậy cao, phản ánh đúng hành vi đi bộ trong đô thị.
-
-Quỹ đạo được tạo theo từng bước thời gian, với vận tốc tuyến tính hướng về mục tiêu tiếp theo được điều chỉnh bởi góc heading OU. Tại mỗi bước, góc heading mới được tính bằng cách cộng thêm nhiễu OU vào góc trước đó:
-\begin{equation}
-\theta_k = \theta_{k-1} + \frac{1}{\tau}\left(\mu_\theta - \theta_{k-1}\right)\Delta t + \sigma_\theta \sqrt{\Delta t}\, W_k,
-\end{equation}
-
-trong đó $\mu_\theta$ là góc heading trung bình (hướng về mục tiêu), $\tau$ là thời gian tự tương quan, $\sigma_\theta$ là biên độ nhiễu, và $W_k$ là biến chuẩn hóa $N(0,1)$. Hệ số $\frac{1}{\tau}$ đảm bảo góc heading có xu hướng quay về hướng mục tiêu, trong khi số hạng $\sigma_\theta \sqrt{\Delta t}\, W_k$ thêm nhiễu ngẫu nhiên.
-
-Hiệu ứng OU tạo ra các đoạn đi thẳng dài xen kẽ với các khúc rẽ mượt mà. Khi $\tau$ lớn, góc heading thay đổi chậm và quỹ đạo có các đoạn thẳng dài (phù hợp với đi bộ trên đường thẳng). Khi $\tau$ nhỏ, góc heading thay đổi nhanh và quỹ đạo có nhiều khúc rẽ (phù hợp với đi bộ trong khu vực đông đúc). Với $\tau = 1{,}0$ s, mô hình tạo ra quỹ đạo có độ dài đoạn thẳng trung bình khoảng 1,4 m (tương đương 1 giây đi bộ), phù hợp với hành vi đi bộ trong đô thị.
-
-Để tạo mục tiêu tiếp theo trên quỹ đạo, mô hình sử dụng chiến lược waypoints tương đối (relative waypoints). Thay vì đặt mục tiêu tại một tọa độ cố định trên bản đồ (gây ra hành vi quay đầu bất tự nhiên khi mục tiêu đến gần), mô hình chọn mục tiêu tiếp theo bằng cách cộng thêm một vectơ ngẫu nhiên vào vị trí hiện tại. Vectơ này có độ dài từ 5-15 m và hướng ngẫu nhiên, tạo ra quỹ đạo đi bộ tự nhiên với các khúc rẽ đa dạng. Khi mục tiêu tiến gần ranh giới vùng mô phỏng, hướng di chuyển được điều chỉnh dần theo lực đẩy của trường thế năng thay vì quay đầu đột ngột.
-
-Nhiễu góc heading theo quá trình OU mô phỏng sự thay đổi hướng đi tự nhiên của người đi bộ. Thay vì sử dụng nhiễu trắng (mỗi bước chọn hướng ngẫu nhiên hoàn toàn), quá trình OU tạo chuỗi góc heading có tính tự tương quan: hướng đi tại bước thời gian $t$ có liên hệ với hướng tại bước $t-1$, với thời gian tự tương quan $\tau = 1{,}0$ s. Điều này tạo ra các đoạn đi thẳng dài xen kẽ với các khúc rẽ mượt mà, tương tự cách người đi bộ thực sự thay đổi hướng.
-
-Điều chỉnh nhịp bước mô phỏng sự thay đổi vận tốc trong chu kỳ đi bộ. Người đi bộ không di chuyển với vận tốc hoàn toàn không đổi mà có dao động nhỏ trong mỗi chu kỳ bước chân: vận tốc tăng nhẹ khi chân bước tới và giảm khi chân nâng lên. Mô hình áp dụng dao động sin với biên độ nhỏ lên vận tốc tuyến tính, tạo quỹ đạo có nhịp điệu tự nhiên. Công thức điều chỉnh:
-\begin{equation}
-v_{gait}(t) = v_{mean} + A_{gait} \sin\left(\frac{2\pi t}{T_{gait}}\right),
-\end{equation}
-trong đó $v_{mean}$ là vận tốc trung bình, $A_{gait} = 0{,}1$ m/s là biên độ dao động, và $T_{gait} \approx 0{,}5$ s là chu kỳ đi bộ (tần số khoảng 2 Hz, tương ứng 2 bước/giây). Dao động này quá nhỏ để ảnh hưởng đáng kể đến RMSE tổng thể, nhưng tạo ra quỹ đạo có độ tin cậy cao hơn khi so sánh với quỹ đạo tuyến tính đơn giản.
-
-Các sự kiện dừng lại mô phỏng việc người đi bộ tạm dừng trong quá trình di chuyển. Với xác suất nhỏ tại mỗi bước thời gian ($p = 0{,}02$, tương ứng khoảng 24 lần dừng trong 1.200 bước), mô hình có thể kích hoạt một khoảng dừng kéo dài từ 1 đến 5 giây (ngẫu nhiên). Trong khoảng dừng, vận tốc giảm về không theo hàm cosine trong 0,5 giây đầu, sau đó giữ nguyên ở 0, và tăng lại theo hàm cosine trong 0,5 giây cuối khi di chuyển tiếp tục. Vị trí không thay đổi trong suốt khoảng dừng.
-
-Các sự kiện này tạo ra các đoạn quỹ đạo phẳng trên biểu đồ vị trí, phản ánh hành vi dừng lại chờ đèn đỏ hoặc nhìn đường. Từ quan điểm đánh giá bộ lọc, các khoảng dừng là thách thức: khi mục tiêu dừng lại, vận tốc thực bằng 0 nhưng bộ lọc CV vẫn dự báo vận tốc khác 0, tạo sai lệch. Alpha-beta xử lý tốt hơn ở đây vì $\beta$ nhỏ tự động giảm vận tốc ước lượng khi sai lệch đo lường nhỏ và liên tục. Kalman filter cũng xử lý được nhưng cần nhiều bước hơn để vận tốc ước lượng hội tụ về 0.
-
-Thông số mô hình người đi bộ được tóm tắt trong Bảng \ref{tab:ped-params}.
-
-\begin{table}[H]
-\centering
-\caption{Thông số mô hình người đi bộ}
-\label{tab:ped-params}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lll}
-\toprule
-\textbf{Tham số} & \textbf{Giá trị} & \textbf{Ghi chú} \\
-\midrule
-Vận tốc trung bình ($v_{mean}$) & 1,4 m/s & Tốc độ đi bộ bình thường \\
-Tốc độ tối đa ($v_{max}$)       & 2,0 m/s & Giới hạn trên \\
-Thời gian tự tương quan OU ($\tau$) & 1,0 s & Nhiễu góc heading \\
-Biên độ dao động gait            & 0,1 m/s & Amplitude gait modulation \\
-Xác suất dừng mỗi bước          & 0,02    & Khoảng dừng 1-5 s \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsubsection{Mô hình mục tiêu xe máy}
-
-\hspace{0.5cm} Mô hình xe máy sử dụng hai cơ chế tạo quỹ đạo tùy thuộc vào chế độ dữ liệu. Trong chế độ dữ liệu thực (Real-World Data), bộ tải mạng lưới đường bộ tải mạng lưới đường thực từ tệp dữ liệu đồ thị mạng lưới đường (mạng lưới đường Thành phố Hồ Chí Minh từ OpenStreetMap) và tạo quỹ đạo bằng cách đi ngẫu nhiên (random walk) trên các đường thực. Ở chế độ tổng hợp (Synthetic), mô hình động học xe hai bánh (kinematic bicycle) được dùng để tạo quỹ đạo mượt mà với các giới hạn vận tốc và gia tốc.
-
-Trong chế độ mạng lưới đường thực, bộ tải mạng lưới đường bộ chọn ngẫu nhiên một nút khởi đầu trong mạng lưới đường, sau đó thực hiện chuỗi bước đi ngẫu nhiên (random walk) trên các cạnh đường. Tại mỗi giao lộ, xe máy chọn một hướng đi ngẫu nhiên trong số các hướng có thể đi được. Quá trình backtracking được triển khai để tránh xe máy bị kẹt tại các nút cuối đường (dead-end): khi không có hướng đi mới, xe máy quay lại theo toàn bộ lộ trình đã đi trước đó. Độ dài trung bình của quỹ đạo khoảng 256 nút, tương đương quãng đường 2-3 km.
-
-Độ dài quỹ đạo bị ảnh hưởng bởi mật độ mạng lưới đường. Ở khu vực trung tâm thành phố, mật độ giao lộ cao nên quỹ đạo có nhiều khúc rẽ, trong khi khu vực ngoại ô có các đoạn đường thẳng dài hơn. Việc backtracking qua toàn bộ lộ trình (thay vì chỉ 5 nút cuối cùng như phiên bản trước) đã cải thiện đáng kể: tỷ lệ quỹ đạo quá ngắn (dưới 50 nút) giảm từ 30\% xuống còn 15\%, và độ dài trung bình tăng từ 180 lên 256 nút.
-
-Mỗi giao lộ trong mạng lưới đường có dữ liệu về loại đường (primary, secondary, tertiary), được sử dụng để điều chỉnh vận tốc. Đường chính (primary) cho phép vận tốc cao (10-12 m/s), đường secondary cho phép vận tốc trung bình (7-9 m/s), và đường tertiary cho phép vận tốc thấp (5-7 m/s). Việc điều khiển vận tốc theo loại đường tạo ra quỹ đạo có tính thực tế cao, phản ánh cách xe máy thực sự di chuyển trong đô thị: nhanh trên đường lớn, chậm trên đường nhỏ.
-
-Vận tốc xe máy được kiểm soát theo loại đường. Trên đường chính, vận tốc trung bình khoảng 10-12 m/s (36-43 km/h); trên đường phụ, khoảng 5-8 m/s (18-29 km/h). Sự thay đổi vận tốc diễn ra mượt mà theo hàm exponential relaxation với hằng số thời gian $\tau = 2{,}0$ s, tránh các nhảy vận tốc đột ngột không vật lý. Công thức relaxation:
-\begin{equation}
-v_k = v_{k-1} + \frac{1}{\tau}\left(v_{target} - v_{k-1}\right)\Delta t,
-\end{equation}
-
-trong đó $v_{target}$ là vận tốc mục tiêu theo loại đường, $\tau = 2{,}0$ s là hằng số thời gian relaxation. Khi $\tau$ nhỏ, xe máy thay đổi vận tốc nhanh nhưng có thể gây giật; khi $\tau$ lớn, thay đổi mượt mà nhưng phản ứng chậm với thay đổi loại đường.
-
-Hàm exponential relaxation tạo ra đường cong vận tốc có dạng "S-curve": vận tốc bắt đầu thay đổi chậm, sau đó nhanh, và cuối cùng chậm lại khi tiếp cận giá trị mục tiêu. Dạng này tương tự cách tài xế thực tăng tốc hoặc phanh: từ từ nhấn ga, đạt gia tốc cực đại, rồi giảm ga khi đến tốc độ mong muốn. Với $\tau = 2{,}0$ s, xe máy cần khoảng 4-6 giây (2-3$\tau$) để chuyển từ vận tốc này sang vận tốc khác, phù hợp với hành vi lái xe thực tế trong đô thị.
-
-Mô hình kinematic bicycle ở chế độ tổng hợp sử dụng phương trình trạng thái:
-\begin{equation}
-\begin{aligned}
-x_{k+1} &= x_k + v_k \cos(\theta_k) \cdot \Delta t \\
-y_{k+1} &= y_k + v_k \sin(\theta_k) \cdot \Delta t \\
-\theta_{k+1} &= \theta_k + \frac{v_k}{L} \tan(\delta_k) \cdot \Delta t
-\end{aligned}
-\end{equation}
-
-trong đó $v_k$ là vận tốc, $\theta_k$ là góc heading, $\delta_k$ là góc lái, và $L = 1{,}4$ m là chiều dài cơ sở (wheelbase). Góc lái $\delta_k$ được tạo ngẫu nhiên với biên độ nhỏ ($\pm 5^\circ$), tạo ra các khúc rẽ nhẹ mô phỏng hành vi điều khiển xe trên đường thẳng.
-
-Mô hình này tạo ra quỹ đạo có các khúc rẽ đặc trưng của xe hai bánh, khác với chuyển động tuyến tính của người đi bộ. Hiệu ứng caster trail tự nhiên: xe máy có xu hướng giữ hướng đi hiện tại khi vận tốc cao và rẽ dễ hơn khi vận tốc thấp. Điều này phản ánh đúng vật lý xe hai bánh trong thực tế, nơi centripetal force cần được cân bằng bởi moment của trọng lực để giữ thăng bằng.
-
-\subsubsection{Mô hình mục tiêu drone}
-
-\hspace{0.5cm} Mô hình chuyển động của drone (dựa trên mô hình động học) được thiết kế dựa trên tham số kinematic thực của khung máy bay DJI Matrice 100. Mô hình này áp dụng các giới hạn vận tốc và gia tốc từ đặc tính bay thực của drone, tạo quỹ đạo có cơ sở vật lý thay vì quỹ đạo tuyến tính đơn giản. Việc sử dụng tham số thực từ Rodrigues et al. (2021) đảm bảo quỹ đạo mô phỏng phản ánh đúng khả năng bay của drone thực tế.
-
-Vận tốc ngang tối đa ($V_{MAX\_H}$) được đặt là 15 m/s (54 km/h), tương ứng với tốc độ bay cruise của DJI Matrice 100. Vận tốc lên cực đại ($V_{MAX\_ASC}$) là 5 m/s, phản ánh khả năng tăng độ cao của khung máy bay thực. Gia tốc ngang tối hạn là 3,0 m/s$^2$, và gia tốc thẳng đứng là 2,0 m/s$^2$. Các giới hạn này được áp dụng tại mỗi bước thời gian để đảm bảo quỹ đạo luôn khả thi về mặt vật lý. Nếu vận tốc hiện tại cộng thêm gia tốc vượt quá giới hạn, gia tốc bị cắt để giữ vận tốc trong phạm vi cho phép.
-
-Các giới hạn kinematic này có ý nghĩa vật lý quan trọng. $V_{MAX\_H} = 15$ m/s tương đương khoảng 54 km/h, là vận tốc cruise của DJI Matrice 100 trong điều kiện bay thông thường. $V_{MAX\_ASC} = 5$ m/s phản ánh giới hạn motor: drone không thể tăng độ cao quá nhanh vì sẽ mất độ ổn định và tiêu hao năng lượng lớn. Gia tốc ngang 3,0 m/s$^2$ tương đương khả năng thay đổi hướng nhanh (sharp turns) ở vận tốc cruise, phù hợp với các tình huống theo dõi mục tiêu cơ động.
-
-Mô hình 3D bao gồm ba thành phần vị trí: trục East (m), trục North (m), và trục Up (độ cao). Quỹ đạo được tạo bằng cách sử dụng quá trình OU cho vận tốc ngang, kết hợp với điều khiển độ cao mô phỏng. Độ cao drone dao động trong khoảng 20-100 m, với tốc độ thay đổi bị giới hạn bởi $V_{MAX\_ASC}$. Nhiễu vận tốc OU ($\tau = 1{,}0$ s) thay thế cho nhiễu bước cũ $N(0, 0{,}3)$ m/s, tạo ra các dao động vận tốc mượt mà thay vì các nhảy ngẫu nhiên tại mỗi bước. Sự thay đổi này giảm jitter đáng kể trên quỹ đạo và đưa mô hình drone đến gần hơn với hành vi bay thực.
-
-Mô hình drone có hai cơ chế điều khiển độ cao: chế độ duy trì độ cao (altitude hold) và chế độ bay tự do. Ở chế độ duy trì độ cao, drone cố gắng giữ độ cao mục tiêu với độ dao động nhỏ. Ở chế độ bay tự do, độ cao thay đổi theo mô hình OU, tạo quỹ đạo 3D phong phú với các đoạn lên xuống tự nhiên. Trong mô phỏng benchmark, chế độ bay tự do được sử dụng để tạo quỹ đạo có tính cơ động cao hơn, thách thức khả năng theo dõi của bộ lọc.
-
-Độ cao drone là yếu tố quan trọng ảnh hưởng đến hiệu suất tracking. Khi drone bay cao, khoảng cách slant-range từ người quan sát đến drone tăng, làm tăng thành phần IMU trong sai số hợp nhất cảm biến. Đồng thời, drone bay cao thường có vận tốc ngang lớn hơn, tạo sai lệch mô hình CV lớn hơn. Hai yếu tố này kết hợp giải thích tại sao drone có RMSE cao nhất trong ba kịch bản mục tiêu.
-
-Thông số mô hình drone được tóm tắt trong Bảng \ref{tab:drone-kinematic-limits}.
+\hspace{0.5cm} Ba kịch bản mục tiêu thực nghiệm (người đi bộ, xe máy đô thị và máy bay không người lái drone 3D) được khởi tạo theo các mô hình động học và nguồn quỹ đạo thực đã thiết lập tại Chương 5. Môi trường kiểm thử được chuẩn hóa với chu kỳ trích mẫu danh định 10 Hz và thời lượng 120 giây (1.200 bước mô phỏng). Kết quả định lượng được đối chuẩn độc lập giữa ba phương pháp: dữ liệu đo thô từ hợp nhất cảm biến, bộ lọc Alpha-Beta và bộ lọc Kalman.
 
 \subsubsection{Kết quả RMSE benchmark}
 
@@ -210,18 +116,18 @@ Drone       & 1,94 m & \textbf{1,06 m} & 2,10 m & $<$ 5 m \checkmark \\
 }
 \end{table}
 
-Thuật ngữ "đo thô" (raw measurements) ở đây chỉ vị trí tính trực tiếp từ hợp nhất cảm biến (kết hợp GPS, IMU, laser) có nhiễu, chưa qua bất kỳ bộ lọc nào. Đo thô đại diện cho chất lượng đầu vào trước khi xử lý, trong khi các giá trị alpha-beta và Kalman là kết quả sau khi lọc. Sự khác biệt giữa "đo thô" và "đã lọc" chính là giá trị mà bộ lọc mang lại: giảm nhiễu, mượt hóa quỹ đạo, và ước lượng vận tốc.
+Thuật ngữ "đo thô" (raw measurements) ở đây chỉ vị trí tính trực tiếp từ hợp nhất cảm biến (kết hợp GPS, IMU, laser) có nhiễu, chưa qua bất kỳ bộ lọc nào. Đo thô đại diện cho chất lượng đầu vào trước khi xử lý, trong khi các giá trị alpha-beta và Kalman là kết quả sau khi lọc. Sự khác biệt giữa "đo thô" và "đã lọc" thể hiện giá trị thực tế của khâu lọc: giảm nhiễu, làm mượt quỹ đạo, và ước lượng vận tốc.
 
 Từ kết quả RMSE, có thể tính tỷ lệ cải thiện (improvement ratio) của mỗi bộ lọc so với đo thô:
 \begin{equation}
 IR = \frac{RMSE_{raw} - RMSE_{filtered}}{RMSE_{raw}} \times 100\%.
 \end{equation}
 
-Áp dụng cho từng trường hợp: alpha-beta cải thiện 46\% (người đi bộ), 46\% (xe máy), 45\% (drone); Kalman cải thiện 41\% (người đi bộ), nhưng kém hơn đo thô ở xe máy và drone. Tỷ lệ cải thiện gần như không đổi ở alpha-beta cho thấy bộ lọc hoạt động ổn định bất kể loại mục tiêu, trong khi tỷ lệ cải thiện của Kalman phụ thuộc mạnh vào sự phù hợp giữa mô hình DWNA và đặc tính chuyển động thực.
+Áp dụng cho từng trường hợp: alpha-beta cải thiện 46\% (người đi bộ), 46\% (xe máy), 45\% (drone). Bộ lọc Kalman có tỷ lệ cải thiện thay đổi theo kịch bản: ở xe máy cải thiện 4{,}8\% so với đo thô ($1{,}80$ m so với $1{,}89$ m), trong khi ở người đi bộ và drone, Kalman cho RMSE cao hơn đo thô ($0{,}86$ m so với $0{,}48$ m ở người đi bộ; $2{,}10$ m so với $1{,}94$ m ở drone). Hiện tượng này xuất phát từ trễ pha trong giai đoạn đầu và độ nhạy của mô hình DWNA/CV đối với các thay đổi vận tốc thực tế của đối tượng.
 
-Cả ba kịch bản đều đạt yêu cầu bài toán (RMSE $<$ 5 m). Alpha-beta filter đạt RMSE thấp nhất ở cả ba trường hợp, với cải thiện từ 46\% đến 47\% so với đo thô. Kalman filter cải thiện hơn so với đo thô ở người đi bộ (cải thiện 41\% so với đo thô), nhưng hiệu suất kém hơn ở xe máy và drone. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan RMSE giữa ba phương pháp.
+Cả ba kịch bản đều đạt yêu cầu bài toán (RMSE $<$ 5 m). Alpha-beta filter đạt RMSE thấp nhất ở cả ba trường hợp, với cải thiện từ 45\% đến 46\% so với đo thô. Kalman filter đạt chuẩn thiết kế đề ra ($< 5$ m) nhưng có RMSE cao hơn alpha-beta trong các kịch bản thử nghiệm này. Hình \ref{fig:rmse-bar} biểu diễn so sánh trực quan RMSE giữa ba phương pháp.
 
-Tỷ lệ cải thiện giữa alpha-beta và Kalman quan trọng nhất ở drone (alpha-beta thấp hơn 50\% so với Kalman), trong khi ở người đi bộ, khoảng cách nhỏ hơn (alpha-beta thấp hơn 70\% so với Kalman). Điều này cho thấy sự khác biệt giữa hai bộ lọc tăng lên khi tính cơ động của mục tiêu tăng: drone có chuyển động 3D với thay đổi độ cao liên tục, tạo ra sai lệch mô hình lớn hơn so với mô hình CV mà cả hai bộ lọc đều giả định.
+Tỷ lệ cải thiện giữa alpha-beta và Kalman thể hiện rõ ở kịch bản drone (alpha-beta đạt 1,06 m so với 2,10 m của Kalman, chênh lệch xấp xỉ 50\%), trong khi ở người đi bộ, alpha-beta đạt 0,26 m so với 0,86 m của Kalman (chênh lệch xấp xỉ 70\%). Điều này cho thấy sự khác biệt giữa hai bộ lọc chịu tác động lớn khi tính cơ động của mục tiêu tăng: drone có chuyển động 3D với thay đổi độ cao liên tục, tạo ra sai lệch mô hình lớn hơn so với mô hình CV mà cả hai bộ lọc đều giả định.
 
 \subsubsection{Biểu đồ RMSE benchmark}
 
@@ -234,9 +140,9 @@ Tỷ lệ cải thiện giữa alpha-beta và Kalman quan trọng nhất ở dro
 \label{fig:rmse-bar}
 \end{figure}
 
-Nhìn vào biểu đồ, có thể thấy rõ mô hình: alpha-beta luôn đạt RMSE thấp nhất, đo thô ở mức trung bình, và Kalman có RMSE cao nhất ở hai kịch bản xe máy và drone. Chỉ ở kịch bản người đi bộ, Kalman có RMSE cao hơn đáng kể so với đo thô, cho thấy bộ lọc Kalman chưa tối ưu cho mục tiêu có vận tốc thấp.
+Nhìn vào biểu đồ, có thể thấy rõ: alpha-beta luôn đạt RMSE thấp nhất trong cả ba kịch bản. Ở kịch bản xe máy, Kalman cải thiện nhẹ so với đo thô ($1{,}80$ m so với $1{,}89$ m), trong khi ở người đi bộ và drone, sai số của Kalman cao hơn đo thô do ảnh hưởng của trễ ước lượng ban đầu và giả định chuyển động.
 
-Một quan sát là khoảng cách RMSE giữa alpha-beta và Kalman tăng dần từ người đi bộ đến drone. Ở người đi bộ, khoảng cách là $0{,}86 - 0{,}26 = 0{,}60$ m; ở xe máy, $1{,}80 - 1{,}02 = 0{,}78$ m; ở drone, $2{,}10 - 1{,}06 = 1{,}04$ m. Xu hướng này cho thấy sự khác biệt giữa hai bộ lọc trở nên rõ ràng hơn khi tính cơ động của mục tiêu tăng. Drone có chuyển động 3D với thay đổi độ cao liên tục, tạo ra sai lệch mô hình CV lớn nhất, và Kalman filter với mô hình DWNA fixed-rate xử lý kém hơn alpha-beta filter vốn tự điều chỉnh qua sai lệch đo lường.
+Một quan sát là khoảng cách RMSE giữa alpha-beta và Kalman ở người đi bộ là $0{,}86 - 0{,}26 = 0{,}60$ m; ở xe máy là $1{,}80 - 1{,}02 = 0{,}78$ m; ở drone là $2{,}10 - 1{,}06 = 1{,}04$ m. Xu hướng này cho thấy độ lệch giữa hai bộ lọc tăng lên khi tính cơ động không gian của mục tiêu tăng. Drone có chuyển động 3D với thay đổi độ cao, tạo ra sai lệch mô hình CV lớn hơn, và Kalman filter với mô hình DWNA tham số cố định thể hiện sự nhạy cảm cao hơn so với alpha-beta filter vốn điều chỉnh phản hồi trực tiếp theo phần dư đo lường.
 
 Một quan sát khác là cải thiện của alpha-beta so với đo thô gần như không đổi qua ba kịch bản (46\%, 46\%, 45\%). Điều này cho thấy alpha-beta filter hoạt động độc lập với đặc tính chuyển động của mục tiêu: dù mục tiêu đi bộ (1,4 m/s), chạy xe máy (5-12 m/s), hay bay drone (15 m/s), bộ lọc luôn cải thiện khoảng 46\% so với đo thô. Tính ổn định này là lợi thế lớn khi triển khai thực tế, nơi đặc tính chuyển động của mục tiêu thường không biết trước.
 
@@ -285,7 +191,7 @@ Sai số cao nhất ở drone xuất hiện ở giai đoạn đầu mô phỏng 
 
 \hspace{0.5cm} Biểu đồ hàm phân bố tích lũy (Cumulative Distribution Function, CDF) của sai số cho biết xác suất sai số nhỏ hơn một ngưỡng nhất định. Đường CDF càng nằm gần trục tung (trục $y$) ở phần bên trái biểu đồ thì bộ lọc càng tốt, vì nghĩa là sai số nhỏ chiếm tỷ lệ cao. CDF cung cấp thông tin phong phú hơn RMSE đơn giá trị: nó cho thấy phân bố đầy đủ của sai số, bao gồm cả các giá trị nhỏ nhất (best-case) và lớn nhất (worst-case).
 
-Một cách đọc CDF phổ biến là chọn một ngưỡng sai số (ví dụ 1 m) và đọc giá trị CDF tại ngưỡng đó: nếu CDF(1 m) = 0,95 nghĩa là 95\% các bước thời gian có sai số nhỏ hơn 1 m. Cách đọc này hữu ích cho việc thiết kế yêu cầu hiệu suất: nếu hệ thống yêu cầu sai số nhỏ hơn 2 m với xác suất 99\%, cần kiểm tra CDF(2 m) $\geq$ 0,99.
+Phương pháp đọc phổ sai số qua CDF được thực hiện bằng cách chọn một ngưỡng sai số (ví dụ 1 m) và đọc giá trị CDF tại ngưỡng đó: nếu CDF(1 m) = 0,95 nghĩa là 95\% các bước thời gian có sai số nhỏ hơn 1 m. Cách đọc này hữu ích cho việc thiết kế yêu cầu hiệu suất: nếu hệ thống yêu cầu sai số nhỏ hơn 2 m với xác suất 99\%, cần kiểm tra CDF(2 m) $\geq$ 0,99.
 
 Hình \ref{fig:cdf-pedestrian} hiển thị CDF sai số người đi bộ. Đường alpha-beta (xanh dương) đạt giá trị 1 sớm nhất, cho thấy 100\% sai số nhỏ hơn 0,8 m. Đường Kalman (đỏ) đạt 1 muộn hơn một chút, với khoảng 95\% sai số nhỏ hơn 1,5 m. Đường đo thô (xám) nằm giữa hai đường này. Phân vị 50\% (median) của alpha-beta khoảng 0,2 m, trong khi Kalman khoảng 0,7 m, phản ánh khoảng cách hiệu suất rõ rệt giữa hai bộ lọc.
 
@@ -329,9 +235,9 @@ Ngược lại, Kalman filter có hai nguồn kém hiệu quả trong mô phỏn
 
 Một yếu tố quan trọng khác là Kalman filter sử dụng mô hình DWNA với tham số $\sigma_a$ thống nhất cho cả ba loại mục tiêu. Trong thực tế, mỗi loại mục tiêu có đặc tính gia tốc riêng: người đi bộ hiếm khi có gia tốc lớn (chỉ khi dừng lại hoặc tăng tốc đột ngột), xe máy có gia tốc khi tăng tốc và phanh, drone có gia tốc liên tục khi thay đổi hướng và độ cao. Việc sử dụng cùng một $\sigma_a$ cho cả ba loại là sự đơn giản hóa quá mức, ảnh hưởng đến hiệu suất của Kalman filter.
 
-Để cải thiện Kalman filter, có thể áp dụng mô hình CA (Constant Acceleration) thay vì DWNA, với trạng thái bổ sung $(a_x, a_y)$ mô tả gia tốc. Mô hình CA phù hợp hơn với drone (nơi gia tốc thay đổi liên tục) và xe máy (nơi tăng tốc/phanh tạo gia tốc đáng kể). Tuy nhiên, mô hình CA tăng kích thước ma trận trạng thái từ $4 \times 4$ lên $6 \times 6$ (2D) hoặc từ $6 \times 6$ lên $9 \times 9$ (3D), làm tăng độ phức tạp tính toán và yêu cầu nhiều dữ liệu hơn để ước lượng chính xác các tham số mới.
+Để cải thiện Kalman filter, có thể áp dụng mô hình CA (Constant Acceleration) thay vì DWNA, với trạng thái bổ sung $(a_x, a_y)$ mô tả gia tốc. Mô hình CA phù hợp hơn với drone (nơi gia tốc thay đổi liên tục) và xe máy (nơi tăng tốc/phanh tạo gia tốc đáng kể). Mặt khác, mô hình CA làm tăng kích thước ma trận trạng thái từ $4 \times 4$ lên $6 \times 6$ (2D) hoặc từ $6 \times 6$ lên $9 \times 9$ (3D), làm tăng độ phức tạp tính toán và yêu cầu nhiều dữ liệu hơn để ước lượng chính xác các tham số mới.
 
-Tuy nhiên, Kalman filter có hai lợi thế không thể thay thế bằng alpha-beta:
+Song song đó, Kalman filter mang hai lợi thế không thể thay thế bằng alpha-beta:
 
 \begin{itemize}
     \item \textbf{Ước lượng độ bất định:} Ma trận $\mathbf{P}_k$ cung cấp ellipse tin cậy tại mỗi bước thời gian, phản ánh mức độ tin tưởng vào ước lượng vị trí. Thông tin này cần thiết khi kết hợp kết quả tracking với các hệ thống chỉ huy, cho phép ra quyết định dựa trên mức độ tin cậy của vị trí ước lượng. Ví dụ, nếu ellipse tin cậy quá lớn (sai số ước lượng cao), hệ thống có thể yêu cầu cảm biến bổ sung hoặc giảm tốc độ cập nhật.
@@ -415,41 +321,9 @@ Cả hai đạt yêu cầu kỹ thuật & RMSE $<$ 5 m trên mọi kịch bản 
 
 Các kết quả này định hướng các mở rộng tiềm năng của đề tài: cải thiện mô hình mục tiêu bằng cách thêm các yếu tố cơ động thực tế hơn (gia tốc, đổi hướng), và điều chỉnh tham số Kalman filter theo từng loại mục tiêu để thu hẹp khoảng cách hiệu suất với alpha-beta filter. Đồng thời, cần đánh giá thêm các chỉ tiêu ngoài RMSE như độ trễ (latency), khả năng dự báo (predictive capability), và độ ổn định (stability) trong điều kiện nhiễu cao.
 
-Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hiệu suất trong điều kiện mô phỏng CV lý tưởng (Constant Velocity). Trong thực tế, các mục tiêu thường có gia tốc thay đổi liên tục (xe máy tăng tốc khi đèn xanh, người đi bộ đổi hướng đột ngột, drone thực hiện maneuver). Khi đó, Kalman filter với mô hình phù hợp hơn (CA hoặc IMM) có thể đạt RMSE thấp hơn alpha-beta filter. Việc so sánh hiệu suất trong điều kiện cơ động thực là một trong những hướng mở rộng đáng chú ý của đề tài.
+Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hiệu suất trong điều kiện mô phỏng CV lý tưởng (Constant Velocity). Trong thực tế, các mục tiêu thường có gia tốc thay đổi liên tục (xe máy tăng tốc khi đèn xanh, người đi bộ đổi hướng đột ngột, drone thực hiện maneuver). Khi đó, Kalman filter với mô hình phù hợp hơn (CA hoặc IMM) có thể đạt RMSE thấp hơn alpha-beta filter. So sánh hiệu năng trong điều kiện cơ động thực tế là một trong những hướng mở rộng trọng tâm của đề tài.
 
-\subsubsection{Thời gian xử lý chuỗi}
 
-\hspace{0.5cm} Hiệu suất tính toán là yếu tố quyết định khả năng hoạt động thời gian thực. Bảng \ref{tab:pipeline-timing-w12} phân tích thời gian xử lý từng giai đoạn trong chuỗi, được đo bằng time.perf\_counter() trên 10.000 lần chạy, Python 3.11, CPython.
-
-Tổng thời gian 59 \textmu s chiếm 0,59\% của chu kỳ 100 ms (tần số 10 Hz), để lại 99,41\% thời gian cho các tác vụ khác (sinh quỹ đạo, gửi WebSocket, cập nhật giao diện). Ngay cả khi yêu cầu tần số 100 Hz (chu kỳ 10 ms), chuỗi xử lý chỉ chiếm 0,59\% thời gian, cho thấy hệ thống có dự phòng hiệu suất lớn.
-
-\subsubsection{Giao diện theo dõi thời gian thực}
-
-\hspace{0.5cm} Hệ thống mô phỏng được điều khiển qua giao diện web thời gian thực, trong đó người dùng chọn loại mục tiêu, phương pháp lọc, và tham số mô phỏng trước khi bắt đầu phiên. Hình \ref{fig:screenshot-tracking-week4} hiển thị giao diện theo dõi đang hoạt động với mục tiêu người đi bộ.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.92\textwidth]{sim/tracking-ped-kfab-synthetic.png}
-\caption{Giao diện theo dõi mục tiêu người đi bộ (KF+AB, chế độ tổng hợp)}
-\label{fig:screenshot-tracking-week4}
-\end{figure}
-
-Bảng điều khiển bên trái cho phép chọn loại mục tiêu (NGƯỜI ĐI BỘ / XE MÁY / DRONE), phương pháp lọc (KF+AB / KF ONLY / AB ONLY), thời lượng (120 giây), bán kính ranh giới (400 m), và nguồn dữ liệu (Synthetic / Real-World Data). Nút ENGAGE bắt đầu phiên mô phỏng, dữ liệu xuất hiện trên bản đồ theo thời gian thực. Biểu đồ RMSE ở góc trên bên phải hiển thị sai số trực quan trong phiên.
-
-Hình \ref{fig:screenshot-tracking-drone-week4} hiển thị chế độ theo dõi drone với Kalman 3D.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.92\textwidth]{sim/tracking-drone-kfab-synthetic-running.png}
-\caption{Giao diện theo dõi drone (KF+AB, chế độ tổng hợp, đang chạy)}
-\label{fig:screenshot-tracking-drone-week4}
-\end{figure}
-
-Drone hiển thị thêm thông tin độ cao (ALT) và vận tốc (SPD) so với người đi bộ, phản ánh đặc tính 3D của mục tiêu này. Giá trị sigma (SIGMA) hiển thị sai số ước lượng hiện thời, cho phép người vận hành theo dõi chất lượng tracking trong thời gian thực.
-
-Giao diện còn hiển thị các layer bản đồ có thể bật/tắt: đường quỹ đạo thực (TRUTH), điểm đo thô (RAW), vị trí sau lọc Kalman (KF), và vị trí sau lọc alpha-beta (AB). Legend hệ thống nhẫn (Range Rings) hiển thị các vòng tròn bán kính 200 m, 400 m, và 600 m, giúp người vận hành xác định khoảng cách mục tiêu so với người quan sát. Chế độ Sovereign / Dark cho phép chuyển đổi giao diện sáng/tối.
-
-Khi mô phỏng hoàn tất (120 giây), giao diện hiển thị bảng tóm tắt với RMSE cuối cùng của từng phương pháp. Dữ liệu phiên có thể xuất ra file CSV để phân tích ngoại tuyến. Toàn bộ phiên mô phỏng được quản lý qua WebSocket (kênh truyền dữ liệu hai chiều), đảm bảo cập nhật thời gian thực mà không cần làm mới trang.
 
 \subsection{Phân tích thống kê đa seed và độ nhạy tham số}
 
@@ -562,7 +436,7 @@ Phân tích độ rộng của khoảng tin cậy mang lại các kết luận v
 
 \subsubsection{Kiểm định t bắt cặp đánh giá ý nghĩa sai biệt thuật toán}
 
-\hspace{0.5cm} Để chứng minh một cách chặt chẽ rằng sự vượt trội về mặt RMSE của bộ lọc Alpha-Beta so với bộ lọc Kalman không phải do ngẫu nhiên ngẫu biến, kiểm định t-Student theo cặp (paired-sample t-test) được thực hiện trên 10 cặp quan sát tương ứng từng seed.
+\hspace{0.5cm} Để xác nhận tính có ý nghĩa thống kê của sai biệt RMSE giữa bộ lọc Alpha-Beta và Kalman, kiểm định t-Student theo cặp (paired-sample t-test) được thực hiện trên 10 cặp quan sát tương ứng từng seed.
 
 Đặt biến sai biệt cho từng seed $k$:
 \begin{equation}
@@ -665,12 +539,7 @@ Kết quả khẳng định trong tất cả 90 phiên đo lường không xuấ
 \hspace{0.5cm} Trong cấu trúc bộ lọc Alpha-Beta, trọng số cập nhật vị trí $\alpha$ và trọng số cập nhật vận tốc $\beta$ kiểm soát trực tiếp sự cân bằng giữa khả năng lọc nhiễu tần số cao và độ trễ pha khi bám theo các chuyển động có gia tốc. Để hệ thống đạt trạng thái tắt dần tới hạn (critically damped) mà không xuất hiện quá điều chỉnh (overshoot) hay dao động tắt dần chậm, mối quan hệ giữa $\alpha$ và $\beta$ được ràng buộc chặt chẽ theo quan hệ giải tích Benedict-Bordner:
 
 
-Hệ số $\alpha$ được kiểm nghiệm qua ba chế độ vận hành đặc thù:
-\begin{itemize}
-    \item Chế độ lọc mạnh ($\alpha = 0{,}20 \Rightarrow \beta = 0{,}0112$): Tập trung triệt tiêu nhiễu đo lường, phù hợp chuyển động thẳng đều vận tốc thấp.
-    \item Chế độ cân bằng chuẩn ($\alpha = 0{,}40 \Rightarrow \beta = 0{,}0513$): Tối ưu hóa giữa triệt tiêu nhiễu và đáp ứng chuyển hướng (chế độ mặc định của hệ thống).
-    \item Chế độ bám bắt nhanh ($\alpha = 0{,}70 \Rightarrow \beta = 0{,}2054$): Giảm độ trễ bám đuổi, tăng độ nhạy phản hồi nhưng cho phép nhiều thành phần nhiễu đi qua bộ lọc.
-\end{itemize}
+Hệ số $\alpha$ được kiểm nghiệm qua ba chế độ vận hành: chế độ lọc mạnh ($\alpha = 0{,}20 \Rightarrow \beta = 0{,}0111$), tập trung triệt tiêu nhiễu đo lường, phù hợp chuyển động thẳng đều vận tốc thấp; chế độ cân bằng chuẩn ($\alpha = 0{,}40 \Rightarrow \beta = 0{,}0508 \approx 0{,}051$), dung hòa giữa triệt tiêu nhiễu và đáp ứng chuyển hướng (chế độ mặc định của hệ thống); và chế độ bám bắt nhanh ($\alpha = 0{,}70 \Rightarrow \beta = 0{,}2046$), giảm độ trễ bám đuổi nhưng cho phép nhiều thành phần nhiễu đi qua bộ lọc.
 
 \begin{table}[H]
 \centering
@@ -681,15 +550,15 @@ Hệ số $\alpha$ được kiểm nghiệm qua ba chế độ vận hành đặ
 \toprule
 $\alpha$ & $\beta$ & \textbf{RMSE trung bình (m)} & \textbf{Độ lệch chuẩn $s$ (m)} & \textbf{Đặc tính động học} \\
 \midrule
-0{,}10 & 0{,}0026 & 0{,}188 & 0{,}041 & Lọc nhiễu tối đa, độ trễ bám bắt lớn (2,4 s) \\
-0{,}20 & 0{,}0112 & 0{,}214 & 0{,}048 & Lọc nhiễu mạnh, độ trễ khi chuyển hướng 1,8 s \\
-0{,}30 & 0{,}0268 & 0{,}235 & 0{,}055 & Lọc vừa phải, trễ chuyển hướng 1,1 s \\
-0{,}40 & 0{,}0513 & 0{,}258 & 0{,}062 & Cân bằng tối ưu, độ trễ khi chuyển hướng 0,6 s \\
+0{,}10 & 0{,}0026 & 0{,}188 & 0{,}041 & Lọc nhiễu cao, độ trễ bám bắt lớn (2,4 s) \\
+0{,}20 & 0{,}0111 & 0{,}214 & 0{,}048 & Lọc nhiễu mạnh, độ trễ khi chuyển hướng 1,8 s \\
+0{,}30 & 0{,}0267 & 0{,}235 & 0{,}055 & Lọc vừa phải, trễ chuyển hướng 1,1 s \\
+0{,}40 & 0{,}0508 & 0{,}258 & 0{,}062 & Cân bằng, độ trễ khi chuyển hướng 0,6 s \\
 0{,}50 & 0{,}0858 & 0{,}284 & 0{,}071 & Bám nhanh, lọc nhiễu bắt đầu giảm \\
-0{,}60 & 0{,}1330 & 0{,}312 & 0{,}082 & Phản ứng nhạy, truyền nhiễu tần số cao \\
-0{,}70 & 0{,}2054 & 0{,}342 & 0{,}094 & Bám bắt nhạy, khuếch đại nhiễu đo lường 32\% \\
+0{,}60 & 0{,}1351 & 0{,}312 & 0{,}082 & Phản ứng nhạy, truyền nhiễu tần số cao \\
+0{,}70 & 0{,}2046 & 0{,}342 & 0{,}094 & Bám bắt nhạy, khuếch đại nhiễu đo lường 32\% \\
 0{,}80 & 0{,}3056 & 0{,}381 & 0{,}112 & Gần như bám trực tiếp đo lường thô \\
-0{,}90 & 0{,}4675 & 0{,}428 & 0{,}135 & Độ nhạy nhiễu cực đại, không còn ý nghĩa lọc \\
+0{,}90 & 0{,}4675 & 0{,}428 & 0{,}135 & Độ nhạy nhiễu lớn, hiệu quả lọc thấp \\
 \bottomrule
 \end{tabular}
 }
@@ -702,59 +571,9 @@ $\alpha$ & $\beta$ & \textbf{RMSE trung bình (m)} & \textbf{Độ lệch chuẩ
 \label{fig:alpha-sensitivity-w7}
 \end{figure}
 
-Phân tích kết quả từ Hình \ref{fig:alpha-sensitivity-w7} chỉ ra rằng đối với mục tiêu người đi bộ có dải vận tốc thấp ($v \approx 1{,}4$ m/s), việc giảm $\alpha$ xuống 0,20 giúp giảm RMSE xuống $0{,}214$ m. Tuy nhiên, khi mục tiêu thực hiện đổi hướng đột ngột $90^\circ$, bộ lọc với $\alpha = 0{,}20$ mất tới 1,8 giây để triệt tiêu sai số trễ (lag error), trong khi $\alpha = 0{,}40$ chỉ mất 0,6 giây. Do đó, tham số $\alpha = 0{,}40$ được chọn làm giá trị mặc định cho toàn bộ các chế độ bám bắt đa mục tiêu.
+Phân tích kết quả từ Hình \ref{fig:alpha-sensitivity-w7} chỉ ra rằng đối với mục tiêu người đi bộ có dải vận tốc thấp ($v \approx 1{,}4$ m/s), việc giảm $\alpha$ xuống 0,20 giúp giảm RMSE xuống $0{,}214$ m. Dù vậy, khi mục tiêu thực hiện đổi hướng đột ngột $90^\circ$, bộ lọc với $\alpha = 0{,}20$ mất tới 1,8 giây để triệt tiêu sai số trễ (lag error), trong khi $\alpha = 0{,}40$ chỉ mất 0,6 giây. Do đó, tham số $\alpha = 0{,}40$ được chọn làm giá trị mặc định cho toàn bộ các chế độ bám bắt đa mục tiêu.
 
-\subsubsection{Phân tích lan truyền sai số và khoảng cách giao cắt chi phối}
 
-\hspace{0.5cm} Độ bất định vị trí hợp nhất $\sigma_{pos}$ biến thiên trực tiếp theo cự ly $R$ từ trạm quan sát đến mục tiêu theo mô hình lan truyền sai số tổng bình phương căn bậc hai (Root-Sum-Square, RSS):
-\begin{equation}
-\sigma_{pos}(R) = \sqrt{\sigma_{gps}^2 + \sigma_{range}^2 + R^2 \left( \sin^2\sigma_{az} + \sin^2\sigma_{el} \right)}
-\label{eq:rss-propagation}
-\end{equation}
-
-Với các thông số cảm biến chuẩn: $\sigma_{gps} = 5{,}0$ m, $\sigma_{range} = 0{,}5$ m, $\sigma_{az} = 0{,}3^\circ = 5{,}236 \times 10^{-3}$ rad, $\sigma_{el} = 0{,}2^\circ = 3{,}491 \times 10^{-3}$ rad:
-\begin{equation}
-\sin^2\sigma_{az} + \sin^2\sigma_{el} \approx (5{,}236 \times 10^{-3})^2 + (3{,}491 \times 10^{-3})^2 = 3{,}960 \times 10^{-5}
-\end{equation}
-
-Cự ly giao cắt (cross-over range) $R_{\text{cross}}$ là khoảng cách tại đó độ bất định góc từ IMU bắt đầu vượt qua độ bất định định vị của GNSS:
-\begin{equation}
-R_{\text{cross}} = \frac{\sigma_{gps}}{\sqrt{\sin^2\sigma_{az} + \sin^2\sigma_{el}}} = \frac{5{,}0}{\sqrt{3{,}960 \times 10^{-5}}} \approx 794{,}5 \text{ m}
-\label{eq:cross-over-calc}
-\end{equation}
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.9\textwidth,
-    height=6.5cm,
-    xlabel={Cự ly quan sát $R$ (m)},
-    ylabel={Độ bất định vị trí $\sigma_{pos}$ (m)},
-    xmin=0, xmax=1000,
-    ymin=4.5, ymax=9.0,
-    grid=major,
-    grid style={dashed, gray!40},
-    legend style={at={(0.05,0.92)}, anchor=north west, font=\small},
-]
-\addplot[blue, very thick, domain=0:1000, samples=100]
-    {sqrt(25.25 + x*x*0.00003960)};
-\addlegendentry{$\sigma_{pos}(R)$ (Hợp nhất cảm biến RSS)}
-\addplot[red, dashed, thick, domain=0:1000] {5.0};
-\addlegendentry{$\sigma_{gps} = 5{,}0$ m (Sai số GNSS trần)}
-\addplot[green!60!black, dotted, thick, domain=0:1000] {sqrt(x*x*0.00003960)};
-\addlegendentry{Thành phần đòn bẩy góc IMU ($R \sin\sigma$)}
-\draw[dashed, gray] (axis cs:794.5,4.5) -- (axis cs:794.5,7.07);
-\node[above, font=\small\bfseries] at (axis cs:794.5, 7.1) {$R_{\text{cross}} = 794$ m};
-\end{axis}
-\end{tikzpicture}
-}
-\caption{Đặc tuyến biến thiên của độ bất định hợp nhất $\sigma_{pos}(R)$ theo cự ly và điểm giao cắt chi phối tại 794 m}
-\label{fig:sigma-pos-range}
-\end{figure}
-
-Kết quả chỉ ra rằng trong toàn bộ phạm vi hoạt động danh định của đề tài ($R \le 400$ m), sai số định vị GNSS đóng góp trên 89\% tổng phương sai bất định. Điều này lý giải tại sao cơ chế ma trận hiệp phương sai thích nghi $\mathbf{R}_k = \sigma_{pos, k}^2 \mathbf{I}$ hoạt động ổn định và kiểm soát chặt chẽ quá trình thu nhận dữ liệu.
 
 \subsubsection{Ảnh hưởng của bán kính không gian hoạt động đến chất lượng lọc}
 
@@ -780,8 +599,6 @@ $R_{\text{bound}}$ (m) & \textbf{RMSE Đo thô (m)} & \textbf{RMSE $\alpha$-$\be
 \end{table}
 
 Tại $R_{\text{bound}} = 800$ m, đóng góp phương sai của góc đo IMU vượt quá 50\%, phù hợp chính xác với lý thuyết cự ly giao cắt 794 m đã chứng minh.
-
-\subsubsection{Phân tích độ phức tạp thời gian và yêu cầu bộ nhớ làm việc}
 
 \subsubsection{Phân tích hàm phân bố xác suất thực nghiệm (PDF) và phân bố tích lũy (CDF)}
 
@@ -817,29 +634,11 @@ Kết quả chứng minh ma trận $\mathbf{P}_k$ cần khoảng 50 đến 100 b
 
 \hspace{0.5cm} Để kiểm chứng tính đối xứng và đẳng hướng (isotropy) của thuật toán lọc, sai số đo lường được phân tách độc lập theo ba trục tọa độ địa phương Đông (East), Bắc (North) và Độ cao (Up). Giả thuyết không kiểm định rằng thuật toán không xuất hiện trục ưu tiên và không bị lệch hướng do ma trận xoay tọa độ.
 
-Tỷ số sai số $s_E / s_N$ dao động trong khoảng hẹp từ $0{,}987$ đến $0{,}996$ (gần như tuyệt đối bằng 1,000). Kết quả này khẳng định hệ thống xử lý tọa độ hoàn toàn đẳng hướng trong mặt phẳng nằm ngang, không xuất hiện hiện tượng trôi lệch trục do phép chiếu bản đồ.
+Tỷ số sai số $s_E / s_N$ dao động trong khoảng hẹp từ $0{,}987$ đến $0{,}996$ (tiệm cận 1,000). Kết quả này cho thấy thuật toán xử lý tọa độ có tính đẳng hướng tốt trong mặt phẳng nằm ngang, không xuất hiện hiện tượng trôi lệch trục do phép chiếu bản đồ.
 
 \subsubsection{Phân tích độ ổn định số học và số điều kiện ma trận}
 
-\hspace{0.5cm} Trong bước cập nhật đo lường của bộ lọc Kalman, việc tính toán ma trận độ lợi Kalman $K_k$ đòi hỏi nghịch đảo ma trận hiệp phương sai đổi mới $\mathbf{S}_k$:
-\begin{equation}
-\mathbf{S}_k = \mathbf{H} \mathbf{P}_k^- \mathbf{H}^T + \mathbf{R}_k
-\label{eq:innovation-covariance}
-\end{equation}
-\begin{equation}
-\mathbf{K}_k = \mathbf{P}_k^- \mathbf{H}^T \mathbf{S}_k^{-1}
-\label{eq:kalman-gain-formula}
-\end{equation}
-
-Độ ổn định số học của phép tính phụ thuộc vào số điều kiện ma trận (Condition Number) $\kappa(\mathbf{S}_k)$:
-\begin{equation}
-\kappa(\mathbf{S}_k) = \frac{\lambda_{\max}(\mathbf{S}_k)}{\lambda_{\min}(\mathbf{S}_k)}
-\label{eq:condition-number}
-\end{equation}
-
-trong đó $\lambda_{\max}$ và $\lambda_{\min}$ là các giá trị riêng cực đại và cực tiểu của ma trận đối xứng $\mathbf{S}_k$. Một ma trận có $\kappa(\mathbf{S}_k) \approx 1$ được gọi là có điều kiện tốt (well-conditioned), trong khi $\kappa(\mathbf{S}_k) \gg 10^3$ tiềm ẩn nguy cơ mất độ chính xác dấu phẩy động.
-
-Do ma trận nhiễu đo lường $\mathbf{R}_k = \sigma_{pos, k}^2 \mathbf{I}$ là ma trận đường chéo có các phần tử trên đường chéo bằng nhau, ma trận $\mathbf{S}_k$ luôn duy trì số điều kiện $\kappa(\mathbf{S}_k) = 1{,}000$, loại bỏ hoàn toàn nguy cơ kỳ dị số học.
+\hspace{0.5cm} Độ ổn định số học của bước cập nhật đo lường Kalman phụ thuộc vào số điều kiện $\kappa(\mathbf{S}_k) = \lambda_{\max}(\mathbf{S}_k) / \lambda_{\min}(\mathbf{S}_k)$ của ma trận hiệp phương sai đổi mới $\mathbf{S}_k = \mathbf{H}\mathbf{P}_k^-\mathbf{H}^T + \mathbf{R}_k$. Do ma trận nhiễu đo lường $\mathbf{R}_k = \sigma_{pos, k}^2 \mathbf{I}$ là ma trận đường chéo với các phần tử dương đồng nhất, $\mathbf{S}_k$ luôn duy trì số điều kiện $\kappa(\mathbf{S}_k) \approx 1{,}000$, loại trừ hoàn toàn nguy cơ kỳ dị số học và bảo toàn tính đối xứng xác định dương trong suốt $108.000$ chu kỳ thực nghiệm.
 
 \subsubsection{Phân tích so sánh mô hình xe máy động học và xe máy mạng lưới đường}
 
@@ -877,7 +676,7 @@ Mô hình xe máy động học di chuyển tự do trong không gian hai chiề
 
 Phân tích số liệu cho thấy:
 1. Bộ lọc Alpha-Beta thể hiện tính ổn định vượt bậc trên mạng lưới đường thực tế, độ lệch chuẩn chỉ đạt $s = 0{,}033$ m và RMSE trung bình $1{,}177$ m.
-2. Bộ lọc Kalman trên mạng lưới đường có độ biến động lớn hơn ($s = 1{,}180$ m) do mô hình vận tốc không đổi (Constant Velocity) bị trễ pha quán tính khi xe máy thực hiện rẽ gắt $90^\circ$ tại các giao lộ ngã tư. Tuy nhiên, giá trị trung bình $2{,}922$ m vẫn hoàn toàn thỏa mãn chỉ tiêu thiết kế $< 5{,}0$ m.
+2. Bộ lọc Kalman trên mạng lưới đường có độ biến động lớn hơn ($s = 1{,}180$ m) do mô hình vận tốc không đổi (Constant Velocity) bị trễ pha quán tính khi xe máy thực hiện rẽ gắt $90^\circ$ tại các giao lộ ngã tư. Dù vậy, giá trị trung bình $2{,}922$ m vẫn hoàn toàn thỏa mãn chỉ tiêu thiết kế $< 5{,}0$ m.
 
 \subsubsection{Phân tích độ nhạy của ma trận nhiễu quá trình \texorpdfstring{$\mathbf{Q}$}{Q}}
 
@@ -950,7 +749,7 @@ Bảng \ref{tab:ekf-vs-linear-compare} đối chiếu hiệu năng giữa EKF tr
 \textbf{Tiêu chí so sánh} & \textbf{Kiến trúc EKF trực tiếp} & \textbf{Kiến trúc phân tầng ENU (Đề xuất)} & \textbf{Cải thiện / Ưu thế} \\
 \midrule
 Thời gian tính toán/chu kỳ & 118{,}4 $\mu$s & 48{,}5 $\mu$s & Giảm 59{,}0\% tải CPU \\
-Độ ổn định số học $\kappa(\mathbf{S})$ & $10^2 - 10^4$ (phụ thuộc góc) & 1{,}000 (ổn định tuyệt đối) & Loại bỏ nguy cơ kỳ dị \\
+Độ ổn định số học $\kappa(\mathbf{S})$ & $10^2 - 10^4$ (phụ thuộc góc) & 1{,}000 (ổn định số học) & Loại bỏ nguy cơ kỳ dị \\
 Độ phức tạp mã nguồn & Cần đạo hàm ma trận phi tuyến & Ma trận tuyến tính hằng số & Tinh gọn, dễ bảo trì \\
 RMSE Người đi bộ ($n=10$) & 0{,}945 $\pm$ 0{,}231 m & 0{,}922 $\pm$ 0{,}218 m & Tương đương (chênh 2{,}4\%) \\
 RMSE Drone 3D ($n=10$) & 2{,}415 $\pm$ 0{,}335 m & 2{,}388 $\pm$ 0{,}318 m & Tương đương (chênh 1{,}1\%) \\
@@ -961,59 +760,7 @@ RMSE Drone 3D ($n=10$) & 2{,}415 $\pm$ 0{,}335 m & 2{,}388 $\pm$ 0{,}318 m & Tư
 
 Kết quả thực nghiệm chứng minh rằng kiến trúc phân tầng hợp nhất sang ENU trước khi lọc đạt độ chính xác tương đương EKF nhưng giảm gần 60\% thời gian tính toán và loại bỏ hoàn toàn các điểm kỳ dị góc ngắm khi mục tiêu ở gần thiên đỉnh ($\text{el} \to 90^\circ$).
 
-\subsubsection{Minh họa chi tiết các bước tính toán số học trên một chu kỳ mẫu}
 
-\hspace{0.5cm} Để tạo điều kiện cho việc kiểm chứng và tái lập độc lập kết quả nghiên cứu, quá trình tính toán số học từ cảm biến đầu vào đến tọa độ ước lượng đầu ra được minh họa chi tiết tại bước thời gian $k = 1$ ($\Delta t = 0{,}1$ s) của kịch bản người đi bộ:
-
-\begin{enumerate}
-    \item \textbf{Dữ liệu cảm biến đầu vào}:
-    \begin{itemize}
-        \item Trạm quan sát: $\text{lat}_{\text{obs}} = 10{,}762622^\circ$, $\text{lon}_{\text{obs}} = 106{,}660172^\circ$, $\text{alt}_{\text{obs}} = 10{,}0$ m.
-        \item Góc phương vị IMU: $\theta = 42{,}35^\circ$ ($\sigma_{\text{az}} = 0{,}3^\circ$).
-        \item Góc tà IMU: $\phi = 1{,}85^\circ$ ($\sigma_{\text{el}} = 0{,}2^\circ$).
-        \item Khoảng cách Laser: $R = 145{,}20$ m ($\sigma_{\text{range}} = 0{,}5$ m).
-    \end{itemize}
-
-    \item \textbf{Chuyển đổi sang tọa độ Descartes địa phương ENU}:
-    \begin{equation}
-    e_{\text{meas}} = R \cos\phi \sin\theta = 145{,}20 \cdot \cos(1{,}85^\circ) \cdot \sin(42{,}35^\circ) = 97{,}762 \text{ m}
-    \end{equation}
-    \begin{equation}
-    n_{\text{meas}} = R \cos\phi \cos\theta = 145{,}20 \cdot \cos(1{,}85^\circ) \cdot \cos(42{,}35^\circ) = 107{,}281 \text{ m}
-    \end{equation}
-
-    \item \textbf{Tính toán độ bất định hợp nhất RSS và ma trận $\mathbf{R}_k$}:
-    \begin{equation}
-    \sigma_{pos} = \sqrt{5{,}0^2 + 0{,}5^2 + 145{,}20^2 \cdot \left(\sin^2(0{,}3^\circ) + \sin^2(0{,}2^\circ)\right)} = \sqrt{25{,}25 + 0{,}835} = 5{,}107 \text{ m}
-    \end{equation}
-    \begin{equation}
-    \mathbf{R}_1 = \sigma_{pos}^2 \mathbf{I}_2 = 26{,}085 \cdot \mathbf{I}_2 \quad (\text{m}^2)
-    \end{equation}
-
-    \item \textbf{Bước cập nhật bộ lọc Alpha-Beta ($\alpha = 0{,}40, \beta = 0{,}0513$)}:
-    \begin{equation}
-    \hat{e}_{\alpha\beta}(1) = \hat{e}(0) + \alpha (e_{\text{meas}} - \hat{e}(0)) = 0 + 0{,}40 \cdot (97{,}762 - 0) = 39{,}105 \text{ m}
-    \end{equation}
-    \begin{equation}
-    \hat{v}_{e, \alpha\beta}(1) = \hat{v}_e(0) + \frac{\beta}{\Delta t} (e_{\text{meas}} - \hat{e}(0)) = 0 + \frac{0{,}0513}{0{,}1} \cdot 97{,}762 = 50{,}152 \text{ m/s}
-    \end{equation}
-
-    \item \textbf{Bước cập nhật bộ lọc Kalman}:
-    \begin{equation}
-    \mathbf{S}_1 = \mathbf{H} \mathbf{P}_1^- \mathbf{H}^T + \mathbf{R}_1 = 100{,}0 \cdot \mathbf{I}_2 + 26{,}085 \cdot \mathbf{I}_2 = 126{,}085 \cdot \mathbf{I}_2
-    \end{equation}
-    \begin{equation}
-    \mathbf{K}_1 = \mathbf{P}_1^- \mathbf{H}^T \mathbf{S}_1^{-1} = \frac{100{,}0}{126{,}085} \mathbf{I}_2 = 0{,}7931 \cdot \mathbf{I}_2
-    \end{equation}
-    \begin{equation}
-    \hat{e}_{\text{KF}}(1) = 0 + 0{,}7931 \cdot (97{,}762 - 0) = 77{,}535 \text{ m}
-    \end{equation}
-    \begin{equation}
-    \mathbf{P}_1(1,1) = (1 - 0{,}7931) \cdot 100{,}0 = 20{,}69 \text{ m}^2 \quad (r_{\text{unc}} = 4{,}55\text{ m})
-    \end{equation}
-\end{enumerate}
-
-Toàn bộ quy trình số học trên được thực thi tự động trong 59 microgiây mỗi chu kỳ, bảo đảm tính minh bạch và tính chính xác tuyệt đối của mô hình bám bắt thời gian thực.
 
 \subsubsection{Phân tích hiệu năng phân đoạn theo các pha thời gian hoạt động}
 
@@ -1024,7 +771,7 @@ Toàn bộ quy trình số học trên được thực thi tự động trong 59
     \item Pha xác lập cân bằng dài hạn ($t \in [30\text{ s}, 120\text{ s}]$, bước $k \in [301, 1200]$): Trạng thái tối ưu Riccati toàn phần.
 \end{enumerate}
 
-Kết quả chứng minh rõ nét bản chất động học: ở pha xác lập ($t > 30$ s), sai số của Kalman filter trên người đi bộ giảm xuống chỉ còn $0{,}385$ m (tiệm cận tuyệt đối mức $0{,}337$ m của Alpha-Beta), đồng thời cung cấp thêm ma trận hiệp phương sai bất định $\mathbf{P}_k$ mà Alpha-Beta không có.
+Kết quả chứng minh rõ nét bản chất động học: ở pha xác lập ($t > 30$ s), sai số của Kalman filter trên người đi bộ giảm xuống chỉ còn $0{,}385$ m (tiệm cận mức $0{,}337$ m của Alpha-Beta), đồng thời cung cấp thêm ma trận hiệp phương sai bất định $\mathbf{P}_k$ mà Alpha-Beta không có.
 
 \subsubsection{Kiểm định tính trắng của chuỗi phần dư đổi mới (Innovation Whiteness Test)}
 
@@ -1060,7 +807,7 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
 
 \subsubsection{Tổng kết phân tích thống kê và ý nghĩa kỹ thuật}
 
-\hspace{0.5cm} Phân tích thống kê đa seed trên 90 kịch bản độc lập đã chứng minh một cách tường minh rằng hệ thống bám mục tiêu thời gian thực thỏa mãn vượt mức toàn bộ các tiêu chuẩn kỹ thuật đề ra:
+\hspace{0.5cm} Phân tích thống kê đa seed trên 90 kịch bản độc lập đã khẳng định rõ ràng rằng hệ thống bám mục tiêu thời gian thực thỏa mãn vượt mức toàn bộ các tiêu chuẩn kỹ thuật đề ra:
 \begin{enumerate}
     \item Độ chính xác định vị: Giá trị RMSE trung bình và biên trên khoảng tin cậy 95\% trong mọi trường hợp đều thấp hơn 2,62 m, thấp hơn đáng kể so với ngưỡng trần thiết kế 5,0 m.
     \item Tính ổn định thống kê: Không xuất hiện bất kỳ điểm ngoại lai nào trong phân tích tứ phân vị IQR và kiểm tra $3\sigma$, khẳng định thuật toán không bị suy thoái số học.
@@ -1075,41 +822,8 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
 
 \subsubsection{So sánh hiệu năng giữa bộ lọc Kalman và Alpha-Beta}
 
-\subsubsection{Bảng tổng hợp chỉ số sai số RMSE trên các kịch bản chuẩn}
+\hspace{0.5cm} Kết quả thực nghiệm tại Bảng \ref{tab:kf-vs-ab} và Hình \ref{fig:rmse-bar} đã chỉ ra rằng bộ lọc Alpha-Beta đạt sai số RMSE thấp hơn so với Kalman trên cả 4 kịch bản thực nghiệm ($0{,}26$ m so với $0{,}86$ m ở người đi bộ; $1{,}14$ m so với $1{,}52$ m ở xe máy mạng đường; $1{,}06$ m so với $2{,}10$ m ở drone). Để làm rõ nguyên nhân đóng góp của từng thành phần kỹ thuật dẫn đến sự khác biệt này, nghiên cứu cắt bỏ đa tầng được thực hiện dưới đây.
 
-\hspace{0.5cm} Bảng \ref{tab:kf-vs-ab} tổng hợp sai số vị trí RMSE giữa phép đo thô sau hợp nhất cảm biến và hai giải thuật lọc trên các loại mục tiêu chuẩn (tần số 10 Hz, giá trị khởi tạo 42, thời gian mô phỏng 120 giây, bán kính ranh giới 400 m):
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.88\textwidth, height=6.8cm,
-    ybar, bar width=11pt,
-    area legend,
-    xlabel={Kịch bản mục tiêu thực nghiệm}, ylabel={Sai số RMSE bám bắt (m)},
-    ymin=0, ymax=2.5,
-    xtick=data,
-    xticklabels={{Pedestrian}, {Motorcycle (kin.)}, {Motorcycle (road)}, {Drone 3D}},
-    xticklabel style={font=\footnotesize},
-    legend style={at={(0.5,-0.22)}, anchor=north, legend columns=3, font=\footnotesize},
-    grid=major, grid style={dashed, gray!30},
-    nodes near coords, nodes near coords style={font=\tiny},
-]
-\addplot[fill=gray!40, draw=gray!70!black] coordinates {(1,0.48) (2,1.89) (3,2.14) (4,1.94)};
-\addlegendentry{Đo thô (Raw)}
-\addplot[fill=violet!50, draw=violet!80!black] coordinates {(1,0.26) (2,1.02) (3,1.14) (4,1.06)};
-\addlegendentry{Bộ lọc Alpha-Beta}
-\addplot[fill=blue!50, draw=blue!80!black] coordinates {(1,0.86) (2,1.80) (3,1.52) (4,2.10)};
-\addlegendentry{Bộ lọc Kalman (3D)}
-\end{axis}
-\end{tikzpicture}
-}
-\caption{Biểu đồ so sánh sai số RMSE bám bắt trên 4 kịch bản mục tiêu chuẩn}
-\label{fig:filter-bar}
-\end{figure}
-
-Bộ lọc Alpha-Beta đạt sai số RMSE thấp hơn đáng kể so với Kalman trên cả 4 kịch bản thực nghiệm, với mức giảm sai số từ $25{,}0\%$ đến gần $70{,}0\%$. Nguyên nhân cốt lõi là mô hình vận tốc không đổi (Constant Velocity, CV) bậc hai của Kalman có xu hướng tích lũy độ trễ pha khi mục tiêu liên tục chuyển hướng ngẫu nhiên, trong khi Alpha-Beta với hệ số suy giảm tối ưu phản ứng linh hoạt và dập tắt nhiễu hiệu quả hơn.
 
 \subsubsection{Nghiên cứu cắt bỏ đa tầng (8-Stage Ablation Study)}
 
@@ -1185,13 +899,13 @@ F = \frac{\text{MS}_{\text{between}}}{\text{MS}_{\text{within}}} = \frac{\text{S
 Giữa các nhóm (Between) & 4{,}852 & 2 & 2{,}426 & $\mathbf{48{,}65}$ & $\mathbf{p < 10^{-9}}$ \\
 Nội bộ nhóm (Within) & 1{,}347 & 27 & 0{,}050 & - & - \\
 \midrule
-\textbf{Tổng cộng (Total)} & \textbf{6{,}199} & \textbf{29} & - & - & \textbf{Ý nghĩa cực cao} \\
+\textbf{Tổng cộng (Total)} & \textbf{6{,}199} & \textbf{29} & - & - & - \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-Thống kê $F = 48{,}65$ với $p < 10^{-9}$ khẳng định sự khác biệt giữa các phương pháp có ý nghĩa thống kê áp đảo. Tiếp tục thực hiện hậu kiểm Tukey HSD (Tukey's Honestly Significant Difference):
+Thống kê $F = 48{,}65$ với $p < 10^{-9}$ khẳng định sự khác biệt giữa các phương pháp có ý nghĩa thống kê rõ rệt ($p < 0{,}001$). Tiếp tục thực hiện hậu kiểm Tukey HSD (Tukey's Honestly Significant Difference):
 
 \begin{table}[H]
 \centering
@@ -1202,7 +916,7 @@ Thống kê $F = 48{,}65$ với $p < 10^{-9}$ khẳng định sự khác biệt 
 \toprule
 \textbf{Cặp so sánh đối chứng} & \textbf{Chênh lệch trung bình} & \textbf{Khoảng tin cậy 95\%} & \textbf{Giá trị $p$-adj} & \textbf{Kết luận} \\
 \midrule
-Alpha-Beta vs Đo thô & $-0{,}580$ m & $[-0{,}785, -0{,}375]$ m & $p < 10^{-6}$ & Alpha-Beta vượt trội \\
+Alpha-Beta vs Đo thô & $-0{,}580$ m & $[-0{,}785, -0{,}375]$ m & $p < 10^{-6}$ & Khác biệt rõ rệt ($p < 10^{-6}$) \\
 Kalman vs Đo thô & $+0{,}125$ m & $[-0{,}080, +0{,}330]$ m & $p = 0{,}295$ & Không có ý nghĩa \\
 \textbf{Alpha-Beta vs Kalman} & $\mathbf{-0{,}705\text{ m}}$ & $\mathbf{[-0{,}910, -0{,}500]\text{ m}}$ & $\mathbf{p < 10^{-7}}$ & \textbf{Alpha-Beta tốt hơn rõ rệt} \\
 \bottomrule
@@ -1246,10 +960,10 @@ Trên toàn bộ 4 kịch bản thực nghiệm, giá trị $p$-value đều vư
 
 \subsubsection{Tổng kết nghiên cứu cắt bỏ và đối chuẩn hiệu năng}
 
-\hspace{0.5cm} Các phân tích so sánh và nghiên cứu cắt bỏ đã chứng minh một cách toàn diện:
+\hspace{0.5cm} Các phân tích so sánh và nghiên cứu cắt bỏ đã xác nhận:
 \begin{enumerate}
-    \item Khẳng định tính ưu việt của bộ lọc Alpha-Beta trên cả 4 kịch bản thực nghiệm chuẩn với mức giảm sai số lên tới $69{,}8\%$.
+    \item Khẳng định hiệu quả giảm sai số của bộ lọc Alpha-Beta trên cả 4 kịch bản thực nghiệm chuẩn với mức giảm sai số lên tới $69{,}8\%$.
     \item Xác lập ma trận nghiên cứu cắt bỏ 8 giai đoạn, định lượng lực đẩy biên mềm ($61{,}5\%$) và điểm điều hướng tương đối ($46{,}2\%$) là hai cải tiến quan trọng nhất.
-    \item Kiểm định thống kê ANOVA ($F = 48{,}65, p < 10^{-9}$) và Tukey HSD xác nhận sự vượt trội của giải thuật có ý nghĩa thống kê tuyệt đối.
+    \item Kiểm định thống kê ANOVA ($F = 48{,}65, p < 10^{-9}$) và Tukey HSD xác nhận sự cải thiện sai số của giải thuật có ý nghĩa thống kê rõ rệt ($p < 0{,}001$).
     \item Phân tích tương quan chéo và biên tối ưu Pareto chứng minh Alpha-Beta đạt độ trễ pha nhóm tối thiểu ($12{,}5$ ms) và hiệu quả sử dụng tài nguyên vi xử lý cao nhất.
 \end{enumerate}
