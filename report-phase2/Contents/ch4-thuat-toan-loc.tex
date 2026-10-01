@@ -207,39 +207,11 @@ Khi mục tiêu ở xa, thời gian xác lập tăng nhẹ từ $0{,}5$ s lên $
 
 \subsubsection{So sánh các chiến lược thích nghi ma trận hiệp phương sai \texorpdfstring{$\mathbf{R}$}{R}}
 
-\hspace{0.5cm} Bốn chiến lược thiết lập ma trận hiệp phương sai đo lường $\mathbf{R}$ được triển khai và đối chiếu thực nghiệm trên 10 seed độc lập:
-\begin{enumerate}
-    \item \textbf{Chiến lược 1 (Cố định tĩnh)}: $\mathbf{R} = \sigma_{\text{gps}}^2 \mathbf{I}_2 = 25{,}0 \mathbf{I}_2$.
-    \item \textbf{Chiến lược 2 (Thích nghi hình học - Đề xuất)}: $\mathbf{R}_k = \sigma_{pos,k}^2(R_k) \mathbf{I}_2$.
-    \item \textbf{Chiến lược 3 (Thích nghi dựa trên đổi mới - IAE)}: $\hat{\mathbf{R}}_k = \frac{1}{M}\sum_{i=0}^{M-1} \mathbf{y}_{k-i} \mathbf{y}_{k-i}^T - \mathbf{H} \mathbf{P}_k^- \mathbf{H}^T$ với cửa sổ trượt $M = 10$.
-    \item \textbf{Chiến lược 4 (Thích nghi logic mờ - Fuzzy Logic)}: Điều chỉnh $\mathbf{R}_k$ dựa trên luật mờ của tỷ số đổi mới chuẩn hóa.
-\end{enumerate}
-
-\begin{table}[H]
-\centering
-\caption{So sánh toàn diện giữa các chiến lược thiết lập ma trận hiệp phương sai đo lường $\mathbf{R}$}
-\label{tab:adaptive-strategies-comparison}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Tiêu chí đánh giá} & \textbf{Cố định tĩnh} & \textbf{Hình học RSS (Đề xuất)} & \textbf{Đổi mới IAE} & \textbf{Logic mờ (Fuzzy)} \\
-\midrule
-Thời gian tính toán ($\mu$s) & 46{,}2 $\mu$s & 48{,}5 $\mu$s & 78{,}4 $\mu$s & 142{,}0 $\mu$s \\
-RMSE Người đi bộ (m) & 0{,}945 m & 0{,}860 m & 0{,}892 m & 0{,}875 m \\
-RMSE Xe máy (động học) (m) & 1{,}980 m & 1{,}800 m & 1{,}850 m & 1{,}820 m \\
-RMSE Drone 3D (m) & 2{,}350 m & 2{,}100 m & 2{,}180 m & 2{,}130 m \\
-Độ ổn định số học & Ổn định cao & Ổn định cao & Tiềm ẩn ma trận âm & Phụ thuộc luật \\
-Độ phức tạp mã nguồn & Rất thấp & Thấp & Trung bình & Cao \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Chiến lược thích nghi hình học RSS mang lại sự cân bằng hiệu quả: đạt độ chính xác cao trong nhóm khảo sát, duy trì thời gian thực thi $48{,}5$ $\mu$s và triệt tiêu nguy cơ ma trận bị âm xác định vốn thường gặp ở phương pháp IAE.
+\hspace{0.5cm} Ma trận hiệp phương sai đo lường $\mathbf{R}$ được thiết lập theo chiến lược thích nghi hình học duy nhất đã triển khai trong đồ án: $\mathbf{R}_k = \sigma_{pos,k}^2(R_k) \mathbf{I}_2$, trong đó phương sai vị trí $\sigma_{pos,k}^2$ phụ thuộc cự ly $R_k$ theo mô hình lan truyền sai số RSS từ laser, IMU và GNSS. Các phương pháp thích nghi hiệp phương sai khác trong tài liệu (thích nghi dựa trên đổi mới IAE, logic mờ) không được triển khai trong đồ án và không có số liệu so sánh thực nghiệm nào được tuyên bố.
 
 \subsubsection{Giả thiết độc lập thống kê và tính chất nhiễu đo lường}
 
-\hspace{0.5cm} Giả thiết căn bản của bộ lọc Kalman tiêu chuẩn là chuỗi nhiễu đo lường $\mathbf{v}_k$ là các biến ngẫu nhiên độc lập và đồng phân phối (IID) với kỳ vọng bằng không và hiệp phương sai $\mathbf{R}_k$. Trong môi trường thực nghiệm, mô hình thích nghi hình học RSS phản ánh sát độ bất định tức thời của cảm biến hỗn hợp, bảo đảm cân bằng tối ưu giữa việc cập nhật đo lường và dự đoán động học.
+\hspace{0.5cm} Giả thiết căn bản của bộ lọc Kalman tiêu chuẩn là chuỗi nhiễu đo lường $\mathbf{v}_k$ là các biến ngẫu nhiên độc lập và đồng phân phối (IID) với kỳ vọng bằng không và hiệp phương sai $\mathbf{R}_k$. Trong môi trường thực nghiệm, mô hình thích nghi hình học RSS phản ánh sát độ bất định tức thời của cảm biến hỗn hợp, giúp cân bằng việc cập nhật đo lường và dự đoán động học theo độ bất định phụ thuộc khoảng cách.
 
 
 \subsubsection{Thiết kế vector trạng thái động học 2D/3D và ma trận chuyển}
@@ -268,7 +240,7 @@ Chiến lược thích nghi hình học RSS mang lại sự cân bằng hiệu q
 
 trong đó $L_u \approx 50$ m là chiều dài tỷ lệ nhiễu loạn, $\sigma_w$ là cường độ gió giật, và $\eta(t)$ là nhiễu trắng Gauss đơn vị.
 
-Ngay cả trong điều kiện gió giật mạnh $10$ m/s, bộ lọc Kalman 3D vẫn duy trì sai số độ cao ở mức $1{,}025$ m, chứng minh khả năng duy trì độ ổn định trong điều kiện nhiễu loạn khí quyển mô phỏng.
+Ngay cả trong điều kiện gió giật mạnh $10$ m/s, bộ lọc Kalman 3D vẫn duy trì sai số độ cao ở mức $1{,}025$ m, cho thấy khả năng duy trì độ ổn định trong điều kiện nhiễu loạn khí quyển mô phỏng.
 
 
 
@@ -308,7 +280,7 @@ $\alpha$ & $\beta$ (Benedict-Bordner) & \textbf{RMSE Người (m)} & \textbf{RMS
 }
 \end{table}
 
-Tại kịch bản người đi bộ, $\alpha = 0{,}20$ cho RMSE tối ưu nhất ($0{,}214$ m) do quỹ đạo người đi bộ rất mượt mà. Đối với xe máy và drone có cơ động cao, $\alpha = 0{,}40 - 0{,}60$ giúp giảm thiểu trễ pha động học. Giá trị chuẩn danh định $\alpha = 0{,}40$ đại diện cho điểm cân bằng tối ưu toàn cục trên mọi loại mục tiêu.
+Tại kịch bản người đi bộ, $\alpha = 0{,}20$ cho RMSE tối ưu nhất ($0{,}214$ m) do quỹ đạo người đi bộ rất mượt mà. Đối với xe máy và drone có cơ động cao, $\alpha = 0{,}40 - 0{,}60$ giúp giảm thiểu trễ pha động học. Giá trị chuẩn danh định $\alpha = 0{,}40$ đại diện cho điểm cân bằng thực nghiệm trên mọi loại mục tiêu trong phạm vi đã khảo sát.
 
 \subsubsection{Cơ chế chuyển đổi trắc địa Ellipsoid WGS-84 và kiểm soát sai số tích lũy}
 
@@ -330,7 +302,7 @@ Z = (N(\phi)(1 - e^2) + h) \sin\phi
 \label{eq:lla-to-ecef-full}
 \end{equation}
 
-Toàn bộ các phép chuyển đổi khứ hồi đều duy trì sai số cực đại dưới $4 \times 10^{-11}$ m, loại bỏ hoàn toàn khả năng phát sinh trôi dạt tọa độ do làm tròn số học.
+Toàn bộ các phép chuyển đổi khứ hồi đều duy trì sai số cực đại dưới $4 \times 10^{-11}$ m, triệt tiêu sai số trôi dạt tọa độ do làm tròn số học.
 
 \subsubsection{Cấu trúc hàng đợi vòng (Ring Buffer) và quản lý áp lực ngược mạng}
 
@@ -342,11 +314,11 @@ Khi tốc độ tiêu thụ dữ liệu của giao diện trình duyệt bị ch
 \label{eq:ring-buffer-write}
 \end{equation}
 
-Dung lượng bộ nhớ RAM của hệ thống duy trì cố định ở mức 42 MB trong mọi điều kiện, bảo đảm hệ thống không bị tràn bộ nhớ ngay cả khi vận hành liên tục trong nhiều ngày.
+Dung lượng bộ nhớ RAM của luồng đệm được chặn trên nghiêm ngặt nhờ giới hạn dung lượng cố định của hàng đợi vòng ($N_{\text{ring}} = 500$), ngăn ngừa hiện tượng rò rỉ bộ nhớ khi hệ thống vận hành liên tục.
 
-\subsubsection{Thuật toán phân loại và nhận dạng mục tiêu dựa trên đặc trưng vận tốc}
+\subsubsection{Hướng mở rộng lý thuyết: Ý tưởng phân loại mục tiêu theo đặc trưng động học}
 
-\hspace{0.5cm} Dựa trên vector vận tốc ước lượng $(\hat{\dot{e}}_k, \hat{\dot{n}}_k, \hat{\dot{u}}_k)$ từ bộ lọc Kalman, hệ thống tích hợp bộ phân loại mục tiêu tự động sử dụng quy tắc ngưỡng động học kết hợp bộ lọc trung bình trượt thời gian 5 giây ($W = 50$ mẫu):
+\hspace{0.5cm} Dựa trên vector vận tốc ước lượng $(\hat{\dot{e}}_k, \hat{\dot{n}}_k, \hat{\dot{u}}_k)$ từ bộ lọc Kalman, một hướng mở rộng lý thuyết là xây dựng bộ phân loại mục tiêu tự động sử dụng quy tắc ngưỡng động học kết hợp bộ lọc trung bình trượt:
 \begin{equation}
 \bar{v}_h = \frac{1}{W}\sum_{i=0}^{W-1} \sqrt{\hat{\dot{e}}_{k-i}^2 + \hat{\dot{n}}_{k-i}^2}, \quad \bar{v}_z = \frac{1}{W}\sum_{i=0}^{W-1} |\hat{\dot{u}}_{k-i}|
 \label{eq:average-velocity-features}
@@ -362,7 +334,7 @@ Quy tắc phân loại:
 \label{eq:target-classification-rule}
 \end{equation}
 
-Trong môi trường mô phỏng trên các tập dữ liệu thử nghiệm, quy tắc phân loại dựa trên ngưỡng vận tốc đạt chỉ số F1-Score $99{,}0\%$, hỗ trợ nhận diện sơ bộ kiểu chuyển động của mục tiêu sau khoảng 5 giây bám bắt ổn định.
+Quy tắc phân loại trên đây đóng vai trò đề xuất mở rộng lý thuyết cho các phiên bản phát triển tiếp theo; trong phiên bản phần mềm hiện tại của đồ án, loại mục tiêu được cấu hình tường minh tại thời điểm khởi tạo phiên mô phỏng.
 
 \subsubsection{Phân tích dạng đối xứng Joseph Form bảo vệ tính dương xác định}
 
@@ -382,100 +354,7 @@ Dạng đối xứng bền vững Joseph (Joseph Stabilized Form) được thi�
 
 Do cả hai số hạng trong phương trình Joseph đều có dạng $\mathbf{A} \mathbf{M} \mathbf{A}^T$ với $\mathbf{M}$ là ma trận dương xác định ($\mathbf{P}_k^-$ và $\mathbf{R}_k$), ma trận kết quả $\mathbf{P}_k$ luôn bảo đảm tính đối xứng và không âm xác định bất kể giá trị của $\mathbf{K}_k$.
 
-\begin{table}[H]
-\centering
-\caption{So sánh độ ổn định số học và thời gian tính toán giữa công thức chuẩn và dạng Joseph}
-\label{tab:joseph-vs-standard-comparison}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Phương pháp cập nhật} & \textbf{Thời gian xử lý/bước} & \textbf{Sai số đối xứng $\|\mathbf{P} - \mathbf{P}^T\|$} & \textbf{Giá trị riêng cực tiểu $\lambda_{\min}$} \\
-\midrule
-Công thức chuẩn $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}^-$ & 31{,}2 $\mu$s & $1{,}4 \times 10^{-12}$ & $+0{,}124$ \\
-Công thức chuẩn + Đối xứng hóa & 33{,}5 $\mu$s & $< 10^{-16}$ (Số học máy) & $+0{,}124$ \\
-Dạng Joseph bền vững & 42{,}8 $\mu$s & $< 10^{-16}$ (Số học máy) & $+0{,}124$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Trong hệ thống thực tế, giải pháp công thức chuẩn $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}^-$ được áp dụng để tối ưu hóa thời gian tính toán ở mức $31{,}2\,\mu$s mỗi bước, với sai số đối xứng duy trì ở mức rất nhỏ ($1{,}4 \times 10^{-12}$) bảo đảm tính ổn định số học trong suốt phiên chạy thực nghiệm. Dạng Joseph bền vững và kỹ thuật ép đối xứng đóng vai trò giải pháp chuẩn quy chiếu khi phân tích ổn định dài hạn.
-
-\subsubsection{Khảo sát tính ổn định ước lượng vận tốc khi GNSS bị nhảy bước vị trí}
-
-\hspace{0.5cm} Hiện tượng nhảy bước vị trí ngẫu nhiên (Position Jump) của GNSS thường phát sinh khi bộ thu chuyển đổi chùm vệ tinh quan sát (Constellation Switch) hoặc do vật cản đô thị gây gián đoạn đường truyền thẳng. Thử nghiệm bơm xung nhảy $\Delta p = 3{,}0$ m tại $t = 20{,}0$ s trong kịch bản xe máy được tiến hành để đánh giá phản ứng của vector vận tốc ước lượng.
-
-Nếu sử dụng phép vi phân số học trực tiếp (Finite Difference $\Delta p / \Delta t$), đỉnh nhọn vận tốc tức thời tăng vọt lên:
-\begin{equation}
-v_{\text{diff}} = \frac{3{,}0\text{ m}}{0{,}1\text{ s}} = 30{,}0 \text{ m/s} \quad (\text{Sai số } 300\%)
-\end{equation}
-
-Ngược lại, bộ lọc Kalman với mô hình động học quán tính phân bổ xung nhảy qua ma trận độ lợi $\mathbf{K}_k$, dập tắt xung nhiễu êm thuận.
-
-\begin{table}[H]
-\centering
-\caption{So sánh phản ứng vận tốc giữa phép vi phân trực tiếp và bộ lọc Kalman khi GNSS nhảy bước}
-\label{tab:velocity-spike-response}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Phương pháp ước lượng} & \textbf{Vận tốc thực} & \textbf{Vận tốc ước lượng đỉnh} & \textbf{Độ vọt sai số} & \textbf{Thời gian tái ổn định} \\
-\midrule
-Vi phân trực tiếp ($\Delta p / \Delta t$) & 10{,}0 m/s & 40{,}0 m/s & $+300{,}0\%$ & 0{,}1 s (1 chu kỳ) \\
-Alpha-Beta ($\alpha=0{,}40, \beta=0{,}0508$) & 10{,}0 m/s & 11{,}5 m/s & $+15{,}0\%$ & 1{,}2 s (12 chu kỳ) \\
-Kalman thích nghi (Adaptive R) & 10{,}0 m/s & 10{,}8 m/s & $+8{,}0\%$ & 0{,}8 s (8 chu kỳ) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Bộ lọc Kalman thích nghi kiểm soát độ vọt sai số vận tốc ở mức chỉ $+8{,}0\%$ ($10{,}8$ m/s so với $10{,}0$ m/s thực tế), loại bỏ hoàn toàn các xung giật nhân tạo có thể gây mất ổn định các hệ thống điều khiển tự động hạ tầng sau.
-
-
-
-\subsubsection{Phân tích khoảng cách Mahalanobis và cơ chế loại bỏ xung nhiễu giả}
-
-\hspace{0.5cm} Trong điều kiện vận hành thực tế, chùm tia laser có thể phản xạ nhầm vào tán cây, chim bay hoặc các phương tiện khác trong tầm nhìn, sinh ra các điểm đo ngoại lai (clutter/false alarms). Để bảo vệ bộ lọc Kalman khỏi bị kéo lệch bởi các phép đo sai này, cơ chế lọc cổng thống kê dựa trên bình phương khoảng cách Mahalanobis (Normalized Innovation Squared, NIS) $d_M^2$ được áp dụng:
-\begin{equation}
-d_M^2 = \mathbf{y}_k^T \mathbf{S}_k^{-1} \mathbf{y}_k = (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_k^-)^T (\mathbf{H}\mathbf{P}_k^-\mathbf{H}^T + \mathbf{R}_k)^{-1} (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_k^-)
-\label{eq:mahalanobis-distance}
-\end{equation}
-
-Khi phép đo là hợp lệ, biến ngẫu nhiên $d_M^2$ tuân theo phân phối Chi-bình phương với số bậc tự do $n_z = \dim(\mathbf{z})$ ($n_z = 2$ cho 2D và $n_z = 3$ cho 3D). Ngưỡng gán cổng $\gamma_{\text{gate}}$ được thiết lập theo mức ý nghĩa $\alpha_{\text{gate}} = 0{,}01$ (độ tin cậy 99\%):
-\begin{equation}
-\text{Quyết định cập nhật} = \begin{cases}
-\text{Chấp nhận và thực hiện Update} & \text{nếu } d_M^2 \le \gamma_{\text{gate}} \\
-\text{Loại bỏ và chỉ duy trì Predict} & \text{nếu } d_M^2 > \gamma_{\text{gate}}
-\end{cases}
-\label{eq:gating-decision-rule}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Đặc tính cổng gán thống kê $\chi^2$ và tỷ lệ loại bỏ nhiễu sai đo lường (mô phỏng trong điều kiện xung nhiễu giả lập)}
-\label{tab:mahalanobis-gating-performance}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Kịch bản mục tiêu} & \textbf{Bậc tự do $n_z$} & \textbf{Ngưỡng cổng $\gamma_{0{,}99}$} & \textbf{Tỷ lệ phát hiện đúng} & \textbf{Tỷ lệ loại bỏ xung giả} \\
-\midrule
-Người đi bộ (2D) & 2 & 9{,}210 & 99{,}1\% & 98{,}5\% \\
-Xe máy (2D) & 2 & 9{,}210 & 98{,}9\% & 98{,}2\% \\
-Drone không gian (3D) & 3 & 11{,}345 & 99{,}0\% & 99{,}1\% \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Cơ chế gán cổng Mahalanobis giúp hệ thống loại bỏ thành công $98{,}5\% - 99{,}1\%$ các xung đo lường sai lệch cực đoan trong các kịch bản mô phỏng xung nhiễu, hạn chế biến dạng quỹ đạo bám bắt của mục tiêu.
-
-\subsubsection{So sánh hiệu năng với các thuật toán lọc phi tuyến nâng cao}
-
-\hspace{0.5cm} Nhằm khẳng định tính ưu việt của giải pháp kiến trúc đề xuất (Hợp nhất sang ENU kết hợp Bộ lọc Kalman thích nghi), hệ thống được so sánh đối chiếu với hai thuật toán lọc phi tuyến phổ biến trong lý thuyết điều khiển: Bộ lọc Kalman không mùi (Unscented Kalman Filter, UKF) và Bộ lọc hạt (Particle Filter, PF với $N_p = 500$ hạt).
-
-Kết quả chứng minh rằng bộ lọc Kalman thích nghi đạt độ chính xác tương đương UKF (chênh lệch dưới 1\%) nhưng nhanh hơn 3,8 lần và nhanh hơn Particle Filter tới 67 lần, bảo đảm tính tất định và khả năng tương thích cao với kiến trúc xử lý thời gian thực.
-
-
+Trong hệ thống thực tế, giải pháp công thức chuẩn $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}^-$ được áp dụng kết hợp kỹ thuật ép đối xứng định kỳ nhằm tối ưu hóa thời gian tính toán. Dạng Joseph đóng vai trò tham chiếu lý thuyết để chứng minh tính ổn định toán học.
 
 \subsubsection{Phân tích tương quan chéo và cấu trúc ma trận hiệp phương sai ngoài đường chéo}
 
@@ -503,6 +382,6 @@ Khi mục tiêu thực hiện chuyển hướng cơ động (ví dụ xe máy r�
 \hspace{0.5cm} Các kết quả nghiên cứu và thiết kế trình bày trong chương này đã thiết lập nền tảng toán học và kỹ thuật vững chắc cho hệ thống bám mục tiêu:
 \begin{enumerate}
     \item Cơ chế thích nghi $\mathbf{R}_k = \sigma_{pos,k}^2 \mathbf{I}$ giải quyết triệt để sự mất cân đối đo lường theo khoảng cách, giúp giảm sai số tới 28,6\% ở cự ly xa.
-    \item Chuỗi xử lý thời gian thực đạt $59{,}0$ $\mu$s mỗi bước (tương đương 0,059\% chu kỳ 100 ms), bảo đảm khả năng mở rộng đa phiên ổn định.
-    \item Toàn bộ 163 ca kiểm thử tự động đạt độ chính xác $100\%$, sai số trắc địa khứ hồi $< 4 \times 10^{-11}$ m, và quy tắc nhận dạng mục tiêu mô phỏng đạt F1-score $99{,}0\%$.
+    \item Chuỗi xử lý thời gian thực được thiết kế với ngân sách $59{,}0$ $\mu$s mỗi bước (tương đương 0,059\% chu kỳ 100 ms), bảo đảm khả năng mở rộng đa phiên ổn định.
+    \item Toàn bộ 163 ca kiểm thử tự động đạt độ chính xác $100\%$ cùng sai số trắc địa khứ hồi $< 4 \times 10^{-11}$ m.
 \end{enumerate}

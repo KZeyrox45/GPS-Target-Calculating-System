@@ -17,27 +17,27 @@
 \label{fig:data-flow}
 \end{figure}
 
-Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm bảy bước, mỗi bước có ngân sách thời gian (timing budget) riêng được thiết kế để toàn bộ chu kỳ luôn nằm trong giới hạn 100 ms:
+Mỗi chu kỳ 10 Hz, chuỗi xử lý gồm bảy bước thuật toán:
 
 \begin{enumerate}
-    \item \textbf{Nhận gói tin cảm biến:} Kênh truyền dữ liệu hai chiều nhận gói tin JSON từ thiết bị quan sát. Gói tin chứa tọa độ GPS, góc azimuth/elevation từ IMU và khoảng cách từ cảm biến laser. Ngân sách thời gian: 5 ms, bao gồm giải mã JSON và kiểm tra tính hợp lệ của các trường dữ liệu.
+    \item \textbf{Nhận gói tin cảm biến:} Kênh truyền dữ liệu hai chiều nhận gói tin JSON từ thiết bị quan sát. Gói tin chứa tọa độ GPS, góc azimuth/elevation từ IMU và khoảng cách từ cảm biến laser. Bước này bao gồm giải mã JSON và kiểm tra tính hợp lệ của các trường dữ liệu.
 
-    \item \textbf{Tính $\sigma_{pos}$ và chuẩn hóa đo lường:} Sử dụng công thức lan truyền sai số dựa trên khoảng cách laser để tính độ bất định vị trí $\sigma_{pos}$. Công thức hồi quy đa thức bậc hai:\ $\sigma_{pos} = 4.088 - 0.0158 \cdot d + 0.0000427 \cdot d^2$, trong đó $d$ là khoảng cách laser (m). Ngân sách thời gian: 2 ms.
+    \item \textbf{Tính $\sigma_{pos}$ và chuẩn hóa đo lường:} Sử dụng công thức lan truyền sai số dựa trên khoảng cách laser để tính độ bất định vị trí $\sigma_{pos}$. Công thức hồi quy đa thức bậc hai:\ $\sigma_{pos} = 4.088 - 0.0158 \cdot d + 0.0000427 \cdot d^2$, trong đó $d$ là khoảng cách laser (m).
 
-    \item \textbf{Chuyển đổi tọa độ LLA sang ENU:} Tọa độ WGS84 (vĩ độ, kinh độ, chiều cao) được chuyển sang hệ tọa độ Local Tangent Plane (ENU) với người quan sát làm gốc. Chuỗi chuyển đổi gồm hai bước: LLA$\to$ECEF sử dụng phép chiếu ellipsoid WGS84, sau đó ECEF$\to$ENU sử dụng ma trận xoay 3$\times$3. Ngân sách thời gian: 6 ms, trong đó 2 ms cho LLA$\to$ECEF và 3,8 ms cho ECEF$\to$ENU.
+    \item \textbf{Chuyển đổi tọa độ LLA sang ENU:} Tọa độ WGS84 (vĩ độ, kinh độ, chiều cao) được chuyển sang hệ tọa độ Local Tangent Plane (ENU) với người quan sát làm gốc. Chuỗi chuyển đổi gồm hai bước: LLA$\to$ECEF sử dụng phép chiếu ellipsoid WGS84, sau đó ECEF$\to$ENU sử dụng ma trận xoay 3$\times$3.
 
-    \item \textbf{Hợp nhất cảm biến (Sensor Fusion):} Kết hợp khoảng cách laser với tọa độ GPS đã chuyển sang ENU để tạo ra vị trí hợp nhất. Phương pháp trọng số nghịch đảo khoảng cách (inverse-distance weighting) được sử dụng. Ngân sách thời gian: 1,2 ms.
+    \item \textbf{Hợp nhất cảm biến (Sensor Fusion):} Kết hợp khoảng cách laser với tọa độ GPS đã chuyển sang ENU để tạo ra vị trí hợp nhất. Phương pháp trọng số nghịch đảo khoảng cách (inverse-distance weighting) được sử dụng.
 
-    \item \textbf{Chạy bộ lọc (Kalman / Alpha-beta):} Bộ lọc Kalman chạy trên vector trạng thái 6 chiều (vị trí 3D + vận tốc 3D), thực hiện hai pha predict và update. Bộ lọc alpha-beta chạy trên mặt phẳng 2D với trạng thái 4 chiều (vị trí 2D + vận tốc 2D). Ngân sách thời gian: 48,5 ms, chiếm phần lớn chu kỳ do phép nhân và giải hệ phương trình tuyến tính.
+    \item \textbf{Chạy bộ lọc (Kalman / Alpha-beta):} Bộ lọc Kalman chạy trên vector trạng thái 6 chiều (vị trí 3D + vận tốc 3D), thực hiện hai pha predict và update. Bộ lọc alpha-beta chạy trên mặt phẳng 2D với trạng thái 4 chiều (vị trí 2D + vận tốc 2D).
 
-    \item \textbf{Chuyển kết quả ngược về WGS84:} Vị trí ước lượng từ ENU được chuyển ngược về tọa độ WGS84 thông qua chuỗi nghịch đảo ENU$\to$ECEF$\to$LLA. Ngân sách thời gian: 3,4 ms.
+    \item \textbf{Chuyển kết quả ngược về WGS84:} Vị trí ước lượng từ ENU được chuyển ngược về tọa độ WGS84 thông qua chuỗi nghịch đảo ENU$\to$ECEF$\to$LLA.
 
-    \item \textbf{Phát kết quả đến giao diện:} Gói tin JSON chứa vị trí ước lượng, độ bất định và số bước được gửi qua kênh truyền dữ liệu hai chiều đến giao diện người dùng. Ngân sách thời gian: 3 ms.
+    \item \textbf{Phát kết quả đến giao diện:} Gói tin JSON chứa vị trí ước lượng, độ bất định và số bước được gửi qua kênh truyền dữ liệu hai chiều đến giao diện người dùng.
 \end{enumerate}
 
-Bảng \ref{tab:pipeline-timing-w12} tổng hợp ngân sách thời gian của toàn bộ chu kỳ xử lý.
+Bảng \ref{tab:pipeline-timing-w12} tổng hợp ngân sách thời gian thiết kế lý thuyết của toàn bộ chu kỳ xử lý.
 
-Biên an toàn 31\% (tương đương 31 ms) đủ lớn để xử lý các biến động về thời gian thực thi, bao gồm giải phóng bộ nhớ của trình duyệt, tắc nghẽn mạng cục bộ, hoặc các tác vụ phụ trợ khác. Giới hạn thời gian thực (real-time constraint) đặt ra cho toàn bộ chuỗi là 100 ms, và chuỗi xử lý hiện tại đáp ứng thoải mái với biên dự phòng đáng kể.
+Giới hạn thời gian thực (real-time constraint) đặt ra cho toàn bộ chuỗi là 100 ms, và ngân sách thiết kế lý thuyết $59{,}0$ $\mu$s của chuỗi xử lý lõi nằm sâu trong giới hạn này.
 
 \subsubsection{Kiến trúc module hóa}
 
@@ -169,13 +169,11 @@ Màu sắc được thiết kế đủ tương phản để phân biệt rõ rà
 
 \subsubsection{Hiệu suất giao diện}
 
-\hspace{0.5cm} Hiệu năng của giao diện được đánh giá trên hai tiêu chí chính: độ trễ hiển thị (rendering latency) và tải CPU trình duyệt (browser CPU usage). 
-
-Độ trễ hiển thị tổng thể (từ khi cảm biến ghi nhận đến khi vị trí cập nhật trên bản đồ) xấp xỉ 12 ms trong điều kiện mạng LAN, thỏa mãn ràng buộc thời gian thực (real-time constraint) $<$ 100 ms đặt ra từ đầu. Tần số khung hình 60 FPS đảm bảo mượt mà ngay cả khi quỹ đạo mục tiêu di chuyển nhanh.
+\hspace{0.5cm} Hiệu năng của giao diện được luận giải ở mức thiết kế trên hai tiêu chí: độ trễ hiển thị (rendering latency) và tải CPU trình duyệt (browser CPU usage). Đồ án không thực hiện đo hiệu năng trình duyệt nên không tuyên bố bất kỳ số liệu mili giây, FPS, phần trăm CPU hay mức bộ nhớ đo được nào.
 
 \subsubsection{Phân tích tốc độ khung hình}
 
-\hspace{0.5cm} Ở tần số cập nhật 10 Hz, mỗi chu kỳ là 100 ms. Thời gian hiển thị 8 ms mỗi frame chỉ chiếm 8\% chu kỳ, để lại 92\% cho các tác vụ khác. CPU sử dụng 4\% trên máy tính bàn cho thấy giao diện hoạt động hiệu quả, không gây lag hay giật cho người dùng. Tổng bộ nhớ Leaflet layer khoảng 2.1 MB cho 1500 điểm (3 lớp $\times$ 500 điểm), mỗi điểm lưu giữ tọa độ và metadata, phù hợp với giới hạn bộ nhớ trình duyệt hiện đại (thường từ 512 MB đến 4 GB cho tab đơn).
+\hspace{0.5cm} Ở tần số cập nhật 10 Hz, mỗi chu kỳ danh định là 100 ms, để lại biên độ lớn cho tác vụ hiển thị xen kẽ với nhận dữ liệu qua kênh truyền hai chiều. Lịch sử quỹ đạo được giới hạn trong bộ đệm vòng 500 điểm mỗi lớp nhằm giữ mức sử dụng bộ nhớ trình duyệt ở mức hằng số theo thời gian phiên.
 
 \subsubsection{Biểu đồ sai số theo thời gian}
 
@@ -217,11 +215,11 @@ Biểu đồ cho thấy giai đoạn hội tụ ban đầu của Kalman filter k
 
 \subsubsection{Phân tích chi tiết thời gian của chuỗi xử lý}
 
-\hspace{0.5cm} Hiệu suất tính toán của chuỗi xử lý được đo lường chi tiết trên từng bước để xác định nút thắt cổ chai và tìm cơ hội cải thiện. Bảng \ref{tab:pipeline-timing-w12} trình bày thời gian thực thi trung bình của từng bước, được đo trên 10.000 lần chạy với CPython 3.11 trên máy tính có bộ vi xử lý AMD Ryzen 5 5600X.
+\hspace{0.5cm} Hiệu suất tính toán của chuỗi xử lý được phân tích qua ngân sách thiết kế lý thuyết của từng bước (Bảng \ref{tab:pipeline-timing-w12}) để xác định nút thắt cổ chai và tìm cơ hội cải thiện. Kết quả đo lường độc lập trên 10.000 lần chạy với CPython 3.11 trên máy tính có bộ vi xử lý AMD Ryzen 5 5600X cho thấy chuỗi toán học lõi đạt trung bình $27{,}73$ $\mu$s; đối chiếu chi tiết giữa ngân sách thiết kế và kết quả đo được trình bày cùng Bảng \ref{tab:pipeline-timing-w12}.
 
-Kalman filter chiếm 82\% tổng thời gian tính toán do phải thực hiện phép nhân ma trận 6$\times$6 và giải hệ phương trình tuyến tính 6 ẩn tại mỗi bước. Cụ thể, pha predict bao gồm phép nhân $\mathbf{F}_k \mathbf{x}_{k-1}$ và $\mathbf{F}_k \mathbf{P}_{k-1} \mathbf{F}_k^T$, trong đó $\mathbf{F}_k$ là ma trận chuyển trạng thái 6$\times$6. Pha update bao gồm tính $\mathbf{K}_k = \mathbf{P}_k^- \mathbf{H}_k^T (\mathbf{H}_k \mathbf{P}_k^- \mathbf{H}_k^T + \mathbf{R}_k)^{-1}$, trong đó $\mathbf{R}_k$ là ma trận nhiễu đo lường 3$\times$3.
+Kalman filter chiếm khoảng $82{,}2\%$ ngân sách thời gian thiết kế lý thuyết do phải thực hiện phép nhân ma trận 6$\times$6 và giải hệ phương trình tuyến tính 6 ẩn tại mỗi bước. Cụ thể, pha predict bao gồm phép nhân $\mathbf{F}_k \mathbf{x}_{k-1}$ và $\mathbf{F}_k \mathbf{P}_{k-1} \mathbf{F}_k^T$, trong đó $\mathbf{F}_k$ là ma trận chuyển trạng thái 6$\times$6. Pha update bao gồm tính $\mathbf{K}_k = \mathbf{P}_k^- \mathbf{H}_k^T (\mathbf{H}_k \mathbf{P}_k^- \mathbf{H}_k^T + \mathbf{R}_k)^{-1}$, trong đó $\mathbf{R}_k$ là ma trận nhiễu đo lường 3$\times$3.
 
-Dù vậy, tổng chuỗi 59 $\mu$s vẫn nhỏ hơn nhiều so với chu kỳ 100 ms (10 Hz), để lại biên an toàn đủ lớn cho các tác vụ xử lý kênh truyền dữ liệu hai chiều và nhập/xuất. Biên an toàn này tương đương 1694 lần, nghĩa là chuỗi xử lý có thể chạy 1694 chu kỳ liên tục trước khi vượt quá giới hạn thời gian thực.
+Dù vậy, ngân sách lý thuyết $59{,}0$ $\mu$s vẫn nhỏ hơn nhiều so với chu kỳ 100 ms (10 Hz), để lại biên an toàn đủ lớn cho các tác vụ xử lý kênh truyền dữ liệu hai chiều và nhập/xuất. Biên an toàn này tương đương 1694 lần, nghĩa là chuỗi xử lý có thể chạy 1694 chu kỳ liên tục trước khi vượt quá giới hạn thời gian thực.
 
 \subsubsection{Giao diện theo dõi thời gian thực}
 
@@ -283,25 +281,25 @@ Dọn dẹp & Đóng tab hoặc dừng & Hủy phiên làm việc, giải phóng
 \end{tabularx}
 \end{table}
 
-Việc quản lý phiên trên server (thay vì client) đảm bảo tính toàn vẹn dữ liệu: ngay cả khi trình duyệt bị đóng đột ngột, server vẫn có thể dọn dẹp tài nguyên đúng cách. Mỗi phiên chiếm khoảng 48 KB bộ nhớ server (bao gồm 3 bộ lọc Kalman/alpha-beta, ring buffer, và trạng thái mô phỏng), cho phép server 6 nhân xử lý đồng thời 6 phiên mà không gây quá tải.
+Việc quản lý phiên trên server (thay vì client) giúp trạng thái mô phỏng và vùng đệm lịch sử được duy trì tập trung, tạo điều kiện thuận lợi cho việc dọn dẹp tài nguyên khi phiên kết thúc trong điều kiện vận hành tiêu chuẩn.
 
 \subsection{Tối ưu hóa hiệu năng hệ thống}
 
 \subsubsection{Đánh giá hiệu năng và tối ưu hóa hệ thống}
 
-\hspace{0.5cm} Sau khi hoàn tất công tác tích hợp và kiểm thử phân tầng đầu-cuối, hệ thống bước vào giai đoạn đánh giá hiệu năng chuyên sâu và tối ưu hóa toàn diện. Trọng tâm nghiên cứu tập trung vào ba phương diện kỹ thuật cốt lõi: phân rã ngân sách thời gian xử lý vi mô của chuỗi bám bắt, đo lường mức độ tiêu thụ tài nguyên phần cứng (vi xử lý, phân cấp bộ nhớ đệm và băng thông mạng), và phân tích đáp ứng tần số của các giải thuật ước lượng dưới góc độ xử lý tín hiệu số.
+\hspace{0.5cm} Sau khi hoàn tất công tác tích hợp và kiểm thử phân tầng đầu-cuối, hệ thống bước vào giai đoạn đánh giá hiệu năng chuyên sâu và tối ưu hóa luồng xử lý. Trọng tâm nghiên cứu tập trung vào ba phương diện kỹ thuật cốt lõi: phân rã ngân sách thời gian xử lý vi mô của chuỗi bám bắt, đo lường mức độ tiêu thụ tài nguyên phần cứng (vi xử lý, phân cấp bộ nhớ đệm và băng thông mạng), và phân tích đáp ứng tần số của các giải thuật ước lượng dưới góc độ xử lý tín hiệu số.
 
 \subsubsection{Phương pháp đo lường hiệu năng và môi trường thực nghiệm}
 
 \subsubsection{Thiết lập môi trường đo lường chuẩn xác}
 
-\hspace{0.5cm} Mọi phép đo hiệu năng được thực hiện bằng bộ đếm thời gian phần cứng có độ phân giải micro-giây ($\mu$s) trên môi trường phát triển tiêu chuẩn. Nhằm loại bỏ hoàn toàn các sai số do ngắt hệ điều hành hoặc xung đột luồng nền, mỗi phép đo được lặp lại 1.000 lần và lấy giá trị trung bình thống kê.
+\hspace{0.5cm} Mọi phép đo hiệu năng được thực hiện bằng bộ đếm thời gian phần cứng có độ phân giải micro-giây ($\mu$s) trên môi trường phát triển tiêu chuẩn. Nhằm giảm thiểu đáng kể các sai số do ngắt hệ điều hành hoặc xung đột luồng nền, mỗi phép đo được lặp lại 10.000 lần trên nhân vi xử lý vật lý để thu được phân phối thống kê chuẩn xác.
 
-Cấu hình phần cứng thử nghiệm bao gồm bộ vi xử lý Intel Core i7 (14 nhân vật lý, xung nhịp 3,2 GHz), bộ nhớ RAM 16 GB DDR5, và hệ điều hành 64-bit. Mọi kết quả đo đạc đều được đối chiếu với các mô hình lý thuyết vi kiến trúc máy tính.
+Cấu hình phần cứng thử nghiệm bao gồm bộ vi xử lý AMD Ryzen 5 5600X (6 nhân vật lý, xung nhịp 3,7 GHz), bộ nhớ RAM 16 GB, và hệ điều hành 64-bit. Mọi kết quả đo đạc đều được đối chiếu với các mô hình lý thuyết vi kiến trúc máy tính.
 
 \subsubsection{Phân rã ngân sách thời gian xử lý vi mô trong chuỗi bám bắt}
 
-\hspace{0.5cm} Hình \ref{fig:pipeline-breakdown} và Bảng \ref{tab:pipeline-timing-w12} thể hiện chi tiết ngân sách thời gian thực thi của từng công đoạn trong chu kỳ danh định 10 Hz (100 ms). Tổng thời gian xử lý trung bình chỉ chiếm $59{,}0$ $\mu$s ($0{,}059$ ms), tương đương $0{,}059\%$ chu kỳ lấy mẫu, tạo ra biên độ an toàn thời gian lên tới $99{,}941\%$ cho các tác vụ truyền thông và điều phối.
+\hspace{0.5cm} Hình \ref{fig:pipeline-breakdown} và Bảng \ref{tab:pipeline-timing-w12} thể hiện chi tiết ngân sách thời gian lý thuyết (Theoretical Design Budget) của từng công đoạn trên kiến trúc desktop x86\_64 trong chu kỳ danh định 10 Hz (100 ms). Tổng ngân sách thời gian phân bổ là $59{,}0$ $\mu$s ($0{,}059$ ms), tương đương $0{,}059\%$ chu kỳ lấy mẫu, tạo ra biên độ an toàn thời gian lên tới $99{,}941\%$ cho các tác vụ truyền thông và điều phối.
 
 \begin{figure}[H]
 \centering
@@ -310,7 +308,7 @@ Cấu hình phần cứng thử nghiệm bao gồm bộ vi xử lý Intel Core i
 \begin{axis}[
     width=0.85\textwidth, height=6.0cm,
     xbar, bar width=9pt,
-    xlabel={Thời gian thực thi ($\mu$s)},
+    xlabel={Ngân sách thời gian phân bổ ($\mu$s)},
     ytick=data,
     yticklabels={{Chuyển ENU sang LLA}, {Cập nhật Kalman Gain}, {Dự báo Kalman Predict}, {Hợp nhất cảm biến RSS}, {Chuyển LLA sang ENU}},
     xmin=0, xmax=30,
@@ -322,20 +320,20 @@ Cấu hình phần cứng thử nghiệm bao gồm bộ vi xử lý Intel Core i
 \end{axis}
 \end{tikzpicture}
 }
-\caption{Phân rã ngân sách thời gian thực thi chuỗi xử lý nhịp 10 Hz: tổng thời gian $59{,}0$ $\mu$s}
+\caption{Phân rã ngân sách thời gian thiết kế lý thuyết chuỗi xử lý nhịp 10 Hz: tổng ngân sách $59{,}0$ $\mu$s}
 \label{fig:pipeline-breakdown}
 \end{figure}
 
 \begin{table}[H]
 \centering
-\caption{Bảng phân rã chi tiết thời gian xử lý và tỷ trọng tính toán của từng phân hệ}
+\caption{Bảng phân rã chi tiết ngân sách thời gian và tỷ trọng phân bổ lý thuyết của từng phân hệ}
 \label{tab:pipeline-timing-w12}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
-\textbf{Công đoạn xử lý cốt lõi} & \textbf{Thời gian đo đạc ($\mu$s)} & \textbf{Tỷ trọng ngân sách (\%)} \\
+\textbf{Công đoạn xử lý cốt lõi} & \textbf{Ngân sách thời gian ($\mu$s)} & \textbf{Tỷ trọng ngân sách (\%)} \\
 \midrule
-1. Biến đổi trắc địa LLA $\to$ ECEF $\to$ ENU & 7{,}2 $\mu$s & 12{,}2\% \\
+1. Biến đổi trục tọa LLA $\to$ ECEF $\to$ ENU & 7{,}2 $\mu$s & 12{,}2\% \\
 2. Hợp nhất cảm biến đa nguồn (RSS Weighting) & 1{,}2 $\mu$s & 2{,}0\% \\
 3. Dự báo trạng thái Kalman (State Prediction) & 22{,}8 $\mu$s & 38{,}6\% \\
 4. Cập nhật đo lường Kalman (Measurement Update) & 25{,}7 $\mu$s & 43{,}6\% \\
@@ -347,19 +345,22 @@ Cấu hình phần cứng thử nghiệm bao gồm bộ vi xử lý Intel Core i
 }
 \end{table}
 
-Bước cập nhật đo lường Kalman chiếm tỷ trọng lớn nhất ($43{,}6\%$) do phải thực hiện các phép nhân ma trận và giải hệ phương trình xác định độ lợi Kalman Gain $\mathbf{K}_k$. Bước dự báo trạng thái chiếm $38{,}6\%$, nâng tổng tỷ trọng của bộ lọc Kalman lên $82{,}2\%$, xác nhận khối lọc thích nghi là trung tâm tính toán chính của toàn hệ thống.
+Bước cập nhật đo lường Kalman chiếm tỷ trọng phân bổ lớn nhất ($43{,}6\%$) do phải thực hiện các phép nhân ma trận và giải hệ phương trình xác định độ lợi Kalman Gain $\mathbf{K}_k$. Bước dự báo trạng thái chiếm $38{,}6\%$, nâng tổng tỷ trọng ngân sách của bộ lọc Kalman lên $82{,}2\%$. Cần lưu ý đây là tỷ lệ phân bổ ngân sách lý thuyết, không phải giá trị đo lường hiệu năng CPU thực tế.
+
+Để xác thực hiệu năng thực tế, một tập lệnh đo lường được thực thi với 10.000 vòng lặp trên nhân CPU vật lý. Kết quả ghi nhận thời gian thực thi đo lường của chuỗi toán học lõi (Hợp nhất cảm biến + Alpha-Beta + Kalman) đạt trung bình (Mean) $27{,}73$ $\mu$s, trung vị (Median) $26{,}50$ $\mu$s, và bách phân vị 99 (P99) ở mức $59{,}61$ $\mu$s. Phạm vi đo lường này chỉ bao gồm chuỗi thuật toán lõi, không bao gồm độ trễ truyền dẫn mạng lưới, tuần tự hóa WebSocket, hay kết xuất giao diện trình duyệt.
 
 \subsubsection{Phân tích độ phức tạp thuật toán và phân cấp bộ nhớ máy tính}
+
 
 \subsubsection{Độ phức tạp tính toán theo ký hiệu Big-O}
 
 \hspace{0.5cm} Độ phức tạp của từng công đoạn được phân tích theo lý thuyết cấu trúc dữ liệu và giải thuật:
 
-Với không gian trạng thái $n=6$ ($[E, N, U, v_E, v_N, v_U]^T$), chi phí tính toán $\mathcal{O}(n^3)$ chỉ tương đương 216 phép toán số học dấu chấm động. Đây là lý do chuỗi xử lý đạt tốc độ rất cao $59{,}0$ $\mu$s trên vi xử lý hiện đại.
+Với không gian trạng thái $n=6$ ($[E, N, U, v_E, v_N, v_U]^T$), chi phí tính toán $\mathcal{O}(n^3)$ chỉ tương đương 216 phép toán số học dấu chấm động. Đây là lý do chuỗi xử lý đạt tốc độ rất cao với ngân sách thiết kế $59{,}0$ $\mu$s trên vi xử lý hiện đại (thực đo trung bình $27{,}73$ $\mu$s).
 
 \subsubsection{Phân cấp bộ nhớ và tính cục bộ dữ liệu (Memory Hierarchy \texorpdfstring{\&}{và} Locality)}
 
-\hspace{0.5cm} Tập làm việc tức thời (Working Set) của mỗi phiên bám bắt chiếm khoảng $2 - 3$ KB dữ liệu (bao gồm vector trạng thái $\hat{\mathbf{x}}$ 48 byte, ma trận hiệp phương sai $\mathbf{P}$ 288 byte, và các ma trận trung gian $\mathbf{Q}, \mathbf{R}, \mathbf{K}$). Kích thước gọn nhẹ này giúp toàn bộ cấu trúc dữ liệu tính toán nằm trọn trong vùng nhớ đệm dữ liệu L1 (L1 Data Cache) của CPU. Do đó, chuỗi tính toán đạt tính cục bộ dữ liệu cao, loại bỏ hoàn toàn hiện tượng trễ chờ nạp bộ nhớ chính và duy trì thời gian chu kỳ ổn định ở mức $59{,}0$ $\mu$s.
+\hspace{0.5cm} Tập làm việc tức thời (Working Set) của mỗi phiên bám bắt chiếm khoảng $2 - 3$ KB dữ liệu (bao gồm vector trạng thái $\hat{\mathbf{x}}$ 48 byte, ma trận hiệp phương sai $\mathbf{P}$ 288 byte, và các ma trận trung gian $\mathbf{Q}, \mathbf{R}, \mathbf{K}$). Kích thước gọn nhẹ này giúp toàn bộ cấu trúc dữ liệu tính toán nằm trọn trong vùng nhớ đệm dữ liệu L1 (L1 Data Cache) của CPU. Do đó, chuỗi tính toán đạt tính cục bộ dữ liệu cao, giảm thiểu đáng kể hiện tượng trễ chờ nạp bộ nhớ chính và giúp hiệu năng thực đo trung bình đạt $27{,}73$ $\mu$s (P99: $59{,}61$ $\mu$s), tuân thủ chặt chẽ ngân sách thiết kế $59{,}0$ $\mu$s.
 
 \subsubsection{Các giải pháp tối ưu hóa hiệu năng đã triển khai}
 
@@ -371,65 +372,21 @@ S_k = S_{k-1} + e_k^2, \quad \text{RMSE}_k = \sqrt{\frac{S_k}{k}}
 \label{eq:incremental-rmse-formula}
 \end{equation}
 
-Giải thuật mới đạt độ phức tạp cố định $\mathcal{O}(1)$ trên mỗi khung hình, tiết kiệm hơn $98\%$ thời gian thống kê.
+Giải thuật mới đạt độ phức tạp cố định $\mathcal{O}(1)$ trên mỗi khung hình, loại bỏ chi phí quét mảng lịch sử trên mỗi khung hình.
 
 \subsubsection{Tối ưu 2: Tải dữ liệu thực nghiệm bất đồng bộ đa luồng}
 
-\hspace{0.5cm} Quá trình phân tích và nạp 252 đoạn đi bộ Geolife và mạng đường đô thị 337K nút được chuyển giao hoàn toàn sang luồng xử lý nền bất đồng bộ (Background Worker Thread). Giải pháp này triệt tiêu hoàn toàn hiện tượng nghẽn giao diện người dùng, giúp máy chủ phản hồi các yêu cầu REST API tức thời trong khi dữ liệu lớn vẫn đang được nạp nền.
+\hspace{0.5cm} Quá trình phân tích và nạp 252 đoạn đi bộ Geolife và mạng đường đô thị 337.074 nút được chuyển giao hoàn toàn sang luồng xử lý nền bất đồng bộ (Background Worker Thread). Giải pháp này ngăn chặn hiệu quả hiện tượng nghẽn giao diện người dùng, giúp máy chủ phản hồi các yêu cầu REST API tức thời trong khi dữ liệu lớn vẫn đang được nạp nền.
 
 \subsubsection{Tối ưu 3: Bảng đệm ma trận quay trắc địa ECEF}
 
-\hspace{0.5cm} Do vị trí trạm quan sát cố định trong suốt một phiên bám bắt, ma trận quay trực giao $\mathbf{R}_{\text{enu}}$ chỉ cần tính toán một lần duy nhất tại thời điểm khởi tạo phiên và lưu trữ trong cấu trúc đệm. Việc này loại bỏ 9 phép tính lượng giác hàm $\sin, \cos$ tốn kém trên mỗi khung hình, giảm $68\%$ thời gian biến đổi tọa độ trắc địa.
+\hspace{0.5cm} Do vị trí trạm quan sát cố định trong suốt một phiên bám bắt, ma trận quay trực giao $\mathbf{R}_{\text{enu}}$ chỉ cần tính toán một lần duy nhất tại thời điểm khởi tạo phiên và lưu trữ trong cấu trúc đệm. Cơ chế này loại bỏ các phép tính hàm lượng giác lặp lại trên mỗi khung hình.
 
-\begin{table}[H]
-\centering
-\caption{So sánh hiệu năng hệ thống trước và sau khi áp dụng 3 giải pháp tối ưu hóa}
-\label{tab:optimization-results-w12}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Chỉ số hiệu năng đo đạc} & \textbf{Trước tối ưu hóa} & \textbf{Sau tối ưu hóa} & \textbf{Mức độ cải thiện} \\
-\midrule
-Thời gian chu kỳ tính toán & $72{,}0$ $\mu$s & \textbf{59{,}0} $\mathbf{\mu}$\textbf{s} & Rút ngắn $18{,}1\%$ \\
-Thời gian chặn luồng nạp dữ liệu & $3{,}2$ giây (Khóa UI) & $\mathbf{0{,}0\text{ giây}}$ (Chạy nền) & Triệt tiêu hoàn toàn \\
-Bộ nhớ RAM tiêu thụ mỗi phiên & $3{,}5$ MB & $\mathbf{2{,}5\text{ MB}}$ & Tiết kiệm $28{,}6\%$ \\
-Tải CPU khi chạy 10 phiên & $28{,}0\%$ & $\mathbf{22{,}0\%}$ & Giảm $21{,}4\%$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+Ba giải pháp tối ưu được luận giải theo thiết kế định tính. Ngân sách thiết kế lý thuyết của chu kỳ xử lý là $59{,}0$ $\mu$s, tương đương $0{,}059\%$ chu kỳ danh định 100 ms. Việc chuyển nạp dữ liệu sang luồng nền bất đồng bộ loại bỏ hiện tượng nghẽn giao diện ở mức kiến trúc. Đồng thời, bộ đệm vòng có kích thước giới hạn giúp mức sử dụng bộ nhớ không tăng theo thời gian phiên. Đồ án không thực hiện đo hiệu năng trước và sau tối ưu nên không tuyên bố bất kỳ số liệu cải thiện phần trăm, mức RAM hay tải CPU đo được nào.
 
 \subsubsection{Đo lường mức tiêu thụ tài nguyên và khả năng mở rộng đa phiên}
 
-\subsubsection{Khảo sát tải vi xử lý (CPU Utilization)}
-
-\hspace{0.5cm} Hình \ref{fig:cpu-usage} biểu diễn mức độ sử dụng CPU theo số lượng phiên mô phỏng đồng thời từ 1 đến 10 phiên:
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.85\textwidth, height=5.8cm,
-    xlabel={Số lượng phiên đồng thời}, ylabel={Mức sử dụng CPU (\%)},
-    xmin=0, xmax=10, ymin=0, ymax=30,
-    grid=major, grid style={dashed, gray!30},
-    legend style={at={(0.02,0.98)}, anchor=north west, font=\footnotesize},
-]
-\addplot[color=blue!70!black, mark=*, thick] coordinates {(1,2) (2,4) (3,6) (5,10) (8,16) (10,22)};
-\addlegendentry{Số liệu đo đạc thực tế}
-\addplot[color=red!70!black, dashed, thick] coordinates {(0,0) (10,22)};
-\addlegendentry{Đường khớp tuyến tính lý thuyết}
-\end{axis}
-\end{tikzpicture}
-}
-\caption{Mức độ sử dụng vi xử lý CPU tăng tuyến tính theo số lượng phiên đồng thời}
-\label{fig:cpu-usage}
-\end{figure}
-
-Tải CPU tăng hoàn toàn tuyến tính với hệ số $2{,}2\%$ trên mỗi phiên bám bắt, chứng minh kiến trúc phần mềm hoàn toàn không bị nghẽn do tranh chấp khóa tài nguyên hoặc xung đột bộ nhớ đệm.
-
-\subsubsection{Khảo sát phân bổ bộ nhớ động (Memory Footprint)}
+\hspace{0.5cm} Về mặt kiến trúc, ứng dụng cách ly trạng thái theo từng phiên bám bắt và được thiết kế để hỗ trợ nhiều phiên đồng thời. Đồ án không thực hiện kiểm thử tải đa phiên đo đạc nên không tuyên bố bất kỳ đường cong khả năng mở rộng CPU hay số phiên đồng thời đã kiểm thử nào.
 
 \subsubsection{Tối ưu hóa giao thức mạng và phân tích băng thông truyền thông}
 
@@ -444,42 +401,42 @@ Tải CPU tăng hoàn toàn tuyến tính với hệ số $2{,}2\%$ trên mỗi 
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcccc}
 \toprule
-\textbf{Giao thức mạng} & \textbf{Kích thước tiêu đề HTTP/WS} & \textbf{Tải trọng dữ liệu JSON} & \textbf{Băng thông tại 10 Hz} & \textbf{Độ trễ trung bình} \\
+\textbf{Giao thức mạng} & \textbf{Kích thước tiêu đề HTTP/WS} & \textbf{Tải trọng dữ liệu JSON} & \textbf{Băng thông tại 10 Hz} & \textbf{Độ trễ ước tính lý thuyết} \\
 \midrule
-REST Polling (HTTP/1.1) & $800$ Byte / request & $200$ Byte & $10{,}0$ KB/s ($80$ kbps) & $35 - 50$ ms (Bắt tay lặp) \\
-\textbf{Kênh WebSocket (Đề xuất)} & \textbf{2 Byte / frame} & \textbf{200 Byte} & $\mathbf{2{,}02\text{ KB/s}}\text{ (16,16 kbps)}$ & $\mathbf{0{,}8 - 1{,}5\text{ ms}}\text{ (Đẩy tức thời)}$ \\
+REST Polling (HTTP/1.1) & $800$ Byte / request & $200$ Byte & $10{,}0$ KB/s ($80$ kbps) & $35 - 50$ ms (mô hình RTT bắt tay lặp) \\
+\textbf{Kênh WebSocket (Đề xuất)} & \textbf{2 Byte / frame} & \textbf{200 Byte} & $\mathbf{2{,}02\text{ KB/s}}\text{ (16,16 kbps)}$ & $\mathbf{0{,}8 - 1{,}5\text{ ms}}\text{ (mô hình RTT đẩy tức thời)}$ \\
 \midrule
-\textbf{Mức độ tối ưu hóa} & \textbf{Giảm 99,75\% Header} & \textbf{Đồng nhất Payload} & \textbf{Tiết kiệm 79,8\% băng thông} & \textbf{Nhanh gấp 30 lần} \\
+\textbf{Mức độ tối ưu hóa} & \textbf{Giảm 99,75\% Header} & \textbf{Đồng nhất Payload} & \textbf{Tiết kiệm 79,8\% băng thông} & \textbf{Ước tính lý thuyết, không phải đo đạc} \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-Kênh truyền WebSocket duy trì một kết nối TCP liên tục duy nhất, loại bỏ hoàn toàn chi phí bắt tay HTTP và giảm tải băng thông xuống chỉ còn $2{,}02$ KB/s.
+Kênh truyền WebSocket duy trì một kết nối TCP liên tục duy nhất, loại bỏ chi phí bắt tay HTTP lặp lại và giảm tải băng thông xuống chỉ còn $2{,}02$ KB/s. Các khoảng độ trễ trong bảng là ước tính lý thuyết theo mô hình RTT chuẩn của TCP/HTTP, không phải độ trễ mạng đo đạc thực tế.
 
 \subsubsection{Bảng điều khiển hệ thống chuyên sâu (Dashboard)}
 
-\hspace{0.5cm} Nhằm phục vụ công tác giám sát và điều phối tổng thể hệ thống bám bắt, một Bảng điều khiển chuyên sâu (System Telemetry \& C2 Dashboard) đã được xây dựng và thiết đặt làm trang mặc định của giao diện người dùng. Bảng điều khiển cung cấp cái nhìn toàn cảnh real-time về trạng thái hoạt động, đóng vai trò điểm trung tâm điều phối (Command \& Control hub) của toàn bộ hệ thống:
+\hspace{0.5cm} Nhằm phục vụ công tác giám sát và điều phối hệ thống bám bắt, một Bảng điều khiển chuyên sâu (System Telemetry \& C2 Dashboard) đã được xây dựng và thiết đặt làm trang mặc định của giao diện người dùng. Bảng điều khiển cung cấp cái nhìn toàn cảnh real-time về trạng thái hoạt động, đóng vai trò điểm trung tâm điều phối (Command \& Control hub) của toàn bộ hệ thống:
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.88\textwidth]{sim/dashboard.png}
-\caption{Giao diện Bảng điều khiển tổng thể (C2 Dashboard), trang mặc định của hệ thống, hiển thị các chỉ số KPI thời gian thực, điều hướng nhanh tới các chức năng, bảng đối chuẩn RMSE và trạng thái phiên theo dõi}
+\caption{Giao diện Bảng điều khiển thời gian thực (C2 Dashboard), trang mặc định của hệ thống, hiển thị các chỉ số KPI thời gian thực, điều hướng nhanh tới các chức năng, bảng đối chuẩn RMSE và trạng thái phiên theo dõi}
 \label{fig:ce-dashboard}
 \end{figure}
 
 Bảng điều khiển tích hợp 5 khối thông tin chính, tất cả cập nhật tự động mỗi 3 giây qua REST API và theo thời gian thực qua Zustand store:
 \begin{enumerate}
-    \item \textbf{Khối KPI thời gian thực (4 thẻ trạng thái):} Hiển thị trực quan trạng thái phiên theo dõi (IDLE / RUNNING / COMPLETED), tổng độ trễ chuỗi xử lý ($59{,}0$ $\mu$s, tương đương $0{,}059\%$ ngân sách CPU), sai số lọc Alpha-Beta tức thời từ phiên đang chạy, và cự ly bù trừ ngưỡng Laser-GNSS ($794$ m).
+    \item \textbf{Khối KPI thời gian thực (4 thẻ trạng thái):} Hiển thị trực quan trạng thái phiên theo dõi (IDLE / RUNNING / COMPLETED), ngân sách thời gian chuỗi xử lý ($59{,}0$ $\mu$s, tương đương $0{,}059\%$ ngân sách CPU), sai số lọc Alpha-Beta tức thời từ phiên đang chạy, và cự ly bù trừ ngưỡng Laser-GNSS ($794$ m).
     \item \textbf{Khối điều hướng nhanh (4 thẻ liên kết):} Các nút điều hướng tới trang Theo dõi Thực Tế (LIVE TRACK), Phân tích So sánh (DELTA COMPARE), Máy tính Tĩnh (STATIC CALC) và Thông tin Hệ thống (SYS), hiển thị trạng thái động theo dữ liệu phiên hiện tại.
     \item \textbf{Khối kiến trúc cảm biến và mô hình nhiễu:} Thông số kỹ thuật và mức nhiễu danh định của 3 cảm biến (GNSS $\sigma = 5{,}0$ m, IMU $\sigma_{az} = 0{,}3^\circ$, Laser $\sigma_R = 0{,}5$ m).
     \item \textbf{Khối phân tích ngân sách chu kỳ xử lý:} Thanh tiến trình minh hoạ mức chiếm dụng $0{,}059\%$ và danh sách phân rã 5 giai đoạn chuỗi xử lý cùng với tần số khung WebSocket thực tế.
     \item \textbf{Khối số liệu phiên theo dõi thực tế:} Bảng số liệu phiên hiện tại (loại mục tiêu, giải thuật, biên độ giới hạn) cùng RMSE tức thời của cả 3 phương pháp, số khung đã đệm và 2 nút hành động trực tiếp đến trang theo dõi.
 \end{enumerate}
 
-\subsubsection{Cơ chế thích nghi ma trận hiệp phương sai đo lường \texorpdfstring{$\mathbf{R}_k$}{Rk} theo đổi mới (Adaptive Innovation Scaling)}
+\subsubsection{Hướng phát triển lý thuyết: Cơ chế thích nghi ma trận hiệp phương sai theo vector đổi mới}
 
-\hspace{0.5cm} Khi mục tiêu thực hiện chuyển hướng đột ngột (ví dụ xe máy rẽ gấp tại giao lộ), vector đổi mới (Innovation Vector) $\mathbf{y}_k = \mathbf{z}_k - \mathbf{H} \hat{\mathbf{x}}_{k|k-1}$ tăng đột biến, khiến mô hình chuyển động vận tốc không đổi (CV) tạm thời không còn khớp với thực tế. Cơ chế thích nghi hiệp phương sai được tích hợp:
+\hspace{0.5cm} Trong giải thuật hiện tại của đồ án, ma trận hiệp phương sai $\mathbf{R}_k$ được thích ứng theo cự ly hình học từ phương pháp lan truyền sai số RSS thông qua hàm \texttt{update\_R}. Một hướng mở rộng lý thuyết cho các chuyển động cơ động cao là tích hợp hệ số co giãn dựa trên vector đổi mới (Innovation Vector) $\mathbf{y}_k = \mathbf{z}_k - \mathbf{H} \hat{\mathbf{x}}_{k|k-1}$:
 \begin{equation}
 \mathbf{S}_k = \mathbf{H} \mathbf{P}_{k|k-1} \mathbf{H}^T + \mathbf{R}_k
 \label{eq:innovation-covariance-formula}
@@ -491,131 +448,11 @@ Hệ số co giãn thích nghi $\lambda_k$:
 \label{eq:adaptive-r-scaling-formula}
 \end{equation}
 
-\subsubsection{Tối ưu hóa tìm kiếm không gian KD-Tree trên đồ thị mạng đường 337K nút}
+Cơ chế co giãn theo vector đổi mới trên đây là đề xuất lý thuyết, chưa được triển khai hoặc đánh giá định lượng trong phiên bản phần mềm hiện tại của đồ án.
 
-\hspace{0.5cm} Nhằm phục vụ tính năng tìm kiếm giao lộ xuất phát gần nhất và định tuyến lại tức thời trên đồ thị 337.074 đỉnh, cấu trúc cây phân cấp không gian 2 chiều (2D KD-Tree) được xây dựng trực tiếp trên tọa độ cầu WGS-84:
+\subsubsection{Ghi chú thiết kế về thuật toán Nagle và độ trễ gói tin TCP}
 
-\begin{table}[H]
-\centering
-\caption{So sánh thời gian tra cứu đỉnh gần nhất giữa quét tuyến tính và cây KD-Tree}
-\label{tab:kdtree-spatial-search-benchmark}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Thuật toán tìm kiếm không gian} & \textbf{Độ phức tạp lý thuyết} & \textbf{Thời gian đo đạc} & \textbf{Tốc độ tăng tốc} \\
-\midrule
-Quét cự ly tuyến tính toàn bộ đỉnh & $\mathcal{O}(|V|) = \mathcal{O}(337.074)$ & $45{,}20$ ms & Chuẩn quy chiếu \\
-Cây phân cấp không gian 2D KD-Tree & $\mathbf{\mathcal{O}(\log |V|)} \approx 19$ bước & $\mathbf{0{,}12\text{ ms}}$ & $\mathbf{376{,}7\text{ lần}}$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Cấu trúc KD-Tree giúp rút ngắn thời gian tìm nút mạng từ $45{,}2$ ms xuống chỉ còn $0{,}12$ ms, cho phép trạm quan sát xác định vị trí đường phố của mục tiêu gần như tức thời.
-
-\subsubsection{Cơ chế nạp trước và lưu đệm gạch bản đồ số (Tile Pre-fetching \texorpdfstring{\&}{và} Caching)}
-
-\hspace{0.5cm} Nhằm bảo đảm giao diện bản đồ Leaflet hoạt động trơn tru trong điều kiện mất sóng 4G ngoài thực địa, cơ chế lưu đệm gạch bản đồ phân cấp theo cấu trúc cây tứ phân (Slippy Map Quadtile) được thiết lập:
-\begin{equation}
-x = \left\lfloor \frac{\lambda + 180}{360} \times 2^z \right\rfloor, \quad y = \left\lfloor \left(1 - \frac{\ln(\tan(\phi \frac{\pi}{180}) + \sec(\phi \frac{\pi}{180}))}{\pi}\right) \times 2^{z-1} \right\rfloor
-\label{eq:slippy-map-tile-coordinates}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Đo đạc dung lượng bộ đệm và hiệu quả giảm băng thông mạng của cơ chế Tile Caching}
-\label{tab:tile-caching-metrics}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Mức thu phóng (Zoom Level)} & \textbf{Số lượng gạch bản đồ} & \textbf{Dung lượng lưu trữ} & \textbf{Thời gian nạp từ đệm} & \textbf{Tiết kiệm băng thông} \\
-\midrule
-Zoom 14 (Tổng quan quận) & 64 gạch & 1{,}8 MB & 0{,}4 ms & 100{,}0\% \\
-Zoom 16 (Đường phố chi tiết) & 1.024 gạch & 28{,}5 MB & 0{,}5 ms & 100{,}0\% \\
-Zoom 18 (Tòa nhà và ngõ hẻm) & 16.384 gạch & 98{,}0 MB & 0{,}6 ms & 99{,}4\% \\
-\midrule
-\textbf{Toàn khu vực trung tâm TP.HCM} & \textbf{17.472 gạch} & \textbf{128{,}3 MB} & $\mathbf{0{,}5\text{ ms}}$ & $\mathbf{99{,}4\%}$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsubsection{Kiểm thử độ ổn định bộ nhớ và độ bền bỉ phần mềm qua 1.000.000 chu kỳ mô phỏng}
-
-\hspace{0.5cm} Nhằm kiểm chứng tính ổn định lâu dài và loại trừ nguy cơ rò rỉ bộ nhớ (Memory Leak) trong các cấu trúc hàng đợi hoặc vòng lặp bám bắt, tiến trình máy chủ mô phỏng được kích hoạt chạy liên tục $1.000.000$ khung dữ liệu ($27{,}7$ giờ thời gian mô phỏng ở tần số 10 Hz):
-\begin{equation}
-N_{\text{total}} = 1.000.000\text{ khung}, \quad T_{\text{sim}} = \frac{1.000.000}{10\text{ Hz}} = 100.000\text{ s} \approx 27{,}78\text{ giờ}
-\label{eq:stress-test-total-frames}
-\end{equation}
-
-Tốc độ biến thiên bộ nhớ RAM của tiến trình theo thời gian:
-\begin{equation}
-\frac{d(\text{RAM})}{dt} = \frac{\text{RAM}(10^6) - \text{RAM}(10^4)}{T_{\text{sim}}} = \frac{74{,}8 - 74{,}3}{27{,}78\text{ h}} = 0{,}018\text{ MB/h} \approx 0{,}0\text{ MB/h}
-\label{eq:memory-leak-rate-slope}
-\end{equation}
-
-Sau $1$ triệu khung xử lý liên tục, dung lượng RAM tiến trình hoàn toàn phẳng và ổn định quanh mức $74{,}5 \pm 0{,}3$ MB nhờ cơ chế lưu trữ xoay vòng cố định ($N=500$ điểm), chứng minh hệ thống vận hành ổn định trong thời gian dài.
-
-\subsubsection{Tối ưu hóa tham số mạng TCP và triệt tiêu độ trễ Nagle Algorithm}
-
-\hspace{0.5cm} Mặc định trong giao thức TCP, thuật toán Nagle tự động gom các gói tin kích thước nhỏ lại để gửi chung trong một phân đoạn, gây ra độ trễ đệm giả tạo từ 40 đến 200 ms. Nhóm đã cấu hình tham số Socket mức thấp:
-\begin{equation}
-\text{TCP\_NODELAY} = \text{True}
-\label{eq:tcp-nodelay-socket-option}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Đo đạc độ trễ truyền gói khung WebSocket khi bật và tắt TCP\_NODELAY}
-\label{tab:tcp-nodelay-benchmark}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Chỉ số độ trễ mạng} & \textbf{Thuật toán Nagle bật (Mặc định)} & \textbf{TCP\_NODELAY bật (Đề xuất)} & \textbf{Mức độ cải thiện} \\
-\midrule
-Độ trễ trung bình gói tin & $41{,}2$ ms & $\mathbf{1{,}1\text{ ms}}$ & Giảm $97{,}3\%$ \\
-Độ trễ phân vị 99th ($p_{99}$) & $185{,}0$ ms & $\mathbf{3{,}8\text{ ms}}$ & Giảm $97{,}9\%$ \\
-Độ biến thiên trễ (Jitter) & $\pm 35{,}0$ ms & $\mathbf{\pm 0{,}4\text{ ms}}$ & Độ trễ ổn định \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Cấu hình \texttt{TCP\_NODELAY} giúp giảm thiểu hiện tượng trễ gom gói, giúp khung tọa độ 10 Hz được đẩy tức thời lên cáp mạng ngay khi tính toán xong.
-
-\subsubsection{Độ ổn định số học IEEE 754 và bảo toàn ma trận đối xứng xác định dương}
-
-\hspace{0.5cm} Trong chuỗi ước lượng Kalman thực thi liên tục hàng triệu chu kỳ, sai số làm tròn số thực dấu chấm động chuẩn IEEE 754 ($\epsilon_{\text{mach}} \approx 2{,}22 \times 10^{-16}$) có thể tích lũy làm ma trận hiệp phương sai $\mathbf{P}_k$ mất tính đối xứng hoặc xuất hiện trị riêng âm ($\lambda_i(\mathbf{P}_k) \le 0$), dẫn đến giải thuật bị sụp đổ số học. Để đánh giá giới hạn ổn định, nhóm đã tiến hành khảo sát dạng cập nhật Joseph Form bảo toàn tính đối xứng và xác định dương:
-\begin{equation}
-\mathbf{P}_k = (\mathbf{I} - \mathbf{K}_k \mathbf{H}) \mathbf{P}_{k|k-1} (\mathbf{I} - \mathbf{K}_k \mathbf{H})^T + \mathbf{K}_k \mathbf{R}_k \mathbf{K}_k^T
-\label{eq:joseph-stabilized-covariance-formula}
-\end{equation}
-
-Song song đó, giải pháp ép ma trận $\mathbf{P}_k$ đối xứng cưỡng bức cũng được khảo sát:
-\begin{equation}
-\mathbf{P}_k \leftarrow \frac{1}{2} \left( \mathbf{P}_k + \mathbf{P}_k^T \right)
-\label{eq:forced-symmetry-projection}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Độ ổn định số học và điều kiện ma trận sau 1.000.000 chu kỳ tính toán liên tục}
-\label{tab:numerical-stability-joseph-comparison}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Chỉ số số học ma trận $\mathbf{P}$} & \textbf{Cập nhật chuẩn $\mathbf{P} = (\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}$} & \textbf{Khảo sát Joseph + Đối xứng} & \textbf{Đánh giá} \\
-\midrule
-Sai lệch tính đối xứng $\|\mathbf{P} - \mathbf{P}^T\|_F$ & $4{,}8 \times 10^{-7}$ & $\mathbf{0{,}0 \times 10^{0}}$ & Bảo toàn đối xứng \\
-Trị riêng cực tiểu $\lambda_{\min}(\mathbf{P})$ & $-1{,}2 \times 10^{-8}$ (Mất xác định dương) & $\mathbf{+1{,}8 \times 10^{-3} > 0}$ & Bảo toàn xác định dương \\
-Hiện tượng phân kỳ bộ lọc sau $10^6$ bước & Xảy ra ở bước 480.000 & \textbf{Không xảy ra} & Ổn định số học \\
-Chi phí tính toán bổ sung & Chuẩn quy chiếu ($25{,}7$ $\mu$s) & $+3{,}2$ $\mu$s ($28{,}9$ $\mu$s) & Rất thấp ($< 3\%$) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Thực nghiệm cho thấy với các phiên chạy tiêu chuẩn (1.200 bước), công thức cập nhật chuẩn hoàn toàn đáp ứng độ ổn định và đạt tốc độ tính toán cao nhất. Dạng Joseph Form và phép ép đối xứng cung cấp giải pháp dự phòng hiệu quả cho kịch bản vận hành liên tục qua hàng triệu chu kỳ.
+\hspace{0.5cm} Trong giao thức TCP, thuật toán Nagle có thể gom các gói tin nhỏ để gửi chung trong một phân đoạn, đây là kiến thức nền kỹ thuật chung về mạng máy tính. Đồ án không cấu hình tham số Socket mức thấp \texttt{TCP\_NODELAY} trong mã nguồn máy chủ và không thực hiện bất kỳ đo đạc độ trễ gói tin nào; do đó không tuyên bố số liệu độ trễ mạng hay mức cải thiện liên quan đến Nagle/\texttt{TCP\_NODELAY}.
 
 \subsection{Xuất dữ liệu và phân tích sau phiên}
 
@@ -696,7 +533,7 @@ Lịch sử khung dữ liệu được tích lũy trong bộ nhớ đệm của 
 
 \subsubsection{Thời gian xuất CSV}
 
-\hspace{0.5cm} Đo lường hiệu suất xuất dữ liệu cho thấy việc tạo tệp CSV từ bộ nhớ đệm hoàn thành trong thời gian rất ngắn. Với 1.200 khung dữ liệu (120 giây ở 10 Hz), thời gian xuất trung bình xấp xỉ 15 ms trên máy tính tham chiếu (CPU 4 lõi, 16 GB RAM). Thời gian này bao gồm: (1) duyệt 1.200 phần tử danh sách; (2) mã hóa 19 trường dữ liệu mỗi khung thành CSV; (3) mã hóa UTF-8 toàn bộ nội dung.
+\hspace{0.5cm} Do dữ liệu được lưu trữ sẵn trong bộ nhớ đệm và thao tác xuất diễn ra hoàn toàn trong bộ nhớ RAM (không truy xuất đĩa), việc tạo tệp CSV cho 1.200 khung dữ liệu hoàn thành tức thời trong phạm vi vài phần trăm giây trên máy trạm tiêu chuẩn. Thời gian này bao gồm: (1) duyệt 1.200 phần tử danh sách; (2) mã hóa 19 trường dữ liệu mỗi khung thành CSV; (3) mã hóa UTF-8 toàn bộ nội dung.
 
 Lý do thời gian xuất nhanh là dữ liệu được lưu trữ sẵn trong bộ nhớ đệm dưới dạng bản ghi, không cần truy xuất đĩa. Toàn bộ quá trình xuất là thao tác bộ nhớ thuần túy, không có nhập/xuất đĩa. Máy chủ phát trực tiếp nội dung đã mã hóa mà không cần tạo tệp tạm trên đĩa.
 

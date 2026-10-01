@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const FEATURES = [
-  { icon: '#', title: 'TELEMETRY DASH', desc: 'Hardware diagnostics, 59µs pipeline latency budget & MTBF metrics', link: '/dashboard' },
+  { icon: '#', title: 'TELEMETRY DASH', desc: 'Simulation diagnostics & 59µs pipeline theoretical budget', link: '/dashboard' },
   { icon: '+', title: 'LIVE TRACK', desc: 'Real-time target tracking via WebSocket at 10 Hz update rate', link: '/tracking' },
   { icon: '=', title: 'STATIC CALC', desc: 'Compute static target coordinates from GPS + azimuth + range', link: '/calculator' },
   { icon: '~', title: 'DELTA COMPARE', desc: 'Compare Kalman Filter vs alpha-beta Filter · RMSE across trajectory', link: '/comparison' },

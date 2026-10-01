@@ -113,32 +113,29 @@ async def get_dashboard_telemetry():
         "hardware_telemetry": {
             "gnss": {
                 "subsystem": "GNSS Receiver (U-blox NEO-M8N)",
-                "status": "LOCKED (3D FIX)",
+                "status": "SIMULATED",
                 "satellites_tracked": 12,
                 "update_rate_hz": 10.0,
                 "nominal_sigma_m": 5.0,
-                "fault_prob_bernoulli": 0.020,
             },
             "imu": {
                 "subsystem": "9-DOF MEMS IMU (MPU-9250)",
-                "status": "CALIBRATED (STABLE)",
+                "status": "SIMULATED",
                 "sampling_rate_hz": 100.0,
                 "sigma_azimuth_deg": 0.3,
                 "sigma_elevation_deg": 0.2,
-                "fault_prob_bernoulli": 0.005,
             },
             "laser": {
                 "subsystem": "Pulsed Laser Rangefinder (LRF-1000)",
-                "status": "OPTICAL RETURN NOMINAL",
+                "status": "SIMULATED",
                 "max_range_m": 1000.0,
                 "sigma_range_m": 0.5,
-                "fault_prob_bernoulli": 0.010,
             },
         },
         "sensor_noise_models": {
-            "gnss": {"sigma_pos_m": 5.0, "rate_hz": 10.0, "fault_prob": 0.020, "desc": "Zero-mean Gaussian position noise"},
-            "imu": {"sigma_az_deg": 0.3, "sigma_el_deg": 0.2, "rate_hz": 100.0, "fault_prob": 0.005, "desc": "Angular noise in spherical coords"},
-            "laser": {"sigma_r_m": 0.5, "max_range_m": 1000.0, "fault_prob": 0.010, "desc": "ToF Gaussian range error"},
+            "gnss": {"sigma_pos_m": 5.0, "rate_hz": 10.0, "desc": "Zero-mean Gaussian position noise"},
+            "imu": {"sigma_az_deg": 0.3, "sigma_el_deg": 0.2, "rate_hz": 100.0, "desc": "Angular noise in spherical coords"},
+            "laser": {"sigma_r_m": 0.5, "max_range_m": 1000.0, "desc": "ToF Gaussian range error"},
         },
         "filter_tuning": {
             "alpha": 0.40,
@@ -152,7 +149,7 @@ async def get_dashboard_telemetry():
             "motorcycle": "HCMC OSM Road Graph (337K Nodes, 305K Edges, Random Walk)",
             "drone": "DJI Matrice 100 6-DoF Kinematics (v_max=15m/s, a_max=5m/s²)",
         },
-        "pipeline_budget": {
+        "theoretical_pipeline_budget": {
             "lla_to_enu_us": 7.2,
             "sensor_fusion_rss_us": 1.2,
             "kalman_predict_us": 22.8,
@@ -169,8 +166,6 @@ async def get_dashboard_telemetry():
         },
         "reliability_metrics": {
             "crossover_range_m": 794.0,
-            "system_mtbf_s": 2840.0,
-            "availability_2oo3_pct": 99.88,
         },
     }
 
@@ -282,11 +277,12 @@ async def ws_tracking(websocket: WebSocket, session_id: str):
     """
     engine = _sessions.get(session_id)
     if engine is None:
-        # Send a close frame before closing so the client gets a clean rejection
+        await websocket.accept()
         await websocket.close(code=4404, reason="Session not found")
         return
 
     if session_id in _streaming:
+        await websocket.accept()
         await websocket.close(code=4409, reason="Session already streaming to another client")
         return
     _streaming.add(session_id)

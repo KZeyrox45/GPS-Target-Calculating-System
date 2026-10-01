@@ -331,7 +331,7 @@ Hệ thống cũng ghi nhận rằng kết quả benchmark chỉ phản ánh hi�
 
 \hspace{0.5cm} Đánh giá hiệu năng bám mục tiêu thời gian thực chỉ trên một giá trị khởi tạo ngẫu nhiên (seed) duy nhất không đủ để khẳng định tính tổng quát và độ ổn định của hệ thống. Trong mô phỏng động học và cảm biến, mỗi seed khởi tạo một chuỗi số ngẫu nhiên xác định đường đi cụ thể của mục tiêu, các pha chuyển hướng, vận tốc tức thời, cũng như mẫu nhiễu của từng cảm biến (GPS, IMU, Laser). Nếu chỉ chạy thử nghiệm trên một seed đơn lẻ (chẳng hạn seed = 42), kết quả sai số vị trí trung bình bình phương (Root Mean Square Error, RMSE) thu được có thể rơi vào tình huống thuận lợi bất thường hoặc bất lợi cục bộ. Để xây dựng cơ sở bằng chứng khoa học vững chắc cho luận văn kỹ thuật máy tính, việc mở rộng phân tích thống kê trên nhiều seed độc lập là bắt buộc, qua đó xác định chính xác kỳ vọng toán học, phương sai mẫu, khoảng tin cậy và kiểm chứng toàn diện các chỉ tiêu kỹ thuật thiết kế.
 
-Phân tích thống kê đa seed (multi-seed statistical analysis) cho phép tách biệt giữa hiệu năng bản chất của thuật toán lọc và các biến thiên ngẫu nhiên của môi trường. Giá trị kỳ vọng mẫu cung cấp ước lượng không thiên vị cho sai số trung bình dài hạn, trong khi phương sai và độ lệch chuẩn mẫu định lượng mức độ nhạy cảm của bộ lọc trước các kích thích động học bất ngờ. Khi phương sai mẫu nhỏ, hệ thống chứng minh được tính bền vững (robustness), bảo đảm đáp ứng bám bắt chính xác trong mọi điều kiện vận hành thực tế.
+Phân tích thống kê đa seed (multi-seed statistical analysis) cho phép tách biệt giữa hiệu năng bản chất của thuật toán lọc và các biến thiên ngẫu nhiên của môi trường. Giá trị kỳ vọng mẫu cung cấp ước lượng không thiên vị cho sai số trung bình dài hạn, trong khi phương sai và độ lệch chuẩn mẫu định lượng mức độ nhạy cảm của bộ lọc trước các kích thích động học bất ngờ. Khi phương sai mẫu nhỏ, kết quả thể hiện tính ổn định thống kê của giải thuật trong phạm vi các kịch bản mô phỏng đã khảo sát.
 
 Mục tiêu cốt lõi của giai đoạn này bao gồm: (1) Thiết lập quy trình thử nghiệm chuẩn hóa trên 10 seed liên tiếp ($1 \le \text{seed} \le 10$) với độ dài 120 giây (1200 bước tính toán ở tần số 10 Hz) cho toàn bộ ba đối tượng mục tiêu (người đi bộ, xe máy, máy bay không người lái); (2) Ước lượng các tham số thống kê mô tả, xây dựng khoảng tin cậy 95\% theo phân phối t-Student và kiểm định giả thuyết thống kê; (3) Thực hiện phân tích loại trừ ngoại lai dựa trên khoảng tứ phân vị (Interquartile Range, IQR) và nguyên lý $3\sigma$; (4) Đánh giá độ nhạy của hệ thống trước tham số làm mịn $\alpha$, bán kính biên hoạt động và thời gian hội tụ của ma trận hiệp phương sai.
 
@@ -339,7 +339,7 @@ Mục tiêu cốt lõi của giai đoạn này bao gồm: (1) Thiết lập quy 
 
 \hspace{0.5cm} Thí nghiệm được thiết kế theo nguyên tắc kiểm soát biến độc lập (controlled variable experiment). Biến độc lập duy nhất được thay đổi giữa các lần chạy là chỉ số seed của bộ sinh số ngẫu nhiên chuẩn $N(0, 1)$, trong khi toàn bộ thông số cấu hình hệ thống được cố định nghiêm ngặt: bán kính không gian hoạt động $R_{\text{bound}} = 400$ m, tần số chu kỳ xử lý $f_s = 10$ Hz ($\Delta t = 0{,}1$ s), thời lượng mỗi kịch bản $T = 120$ s (tương ứng $N = 1200$ chu kỳ lấy mẫu), sai số danh định của cảm biến vệ tinh $\sigma_{\text{gps}} = 5{,}0$ m, sai số đo cự ly laser $\sigma_{\text{range}} = 0{,}5$ m, sai số góc phương vị IMU $\sigma_{\text{az}} = 0{,}3^\circ$, sai số góc tà $\sigma_{\text{el}} = 0{,}2^\circ$, và tham số bộ lọc alpha-beta $\alpha = 0{,}4$.
 
-Tổng quy mô thực nghiệm bao gồm 10 giá trị seed $\times$ 3 kịch bản mục tiêu $\times$ 3 phương pháp ước lượng (Đo thô từ hợp nhất cảm biến, Bộ lọc Alpha-Beta, Bộ lọc Kalman), tạo thành $90$ tập dữ liệu thời gian thực độc lập. Mỗi tập dữ liệu ghi nhận đầy đủ 1200 vector trạng thái thực tế và trạng thái ước lượng, tương đương 108.000 khung đo lường được xử lý và kiểm định.
+Tổng quy mô thực nghiệm bao gồm 10 giá trị seed $\times$ 3 kịch bản mục tiêu $\times$ 3 phương pháp ước lượng (Đo thô từ hợp nhất cảm biến, Bộ lọc Alpha-Beta, Bộ lọc Kalman), tạo thành $90$ tổ hợp đánh giá qua 10 seed (3 kịch bản $\times$ 3 phương pháp $\times$ 10 seed). Mỗi tổ hợp ghi nhận đầy đủ 1200 vector trạng thái thực tế và trạng thái ước lượng, tương đương 108.000 khung đo lường được xử lý và kiểm định.
 
 Với mỗi seed $k \in \{1, 2, \dots, 10\}$, bộ sinh số ngẫu nhiên tạo ra một profile chuyển động mang đặc trưng riêng biệt:
 \begin{enumerate}
@@ -348,7 +348,7 @@ Với mỗi seed $k \in \{1, 2, \dots, 10\}$, bộ sinh số ngẫu nhiên tạo
     \item Đối tượng máy bay không người lái (3D): vận tốc không gian từ 6,0 m/s đến 15,0 m/s, thay đổi đồng thời cả ba trục tọa độ Đông, Bắc và Độ cao với giới hạn gia tốc động học danh định.
 \end{enumerate}
 
-Việc áp dụng cùng một hạt giống ngẫu nhiên cho cả ba phương pháp xử lý trong từng kịch bản bảo đảm tính tương thích cặp (paired comparison), loại bỏ hoàn toàn sai số thiên vị do quỹ đạo khác nhau khi so sánh đối đầu giữa bộ lọc Kalman \cite{welch1995kalman} và bộ lọc Alpha-Beta.
+Việc áp dụng cùng một hạt giống ngẫu nhiên cho cả ba phương pháp xử lý trong từng kịch bản bảo đảm tính tương thích cặp (paired comparison), triệt tiêu sai số thiên vị do quỹ đạo khác nhau khi so sánh đối đầu giữa bộ lọc Kalman \cite{welch1995kalman} và bộ lọc Alpha-Beta.
 
 \subsubsection{Cơ sở toán học của các ước lượng thống kê mẫu}
 
@@ -422,7 +422,7 @@ Từ bảng dữ liệu chi tiết, các chỉ số thống kê tổng hợp đ�
 \label{fig:multi-seed-spec}
 \end{figure}
 
-Hình \ref{fig:multi-seed-spec} minh họa trực quan kết quả thống kê so với ngưỡng giới hạn kỹ thuật. Khoảng cách an toàn từ giá trị lớn nhất ghi nhận được trong toàn bộ 90 phiên ($2{,}825$ m tại kịch bản Drone, bộ lọc Kalman) đến giới hạn cho phép ($5{,}000$ m) đạt mức $2{,}175$ m, tương đương biên độ an toàn dự phòng đạt 43,5\%.
+Hình \ref{fig:multi-seed-spec} minh họa trực quan kết quả thống kê so với ngưỡng giới hạn kỹ thuật. Khoảng cách an toàn từ giá trị lớn nhất ghi nhận được trong toàn bộ 90 tổ hợp đánh giá qua 10 seed ($2{,}825$ m tại kịch bản Drone, bộ lọc Kalman) đến giới hạn cho phép ($5{,}000$ m) đạt mức $2{,}175$ m, tương đương biên độ an toàn dự phòng đạt 43,5\%.
 
 \subsubsection{Ước lượng khoảng tin cậy 95\% và kiểm định giả thuyết}
 
@@ -430,8 +430,8 @@ Hình \ref{fig:multi-seed-spec} minh họa trực quan kết quả thống kê s
 
 Phân tích độ rộng của khoảng tin cậy mang lại các kết luận vật lý sâu sắc:
 \begin{enumerate}
-    \item Độ hẹp của khoảng tin cậy phản ánh tính nhất quán của thuật toán. Bộ lọc Alpha-Beta có độ rộng CI nhỏ nhất trên mọi kịch bản (0,112 m ở người đi bộ và 0,120 m ở xe máy), chứng minh khả năng dự đoán cực kỳ ổn định.
-    \item Biên trên của khoảng tin cậy 95\% cho trường hợp xấu nhất toàn hệ thống (Drone, Kalman) là $2{,}616$ m, hoàn toàn nằm sâu phía dưới ngưỡng $5{,}0$ m. Ta có thể khẳng định với độ tin cậy thống kê 95\% rằng giá trị kỳ vọng dài hạn của hệ thống trong mọi kịch bản không vượt quá $2{,}62$ m.
+    \item Độ hẹp của khoảng tin cậy phản ánh tính nhất quán của thuật toán. Bộ lọc Alpha-Beta có độ rộng CI nhỏ nhất trên mọi kịch bản (0,112 m ở người đi bộ và 0,120 m ở xe máy), cho thấy khả năng dự đoán ổn định.
+    \item Biên trên của khoảng tin cậy 95\% cho trường hợp xấu nhất trong các kịch bản đã đánh giá (Drone, Kalman) là $2{,}616$ m, hoàn toàn nằm sâu phía dưới ngưỡng $5{,}0$ m. Ta có thể khẳng định với độ tin cậy thống kê 95\% rằng giá trị kỳ vọng của sai số trong phạm vi 10 seed mô phỏng đã đánh giá không vượt quá $2{,}62$ m.
 \end{enumerate}
 
 \subsubsection{Kiểm định t bắt cặp đánh giá ý nghĩa sai biệt thuật toán}
@@ -467,7 +467,7 @@ trong đó $\bar{d}$ và $s_d$ lần lượt là trung bình và độ lệch ch
 \toprule
 \textbf{Kịch bản đối chiếu} & \textbf{Sai biệt TB $\bar{d}$ (m)} & \textbf{Độ lệch chuẩn $s_d$} & \textbf{Thống kê $t_{\text{stat}}$} & \textbf{Giá trị $p$} & \textbf{Kết luận ($p < 0{,}001$)} \\
 \midrule
-Người đi bộ (KF vs AB) & 0{,}583 & 0{,}221 & 8{,}34 & $7{,}4 \times 10^{-6}$ & Bác bỏ $H_0$, AB ưu việt hơn \\
+Người đi bộ (KF vs AB) & 0{,}583 & 0{,}221 & 7{,}28 & $4{,}64 \times 10^{-5}$ & Bác bỏ $H_0$, AB ưu việt hơn \\
 Xe máy (KF vs AB)      & 0{,}619 & 0{,}203 & 9{,}64 & $2{,}1 \times 10^{-6}$ & Bác bỏ $H_0$, AB ưu việt hơn \\
 Drone 3D (KF vs AB)    & 1{,}294 & 0{,}284 & 14{,}41 & $8{,}9 \times 10^{-8}$ & Bác bỏ $H_0$, AB ưu việt hơn \\
 \bottomrule
@@ -532,7 +532,7 @@ Ranh giới phát hiện ngoại lai trên và dưới (Fences) được định
 \label{fig:boxplot-stats}
 \end{figure}
 
-Kết quả khẳng định trong tất cả 90 phiên đo lường không xuất hiện bất kỳ giá trị nào vượt ngoài các ranh giới $\text{Fence}_{\text{lower}}$ và $\text{Fence}_{\text{upper}}$. Phân phối sai số thực nghiệm hoàn toàn liên tục và không bị biến dạng bởi các lỗi số học.
+Kết quả khẳng định trong tất cả 90 tổ hợp đánh giá qua 10 seed không xuất hiện bất kỳ giá trị nào vượt ngoài các ranh giới $\text{Fence}_{\text{lower}}$ và $\text{Fence}_{\text{upper}}$. Phân phối sai số thực nghiệm hoàn toàn liên tục và không bị biến dạng bởi các lỗi số học.
 
 \subsubsection{Phân tích độ nhạy tham số làm mịn \texorpdfstring{$\alpha$}{alpha} và tiêu chí tắt dần tới hạn}
 
@@ -638,7 +638,7 @@ Tỷ số sai số $s_E / s_N$ dao động trong khoảng hẹp từ $0{,}987$ �
 
 \subsubsection{Phân tích độ ổn định số học và số điều kiện ma trận}
 
-\hspace{0.5cm} Độ ổn định số học của bước cập nhật đo lường Kalman phụ thuộc vào số điều kiện $\kappa(\mathbf{S}_k) = \lambda_{\max}(\mathbf{S}_k) / \lambda_{\min}(\mathbf{S}_k)$ của ma trận hiệp phương sai đổi mới $\mathbf{S}_k = \mathbf{H}\mathbf{P}_k^-\mathbf{H}^T + \mathbf{R}_k$. Do ma trận nhiễu đo lường $\mathbf{R}_k = \sigma_{pos, k}^2 \mathbf{I}$ là ma trận đường chéo với các phần tử dương đồng nhất, $\mathbf{S}_k$ luôn duy trì số điều kiện $\kappa(\mathbf{S}_k) \approx 1{,}000$, loại trừ hoàn toàn nguy cơ kỳ dị số học và bảo toàn tính đối xứng xác định dương trong suốt $108.000$ chu kỳ thực nghiệm.
+\hspace{0.5cm} Độ ổn định số học của bước cập nhật đo lường Kalman phụ thuộc vào số điều kiện $\kappa(\mathbf{S}_k) = \lambda_{\max}(\mathbf{S}_k) / \lambda_{\min}(\mathbf{S}_k)$ của ma trận hiệp phương sai đổi mới $\mathbf{S}_k = \mathbf{H}\mathbf{P}_k^-\mathbf{H}^T + \mathbf{R}_k$. Do ma trận nhiễu đo lường $\mathbf{R}_k = \sigma_{pos, k}^2 \mathbf{I}$ là ma trận đường chéo với các phần tử dương đồng nhất, $\mathbf{S}_k$ luôn duy trì số điều kiện $\kappa(\mathbf{S}_k) \approx 1{,}000$, ngăn ngừa nguy cơ mất ổn định số học và bảo toàn tính đối xứng xác định dương trong suốt $108.000$ chu kỳ thực nghiệm.
 
 \subsubsection{Phân tích so sánh mô hình xe máy động học và xe máy mạng lưới đường}
 
@@ -692,11 +692,9 @@ Khi $\sigma_a$ quá nhỏ ($0{,}2$ $\text{m/s}^2$), bộ lọc tin quá mức v�
 
 \subsubsection{Phân tích độ ổn định khi mất tín hiệu cảm biến (Dead-Reckoning)}
 
-\hspace{0.5cm} Trong điều kiện vận hành thực tế, tín hiệu GNSS hoặc chùm tia laser có thể bị che khuất tạm thời bởi nhà cao tầng hoặc cây cối. Khảo sát mô phỏng giai đoạn mất tín hiệu hoàn toàn trong khoảng thời gian $\Delta T_{\text{loss}} \in [1{,}0\text{ s}, 5{,}0\text{ s}]$ (tương ứng 10 đến 50 chu kỳ lấy mẫu).
+\hspace{0.5cm} Trong điều kiện vận hành thực tế, tín hiệu GNSS hoặc chùm tia laser có thể bị che khuất tạm thời bởi nhà cao tầng hoặc cây cối. Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán (predict-only) mà không có cập nhật đo lường, trạng thái được ngoại suy bằng tích phân vận tốc.
 
-Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán (predict) mà không có cập nhật đo lường (update), trạng thái được ngoại suy bằng tích phân vận tốc (dead-reckoning). 
-
-Ưu thế then chốt của Kalman filter nằm ở việc ma trận hiệp phương sai $\mathbf{P}_k$ tự động tăng lên tỷ lệ thuận với thời gian mất tín hiệu, phản ánh đúng sự gia tăng bất định của dự đoán mù. Khi tín hiệu đo lường xuất hiện trở lại, độ lợi Kalman $\mathbf{K}_k$ tự động tăng vọt, giúp bộ lọc tái bắt mục tiêu chỉ sau 4 đến 8 chu kỳ trích mẫu ($0{,}4 - 0{,}8$ s).
+Ưu thế then chốt của bộ lọc Kalman nằm ở việc ma trận hiệp phương sai $\mathbf{P}_k$ tự động tăng lên theo thời gian mất tín hiệu, phản ánh đúng sự gia tăng bất định của dự đoán. Khi có phép đo trở lại, độ lợi Kalman tự động mở rộng để hiệu chỉnh trạng thái về sát quỹ đạo thực tế. Đồ án hiện tại chưa thực hiện benchmark đo đạc thời gian phục hồi trong luồng mô phỏng thời gian thực.
 
 \subsubsection{Phân tích độ nhạy theo tần số trích mẫu chu kỳ hệ thống}
 
@@ -709,7 +707,7 @@ Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán 
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{ccccc}
 \toprule
-\textbf{Tần số $f_s$ (Hz)} & \textbf{Chu kỳ $\Delta t$ (ms)} & \textbf{RMSE $\alpha$-$\beta$ Người (m)} & \textbf{RMSE KF Người (m)} & \textbf{Thời gian xử lý/bước} \\
+\textbf{Tần số $f_s$ (Hz)} & \textbf{Chu kỳ $\Delta t$ (ms)} & \textbf{RMSE $\alpha$-$\beta$ Người (m)} & \textbf{RMSE KF Người (m)} & \textbf{Ngân sách chuỗi lọc (lý thuyết)} \\
 \midrule
 1 Hz  & 1000 ms & 0{,}825 & 1{,}640 & 48{,}5 $\mu$s \\
 2 Hz  & 500 ms  & 0{,}562 & 1{,}215 & 48{,}5 $\mu$s \\
@@ -721,7 +719,9 @@ Trong pha mất tín hiệu, bộ lọc chỉ thực hiện bước dự đoán 
 }
 \end{table}
 
-Khi nâng tần số từ 1 Hz lên 10 Hz, sai số RMSE của bộ lọc Alpha-Beta giảm 58,9\% và Kalman giảm 43,8\%. Tại tần số 10 Hz, hệ thống đạt điểm cân bằng tối ưu giữa độ chính xác động học cao và tải xử lý CPU không đáng kể (59 $\mu$s trên tổng quỹ 100 ms).
+Ngân sách thiết kế lý thuyết của chuỗi lọc theo Bảng 6.1; không phải thời gian đo thực nghiệm theo từng tần số.
+
+Khi nâng tần số từ 1 Hz lên 10 Hz, sai số RMSE của bộ lọc Alpha-Beta giảm 58,9\% và Kalman giảm 43,8\%. Tại tần số 10 Hz, hệ thống đạt sự cân bằng thực nghiệm giữa độ chính xác động học cao và tải xử lý CPU không đáng kể (59 $\mu$s trên tổng quỹ 100 ms) trong phạm vi các kịch bản đã đánh giá.
 
 \subsubsection{So sánh kiến trúc lọc phi tuyến EKF và lọc tuyến tính phân tầng trong tọa độ ENU}
 
@@ -737,28 +737,7 @@ Trong kiến trúc EKF trực tiếp, hàm đo lường phi tuyến $h(\mathbf{x
 \label{eq:ekf-jacobian}
 \end{equation}
 
-Bảng \ref{tab:ekf-vs-linear-compare} đối chiếu hiệu năng giữa EKF trực tiếp và kiến trúc phân tầng đề xuất qua 10 seed thực nghiệm.
-
-\begin{table}[H]
-\centering
-\caption{Đối chiếu hiệu năng giữa EKF trực tiếp và Bộ lọc phân tầng ENU đề xuất}
-\label{tab:ekf-vs-linear-compare}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Tiêu chí so sánh} & \textbf{Kiến trúc EKF trực tiếp} & \textbf{Kiến trúc phân tầng ENU (Đề xuất)} & \textbf{Cải thiện / Ưu thế} \\
-\midrule
-Thời gian tính toán/chu kỳ & 118{,}4 $\mu$s & 48{,}5 $\mu$s & Giảm 59{,}0\% tải CPU \\
-Độ ổn định số học $\kappa(\mathbf{S})$ & $10^2 - 10^4$ (phụ thuộc góc) & 1{,}000 (ổn định số học) & Loại bỏ nguy cơ kỳ dị \\
-Độ phức tạp mã nguồn & Cần đạo hàm ma trận phi tuyến & Ma trận tuyến tính hằng số & Tinh gọn, dễ bảo trì \\
-RMSE Người đi bộ ($n=10$) & 0{,}945 $\pm$ 0{,}231 m & 0{,}922 $\pm$ 0{,}218 m & Tương đương (chênh 2{,}4\%) \\
-RMSE Drone 3D ($n=10$) & 2{,}415 $\pm$ 0{,}335 m & 2{,}388 $\pm$ 0{,}318 m & Tương đương (chênh 1{,}1\%) \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Kết quả thực nghiệm chứng minh rằng kiến trúc phân tầng hợp nhất sang ENU trước khi lọc đạt độ chính xác tương đương EKF nhưng giảm gần 60\% thời gian tính toán và loại bỏ hoàn toàn các điểm kỳ dị góc ngắm khi mục tiêu ở gần thiên đỉnh ($\text{el} \to 90^\circ$).
+Kiến trúc phân tầng được lựa chọn cho đồ án vì nó chuyển bài toán phi tuyến trong không gian cầu về bài toán tuyến tính trong tọa độ Descartes phẳng ENU, nơi Bộ lọc Kalman tuyến tính chuẩn áp dụng trực tiếp mà không cần tuyến tính hóa Jacobian tại mỗi bước. Lựa chọn này mang tính thiết kế định tính: giảm độ phức tạp triển khai và tránh các điểm kỳ dị góc ngắm khi mục tiêu ở gần thiên đỉnh ($\text{el} \to 90^\circ$). Đồ án không triển khai EKF và không tuyên bố bất kỳ số liệu so sánh định lượng nào giữa EKF và kiến trúc phân tầng.
 
 
 
@@ -793,17 +772,7 @@ Với mức ý nghĩa thống kê 95\%, giới hạn tin cậy Bartlett đối v
 
 Toàn bộ hệ số tự tương quan $r_{yy}(\tau)$ với $\tau \ge 1$ đều nằm hoàn toàn bên trong ranh giới Bartlett 95\% ($|r_{yy}| \le 0{,}041 < 0{,}0566$). Kết quả này là bằng chứng toán học khẳng định bộ lọc Kalman đã trích xuất tối đa toàn bộ thông tin hữu ích từ chuỗi đo lường, không để sót các thành phần tín hiệu chưa được mô hình hóa.
 
-\subsubsection{Đánh giá tính nhất quán hiệp phương sai qua chỉ số NEES}
 
-\hspace{0.5cm} Chỉ số sai số ước lượng chuẩn hóa bình phương (Normalized Estimation Error Squared, NEES) $\epsilon_k$ là tiêu chuẩn vàng trong lý thuyết lọc để kiểm tra xem ma trận hiệp phương sai $\mathbf{P}_k$ có phản ánh chính xác sai số thực tế hay không:
-\begin{equation}
-\epsilon_k = (\mathbf{x}_k - \hat{\mathbf{x}}_k)^T \mathbf{P}_k^{-1} (\mathbf{x}_k - \hat{\mathbf{x}}_k)
-\label{eq:nees-definition}
-\end{equation}
-
-Khi bộ lọc nhất quán (consistent), biến ngẫu nhiên $\epsilon_k$ tuân theo phân phối Chi-bình phương với số bậc tự do bằng số chiều vector trạng thái: $\epsilon_k \sim \chi^2(n_x)$ với $n_x = 4$ (cho bài toán 2D) và $n_x = 6$ (cho bài toán 3D). Kỳ vọng lý thuyết là $\mathbb{E}[\epsilon_k] = n_x$.
-
-Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong khoảng tin cậy 95\% của phân phối $\chi^2$, chứng minh ma trận $\mathbf{P}_k$ ước lượng chính xác độ bất định thực tế mà không bị hiện tượng tự tin thái quá (overconfidence) hay quá bi quan (underconfidence).
 
 \subsubsection{Tổng kết phân tích thống kê và ý nghĩa kỹ thuật}
 
@@ -825,9 +794,9 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
 \hspace{0.5cm} Kết quả thực nghiệm tại Bảng \ref{tab:kf-vs-ab} và Hình \ref{fig:rmse-bar} đã chỉ ra rằng bộ lọc Alpha-Beta đạt sai số RMSE thấp hơn so với Kalman trên cả 4 kịch bản thực nghiệm ($0{,}26$ m so với $0{,}86$ m ở người đi bộ; $1{,}14$ m so với $1{,}52$ m ở xe máy mạng đường; $1{,}06$ m so với $2{,}10$ m ở drone). Để làm rõ nguyên nhân đóng góp của từng thành phần kỹ thuật dẫn đến sự khác biệt này, nghiên cứu cắt bỏ đa tầng được thực hiện dưới đây.
 
 
-\subsubsection{Nghiên cứu cắt bỏ đa tầng (8-Stage Ablation Study)}
+\subsubsection{Nghiên cứu cắt bỏ đa tầng (6-Stage Ablation Study)}
 
-\hspace{0.5cm} Nhằm định lượng độc lập mức độ đóng góp của từng cải tiến công nghệ, một quy trình nghiên cứu cắt bỏ 8 giai đoạn được thiết lập bằng cách lần lượt vô hiệu hóa từng thành phần và đo lường sự biến thiên sai số RMSE:
+\hspace{0.5cm} Nhằm định lượng độc lập mức độ đóng góp của từng cải tiến công nghệ, một quy trình nghiên cứu cắt bỏ 6 giai đoạn được thiết lập bằng cách lần lượt vô hiệu hóa từng thành phần và đo lường sự biến thiên sai số RMSE:
 
 \begin{table}[H]
 \centering
@@ -838,14 +807,13 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
 \toprule
 \textbf{Cấu hình kiểm thử cắt bỏ} & \textbf{Người đi bộ} & \textbf{Xe máy mạng} & \textbf{Drone 3D} & \textbf{Tỷ lệ suy giảm} \\
 \midrule
-1. Hệ thống đầy đủ (Đủ 8 cải tiến) & $\mathbf{0{,}26\text{ m}}$ & $\mathbf{1{,}14\text{ m}}$ & $\mathbf{1{,}06\text{ m}}$ & $\mathbf{0{,}0\% \text{ (Tối ưu)}}$ \\
+1. Hệ thống đầy đủ (Đủ 6 cải tiến) & $\mathbf{0{,}26\text{ m}}$ & $\mathbf{1{,}14\text{ m}}$ & $\mathbf{1{,}06\text{ m}}$ & $\mathbf{0{,}0\% \text{ (Tối ưu)}}$ \\
 2. Cắt bỏ: Lực đẩy thế năng biên mềm & 0{,}42 m & 1{,}75 m & 1{,}58 m & $+61{,}5\%$ \\
 3. Cắt bỏ: Điểm điều hướng tương đối & 0{,}38 m & 1{,}48 m & 1{,}42 m & $+46{,}2\%$ \\
 4. Cắt bỏ: Phát lại hai chiều dữ liệu & 0{,}31 m & 1{,}32 m & 1{,}25 m & $+19{,}2\%$ \\
 5. Cắt bỏ: Thư giãn vận tốc hàm mũ & 0{,}28 m & 1{,}38 m & 1{,}12 m & $+15{,}4\%$ \\
 6. Cắt bỏ: Bộ lọc thông thấp OU Drone & 0{,}27 m & 1{,}16 m & 1{,}28 m & $+11{,}5\%$ \\
-7. Cắt bỏ: Cổng loại trừ Mahalanobis $\chi^2$ & 0{,}35 m & 1{,}42 m & 1{,}36 m & $+34{,}6\%$ \\
-8. Cắt bỏ: Khởi tạo sai phân hữu hạn & 0{,}26 m & 1{,}19 m & 1{,}15 m & $+3{,}8\%$ \\
+7. Cắt bỏ: Khởi tạo sai phân hữu hạn & 0{,}26 m & 1{,}19 m & 1{,}15 m & $+3{,}8\%$ \\
 \midrule
 \textbf{Hệ thống thô (Không cải tiến)} & $\mathbf{0{,}58\text{ m}}$ & $\mathbf{2{,}45\text{ m}}$ & $\mathbf{2{,}38\text{ m}}$ & $\mathbf{+123{,}1\% \text{ (Rất tệ)}}$ \\
 \bottomrule
@@ -862,13 +830,13 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
     xbar, bar width=8pt,
     xlabel={RMSE Increase When Removed (\%)},
     ytick=data,
-    yticklabels={{Finite Diff Init}, {OU Low-pass}, {Speed Relaxation}, {Bidirectional Replay}, {Mahalanobis Gate}, {Relative Waypoints}, {Soft Boundary}},
+    yticklabels={{Finite Diff Init}, {OU Low-pass}, {Speed Relaxation}, {Bidirectional Replay}, {Relative Waypoints}, {Soft Boundary}},
     yticklabel style={font=\footnotesize},
     xmin=0, xmax=70,
     grid=major, grid style={dashed, gray!30},
     nodes near coords, nodes near coords style={font=\scriptsize},
 ]
-\addplot[fill=orange!60, draw=orange!80!black] coordinates {(3.8,1) (11.5,2) (15.4,3) (19.2,4) (34.6,5) (46.2,6) (61.5,7)};
+\addplot[fill=orange!60, draw=orange!80!black] coordinates {(3.8,1) (11.5,2) (15.4,3) (19.2,4) (46.2,5) (61.5,6)};
 \end{axis}
 \end{tikzpicture}
 }
@@ -876,94 +844,13 @@ Tất cả các giá trị NEES thực nghiệm đều nằm trọn vẹn trong 
 \label{fig:ablation-bar}
 \end{figure}
 
-Lực đẩy thế năng biên mềm là cải tiến đóng góp lớn nhất (giúp giảm $61{,}5\%$ sai số), tiếp theo là điểm điều hướng tương đối ($46{,}2\%$) và cổng kiểm định Mahalanobis ($34{,}6\%$). Sự kết hợp đồng bộ của 8 thành phần kỹ thuật đã giúp hạ thấp sai số tổng thể tới $55{,}2\%$ so với hệ thống ban đầu.
-
-\subsubsection{Kiểm định phân tích phương sai ANOVA một nhân tố và hậu kiểm Tukey HSD}
-
-\hspace{0.5cm} Nhằm kiểm chứng ý nghĩa thống kê của sự khác biệt sai số giữa các giải thuật lọc trên tập mẫu 10 giá trị khởi tạo ngẫu nhiên, phương pháp phân tích phương sai ANOVA một nhân tố (One-Way ANOVA) được thực thi:
-
-\begin{equation}
-F = \frac{\text{MS}_{\text{between}}}{\text{MS}_{\text{within}}} = \frac{\text{SS}_{\text{between}} / (k - 1)}{\text{SS}_{\text{within}} / (N - k)}
-\label{eq:one-way-anova-f-statistic}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Bảng phân tích phương sai ANOVA một nhân tố so sánh sai số bám bắt giữa 3 giải thuật}
-\label{tab:anova-variance-table}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccccc}
-\toprule
-\textbf{Nguồn biến thiên} & \textbf{Tổng bình phương (SS)} & \textbf{Bậc tự do (df)} & \textbf{Trung bình bình phương (MS)} & \textbf{Thống kê $F$} & \textbf{Giá trị $p$-value} \\
-\midrule
-Giữa các nhóm (Between) & 4{,}852 & 2 & 2{,}426 & $\mathbf{48{,}65}$ & $\mathbf{p < 10^{-9}}$ \\
-Nội bộ nhóm (Within) & 1{,}347 & 27 & 0{,}050 & - & - \\
-\midrule
-\textbf{Tổng cộng (Total)} & \textbf{6{,}199} & \textbf{29} & - & - & - \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Thống kê $F = 48{,}65$ với $p < 10^{-9}$ khẳng định sự khác biệt giữa các phương pháp có ý nghĩa thống kê rõ rệt ($p < 0{,}001$). Tiếp tục thực hiện hậu kiểm Tukey HSD (Tukey's Honestly Significant Difference):
-
-\begin{table}[H]
-\centering
-\caption{Kết quả hậu kiểm Tukey HSD xác định sự khác biệt trung bình từng cặp phương pháp}
-\label{tab:tukey-hsd-pairwise-results}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Cặp so sánh đối chứng} & \textbf{Chênh lệch trung bình} & \textbf{Khoảng tin cậy 95\%} & \textbf{Giá trị $p$-adj} & \textbf{Kết luận} \\
-\midrule
-Alpha-Beta vs Đo thô & $-0{,}580$ m & $[-0{,}785, -0{,}375]$ m & $p < 10^{-6}$ & Khác biệt rõ rệt ($p < 10^{-6}$) \\
-Kalman vs Đo thô & $+0{,}125$ m & $[-0{,}080, +0{,}330]$ m & $p = 0{,}295$ & Không có ý nghĩa \\
-\textbf{Alpha-Beta vs Kalman} & $\mathbf{-0{,}705\text{ m}}$ & $\mathbf{[-0{,}910, -0{,}500]\text{ m}}$ & $\mathbf{p < 10^{-7}}$ & \textbf{Alpha-Beta tốt hơn rõ rệt} \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-\subsubsection{Kiểm định tính trắng của sai số dư thừa bằng thống kê Shapiro-Wilk}
-
-\hspace{0.5cm} Theo định lý lọc tối ưu Kalman-Bucy, một bộ lọc đạt trạng thái tối ưu lý thuyết khi và chỉ khi chuỗi sai số đo lường dư thừa (Innovation Sequence) $\boldsymbol{\gamma}_k$ là một quá trình nhiễu trắng Gauss có kỳ vọng bằng 0:
-\begin{equation}
-\mathbb{E}[\boldsymbol{\gamma}_k] = \mathbf{0}, \quad \mathbb{E}[\boldsymbol{\gamma}_k \boldsymbol{\gamma}_j^T] = \mathbf{S}_k \delta_{kj}
-\label{eq:whiteness-innovation-property}
-\end{equation}
-
-Kiểm định tính chuẩn Shapiro-Wilk được thực thi trên tập mẫu $N = 1.200$ khung đo lường liên tục:
-\begin{equation}
-W = \frac{\left( \sum_{i=1}^N a_i \gamma_{(i)} \right)^2}{\sum_{i=1}^N (\gamma_i - \bar{\gamma})^2}
-\label{eq:shapiro-wilk-w-statistic}
-\end{equation}
-
-\begin{table}[H]
-\centering
-\caption{Kết quả kiểm định tính chuẩn Shapiro-Wilk của chuỗi Innovation trên các kịch bản mục tiêu}
-\label{tab:shapiro-wilk-normality-results}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Kịch bản thực nghiệm} & \textbf{Kỳ vọng trung bình $\bar{\gamma}$} & \textbf{Thống kê $W$} & \textbf{Giá trị $p$-value} & \textbf{Kết luận kiểm định ($p > 0{,}05$)} \\
-\midrule
-Người đi bộ Geolife & $+0{,}012$ m & $\mathbf{0{,}988}$ & $0{,}425$ & Tuân theo phân phối chuẩn Gauss \\
-Xe máy mô hình động học & $-0{,}028$ m & $\mathbf{0{,}982}$ & $0{,}285$ & Tuân theo phân phối chuẩn Gauss \\
-Xe máy mạng đường OSM & $+0{,}035$ m & $\mathbf{0{,}976}$ & $0{,}162$ & Tuân theo phân phối chuẩn Gauss \\
-Drone không gian 3D & $-0{,}018$ m & $\mathbf{0{,}984}$ & $0{,}340$ & Tuân theo phân phối chuẩn Gauss \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
-
-Trên toàn bộ 4 kịch bản thực nghiệm, giá trị $p$-value đều vượt xa mức ý nghĩa $\alpha_{\text{sig}} = 0{,}05$ ($p \in [0{,}162, 0{,}425]$), chấp nhận giả thuyết $H_0$. Điều này chứng minh chuỗi sai số dư thừa của giải thuật là nhiễu trắng thuần túy, khẳng định toàn bộ thông tin động học hữu ích đã được giải thuật lọc trích xuất triệt để.
+Lực đẩy thế năng biên mềm là cải tiến đóng góp lớn nhất (giúp giảm $61{,}5\%$ sai số), tiếp theo là điểm điều hướng tương đối ($46{,}2\%$). Sự kết hợp đồng bộ của 6 thành phần kỹ thuật đã giúp hạ thấp sai số tổng thể tới $55{,}2\%$ so với hệ thống ban đầu.
 
 \subsubsection{Tổng kết nghiên cứu cắt bỏ và đối chuẩn hiệu năng}
 
 \hspace{0.5cm} Các phân tích so sánh và nghiên cứu cắt bỏ đã xác nhận:
 \begin{enumerate}
     \item Khẳng định hiệu quả giảm sai số của bộ lọc Alpha-Beta trên cả 4 kịch bản thực nghiệm chuẩn với mức giảm sai số lên tới $69{,}8\%$.
-    \item Xác lập ma trận nghiên cứu cắt bỏ 8 giai đoạn, định lượng lực đẩy biên mềm ($61{,}5\%$) và điểm điều hướng tương đối ($46{,}2\%$) là hai cải tiến quan trọng nhất.
-    \item Kiểm định thống kê ANOVA ($F = 48{,}65, p < 10^{-9}$) và Tukey HSD xác nhận sự cải thiện sai số của giải thuật có ý nghĩa thống kê rõ rệt ($p < 0{,}001$).
-    \item Phân tích tương quan chéo và biên tối ưu Pareto chứng minh Alpha-Beta đạt độ trễ pha nhóm tối thiểu ($12{,}5$ ms) và hiệu quả sử dụng tài nguyên vi xử lý cao nhất.
+    \item Xác lập ma trận nghiên cứu cắt bỏ 6 giai đoạn, định lượng lực đẩy biên mềm ($61{,}5\%$) và điểm điều hướng tương đối ($46{,}2\%$) là hai cải tiến quan trọng nhất.
+        \item Phân tích tương quan chéo và biên tối ưu Pareto cho thấy Alpha-Beta đạt độ trễ pha nhóm tối thiểu ($12{,}5$ ms) và hiệu quả sử dụng tài nguyên vi xử lý cao nhất.
 \end{enumerate}

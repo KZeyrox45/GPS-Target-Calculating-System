@@ -598,26 +598,26 @@ Trong mô phỏng hiện tại, mỗi cảm biến luôn có dữ liệu (đư�
 
 \begin{table}[H]
 \centering
-\caption{Thời gian thực thi mỗi bước lọc}
+\caption{Ngân sách thời gian thiết kế lý thuyết mỗi bước lọc}
 \label{tab:filter-timing}
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{lcc}
 \toprule
-\textbf{Thành phần} & \textbf{Thời gian} & \textbf{Tỷ lệ} \\
+\textbf{Thành phần} & \textbf{Ngân sách ($\mu$s)} & \textbf{Tỷ trọng ngân sách} \\
 \midrule
 Alpha-beta (2 trục) & $\sim$10 $\mu$s & 17\% \\
 Kalman 2D (4 trạng thái) & $\sim$25 $\mu$s & 42\% \\
-Kalman 3D (6 trạng thái) & $\sim$48 $\mu$s & 82\% \\
+Kalman 3D (6 trạng thái) & $\sim$48 $\mu$s & 82\% (ngân sách) \\
 \midrule
-\multicolumn{2}{l}{\textbf{Tổng chuỗi xử lý}} & \textbf{59 $\mu$s} \\
+\multicolumn{2}{l}{\textbf{Tổng ngân sách thiết kế chuỗi xử lý}} & \textbf{59 $\mu$s} \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-Thời gian 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% của chu kỳ 100 ms (tần số 10 Hz), để lại 99,941\% dung lượng thời gian cho các tác vụ khác (đọc cảm biến, truyền dữ liệu mạng, hiển thị bản đồ). Với tần số 100 Hz (chu kỳ 10 ms), chuỗi xử lý chỉ chiếm 0,59\% dung lượng thời gian, cho thấy khả năng mở rộng rất lớn.
+Ngân sách thiết kế lý thuyết 59 $\mu$s cho toàn bộ chuỗi xử lý (bao gồm chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% của chu kỳ 100 ms (tần số 10 Hz), để lại 99,941\% dung lượng thời gian cho các tác vụ khác (đọc cảm biến, truyền dữ liệu mạng, hiển thị bản đồ). Với tần số 100 Hz (chu kỳ 10 ms), ngân sách này chỉ chiếm 0,59\% dung lượng thời gian theo tính toán lý thuyết, gợi ý khả năng mở rộng về mặt ngân sách thiết kế.
 
-\textbf{Khả năng mở rộng lên 100 Hz\\} Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với các dòng IMU công nghiệp hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với thời gian 59 $\mu$s hiện tại, dung lượng thời gian còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% ngân sách chu kỳ. Điều này khẳng định chuỗi thuật toán hoàn toàn đáp ứng thời gian thực ở các dải tần số cao hơn nhiều so với tần số thiết kế ban đầu.
+\textbf{Khả năng mở rộng lên 100 Hz (phân tích lý thuyết)\\} Về mặt lý thuyết, với ngân sách thiết kế 59 $\mu$s, chu kỳ 10 ms tương ứng với tỷ trọng 0,59\%; đây là phân tích khả năng mở rộng dựa trên ngân sách thiết kế, không phải benchmark thực nghiệm ở 100 Hz. Nếu tăng tần số cảm biến lên 100 Hz (phù hợp với các dòng IMU công nghiệp hiện đại), chuỗi xử lý cần hoàn thành trong 10 ms. Với ngân sách thiết kế 59 $\mu$s, dung lượng thời gian còn lại là $10\,000 - 59 = 9\,941$ $\mu$s, tức chỉ sử dụng 0,59\% ngân sách chu kỳ theo tính toán lý thuyết. Đồ án không thực hiện vận hành thực nghiệm ở 100 Hz.
 
 \subsubsection{So sánh chi tiết Kalman và alpha-beta}
 
@@ -648,7 +648,7 @@ Alpha-beta filter có ưu điểm về tốc độ và độ phức tạp thấp
 
 \hspace{0.5cm} Việc lựa chọn bộ lọc phụ thuộc vào yêu cầu cụ thể của bài toán và điều kiện tài nguyên phần cứng.
 
-Sử dụng Kalman filter khi: Mục tiêu có khả năng cơ động cao (drone, xe máy tăng/giảm tốc đột ngột); nhiễu đo lường thay đổi theo thời gian (khoảng cách thay đổi liên tục); cần thông tin về độ bất định của ước tính để đánh giá chất lượng bám; tài nguyên tính toán dồi dào (máy tính công nghiệp, Raspberry Pi 4).
+Sử dụng Kalman filter khi: Mục tiêu có khả năng cơ động cao (drone, xe máy tăng/giảm tốc đột ngột); nhiễu đo lường thay đổi theo thời gian (khoảng cách thay đổi liên tục); cần thông tin về độ bất định của ước tính để đánh giá chất lượng bám; tài nguyên tính toán dồi dào (máy tính công nghiệp, máy tính nhúng định hướng triển khai tương lai như Raspberry Pi 4).
 
 Sử dụng alpha-beta filter khi: Mục tiêu di chuyển đều với vận tốc gần không đổi (người đi bộ trên quãng đường thẳng); tài nguyên tính toán hạn chế (microcontroller, IoT device); cần độ trễ xử lý cực thấp (real-time cứng); chỉ cần ước tính vị trí mà không cần đánh giá độ bất định.
 
@@ -711,7 +711,7 @@ Kết quả cho thấy RMSE cực tiểu tại $\alpha = 0{,}4$. Khi $\alpha$ nh
 
 \textbf{Thứ hai,} trong điều kiện thử nghiệm với mô hình vận tốc không đổi (Constant Velocity), bộ lọc alpha-beta đạt sai số RMSE thấp hơn bộ lọc Kalman (0,26 m so với 0,86 m ở người đi bộ; 1,02 m so với 1,80 m ở xe máy động học; 1,06 m so với 2,10 m ở drone). Điều này xuất phát từ đặc tính đáp ứng tức thời của cấu trúc Benedict-Bordner không bị trễ pha hội tụ hiệp phương sai. Dẫu vậy, bộ lọc Kalman đóng vai trò trung tâm cho các bài toán phức tạp nhờ khả năng ước lượng ma trận hiệp phương sai bất định $\mathbf{P}_k$ theo thời gian thực và thích nghi động ma trận $\mathbf{R}_k$ theo cự ly quan sát.
 
-\textbf{Thứ ba,} thời gian xử lý 59 $\mu$s cho toàn bộ chuỗi thuật toán (chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% dung lượng chu kỳ 100 ms (10 Hz), để lại 99,941\% cho các tác vụ hệ thống khác. Điều này xác nhận hệ thống hoàn toàn đáp ứng thời gian thực ở tần số 10 Hz và có thể mở rộng lên 100 Hz (khi đó chuỗi xử lý chỉ chiếm 0,59\% dung lượng chu kỳ 10 ms).
+\textbf{Thứ ba,} ngân sách thiết kế lý thuyết 59 $\mu$s cho toàn bộ chuỗi thuật toán (chuyển đổi tọa độ, hợp nhất cảm biến, cả hai bộ lọc) chỉ chiếm 0,059\% dung lượng chu kỳ 100 ms (10 Hz), để lại 99,941\% cho các tác vụ hệ thống khác. Điều này xác nhận hệ thống đáp ứng ngân sách thời gian thực ở tần số 10 Hz trong phạm vi đã kiểm thử và gợi ý khả năng mở rộng về mặt lý thuyết lên 100 Hz (khi đó ngân sách thiết kế chỉ chiếm 0,59\% dung lượng chu kỳ 10 ms theo tính toán lý thuyết, chưa được kiểm chứng thực nghiệm).
 
 Bảng sau tóm tắt các tham số thiết kế chính:
 

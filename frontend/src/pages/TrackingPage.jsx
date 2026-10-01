@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import TrackingMap     from '../components/map/TrackingMap';
 import SimulationPanel from '../components/controls/SimulationPanel';
 import LayerControl    from '../components/controls/LayerControl';
@@ -6,10 +6,23 @@ import CoordDisplay    from '../components/ui/CoordDisplay';
 import ErrorMetricsChart from '../components/charts/ErrorMetricsChart';
 import AltitudeChart from '../components/charts/AltitudeChart';
 import useTrackingStore from '../store/trackingStore';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 export default function TrackingPage() {
   const { simConfig, isRunning, simulationEnded } = useTrackingStore();
   const observerPos = [simConfig.observer_lat, simConfig.observer_lon];
+  const { disconnect } = useWebSocket();
+
+  useEffect(() => {
+    return () => {
+      const state = useTrackingStore.getState();
+      if (state.sessionId && state.isRunning) {
+        disconnect();
+        state.setIsRunning(false);
+        fetch(`/api/simulation/stop/${state.sessionId}`, { method: 'POST', keepalive: true }).catch(() => {});
+      }
+    };
+  }, [disconnect]);
 
   return (
     <div style={{ display: 'flex', height: '100%', width: '100%', overflow: 'hidden' }}>

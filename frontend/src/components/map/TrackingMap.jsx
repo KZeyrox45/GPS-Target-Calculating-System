@@ -53,6 +53,18 @@ function RangeRings({ center, radii = [200, 400, 600] }) {
   ));
 }
 
+// Invalidate map size on mount to prevent gray or misaligned tiles
+function MapResizer() {
+  const map = useMap();
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [map]);
+  return null;
+}
+
 export default function TrackingMap({ observerPos }) {
   const {
     currentFrame, showGroundTruth, showRaw, showKalman, showAlphaBeta, showRoads,
@@ -70,8 +82,8 @@ export default function TrackingMap({ observerPos }) {
         zoomControl={true}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
         />
 
@@ -108,6 +120,7 @@ export default function TrackingMap({ observerPos }) {
         )}
 
         <MapAutoCenter />
+        <MapResizer />
       </MapContainer>
 
       {/* Tactical grid overlay */}

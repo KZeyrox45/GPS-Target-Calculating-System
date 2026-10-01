@@ -77,41 +77,11 @@ Bên cạnh đó, các mô-đun trình nạp dữ liệu (Data Loaders) cũng đ
 
 \subsubsection{Khảo sát hiệu năng dưới tải đa phiên đồng thời}
 
-\hspace{0.5cm} Khảo sát tải trọng đồng thời được thực hiện từ 1 đến 20 phiên chạy song song ở tần số 10 Hz với đầy đủ chuỗi xử lý tính toán và truyền phát WebSocket:
-
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.82\textwidth, height=5.8cm,
-    xlabel={Số lượng phiên đồng thời},
-    ylabel={Thời gian trễ trung bình (ms)},
-    xmin=0, xmax=21, ymin=0, ymax=110,
-    xtick={1, 3, 5, 8, 10, 15, 20},
-    ytick={0, 20, 40, 60, 80, 100},
-    grid=major, grid style={dashed, gray!30},
-    legend style={at={(0.02,0.98)}, anchor=north west, font=\footnotesize},
-]
-\addplot[color=blue!70!black, mark=*, thick] coordinates {
-    (1,6.2) (3,7.1) (5,8.5) (8,12.3) (10,15.7) (15,24.2) (20,38.6)
-};
-\addplot[color=red!70!black, dashed, thick] coordinates {(0,100) (21,100)};
-\legend{Thời gian trễ đo đạc, Ngưỡng trễ tối đa 100 ms (10 Hz)}
-\end{axis}
-\end{tikzpicture}
-}
-\caption{Độ trễ trung bình theo số lượng phiên đồng thời so với ngưỡng an toàn chu kỳ 100 ms}
-\label{fig:load-test-latency-curve}
-\end{figure}
-
-Tại mức tải thiết kế 10 phiên đồng thời, độ trễ trung bình chỉ đạt $15{,}7$ ms, bảo đảm biên độ an toàn thời gian lên tới $84{,}3\%$ trước ngưỡng giới hạn 100 ms.
+\hspace{0.5cm} Về khả năng mở rộng đa phiên, đồ án không thực hiện kiểm thử tải đồng thời đo đạc (không tuyên bố bất kỳ giá trị độ trễ mili giây nào theo số phiên). Ở mức luận giải thiết kế: mỗi phiên bám bắt duy trì một vòng lặp tính toán độc lập với ngân sách thiết kế $59{,}0$ $\mu$s mỗi khung hình, trao đổi gói tin JSON gọn nhẹ qua kênh truyền hai chiều riêng; chu kỳ danh định 100 ms để lại biên độ lớn cho việc phục vụ nhiều phiên song song trên cùng máy chủ. Mọi tuyên bố định lượng về độ trễ đa phiên đều không thuộc phạm vi bằng chứng của đồ án.
 
 \subsubsection{Kiểm tra độ ổn định vận hành liên tục (Endurance Testing)}
 
-\hspace{0.5cm} Quá trình kiểm tra độ ổn định vận hành liên tục (Endurance Testing) được tiến hành trong 1 triệu chu kỳ xử lý (tương đương hơn 27 giờ vận hành liên tục ở tần số 10 Hz). Mục tiêu là xác minh tính ổn định số học của ma trận hiệp phương sai sai số $\mathbf{P}_k$ trong thuật toán Kalman, bảo đảm ma trận này không bị phân kỳ hay mất tính đối xứng dương xác định. Kết quả cho thấy hệ thống xử lý ổn định (59 $\mu$s mỗi chu kỳ) và không quan sát thấy tăng trưởng bộ nhớ bất thường qua quá trình theo dõi, khẳng định tính bền bỉ của phần mềm máy chủ quản lý.
-
-Thử nghiệm vận hành liên tục trong 60 phút ở mức 5 phiên đồng thời (tương đương $180.000$ khung dữ liệu được xử lý) cho thấy bộ nhớ RAM duy trì ổn định trong dải $72 - 78$ MB mà không quan sát thấy hiện tượng rò rỉ bộ nhớ (Memory Leak), xác nhận cơ chế quản lý bộ đệm vòng (Ring Buffer) vận hành hiệu quả.
+Về độ ổn định vận hành liên tục, đồ án không thực hiện kiểm thử endurance đo đạc riêng (không tuyên bố số chu kỳ, số giờ chạy hay mức tiêu thụ RAM đo được). Tính ổn định vận hành được luận giải ở mức thiết kế: bộ đệm vòng (Ring Buffer) có kích thước giới hạn nên mức sử dụng bộ nhớ không tăng theo thời gian phiên, và bộ kiểm thử tự động 163 ca xác nhận không phát sinh lỗi số học trong các kịch bản mô phỏng đã đánh giá.
 
 \subsubsection{Xác thực tính toàn vẹn của chuỗi biến đổi tọa độ WGS-84 khứ hồi}
 
@@ -145,23 +115,23 @@ S_{\text{disk}} = 102{,}5\text{ MB (GraphML)} \implies S_{\text{RAM}} = 245{,}0\
 
 \begin{table}[H]
 \centering
-\caption{Thời gian thực thi của các thao tác giải thuật trên đồ thị mạng đường 337K nút}
+\caption{Độ phức tạp lý thuyết của các thao tác giải thuật trên đồ thị mạng đường 337.074 nút}
 \label{tab:graph-operations-timing}
 \adjustbox{max width=\linewidth}{
-\begin{tabular}{lcc}
+\begin{tabular}{lc}
 \toprule
-\textbf{Thao tác giải thuật đồ thị} & \textbf{Độ phức tạp lý thuyết} & \textbf{Thời gian đo đạc thực tế} \\
+\textbf{Thao tác giải thuật đồ thị} & \textbf{Độ phức tạp lý thuyết} \\
 \midrule
-Tìm đỉnh gần nhất theo tọa độ GPS (KD-Tree) & $\mathcal{O}(\log |V|)$ & $0{,}12$ ms \\
-Chọn nhánh rẽ có trọng số tại ngã tư & $\mathcal{O}(k_{\text{degree}}) \approx \mathcal{O}(1)$ & $0{,}02$ ms \\
-Quay lui toàn phần chống kẹt ngõ cụt & $\mathcal{O}(L_{\text{path}})$ & $0{,}45$ ms \\
-Sinh 1.200 điểm quỹ đạo xe máy (120 s) & $\mathcal{O}(N_{\text{steps}})$ & $4{,}80$ ms \\
+Tìm đỉnh gần nhất theo tọa độ GPS (NetworkX) & $\mathcal{O}(|V|)$ \\
+Chọn nhánh rẽ có trọng số tại ngã tư & $\mathcal{O}(k_{\text{degree}}) \approx \mathcal{O}(1)$ \\
+Quay lui toàn phần chống kẹt ngõ cụt & $\mathcal{O}(L_{\text{path}})$ \\
+Sinh 1.200 điểm quỹ đạo xe máy (120 s) & $\mathcal{O}(N_{\text{steps}})$ \\
 \bottomrule
 \end{tabular}
 }
 \end{table}
 
-Toàn bộ quá trình sinh hành trình ngẫu nhiên 120 giây cho xe máy hoàn thành trong chưa đầy 5 ms, cho phép trạm quan sát chuyển đổi mục tiêu và kích hoạt phiên mô phỏng tức thời.
+Quá trình sinh hành trình ngẫu nhiên 120 giây cho xe máy được thực hiện trong giai đoạn khởi tạo phiên mô phỏng, cho phép trạm quan sát chuyển đổi mục tiêu trước khi kích hoạt vòng lặp bám bắt thời gian thực.
 
 \subsubsection{Ma trận phòng thủ an ninh mạng và xác thực dữ liệu đầu vào}
 
@@ -214,34 +184,16 @@ Tệp dữ liệu CSV tuân thủ nghiêm ngặt chuẩn mã hóa ký tự UTF-8
 
 \hspace{0.5cm} Giao diện người dùng thời gian thực được kiểm tra tính tương thích trên ba trình duyệt phổ biến nhất:
 
-Khi kết nối WebSocket bị gián đoạn do sự cố mạng, cơ chế Exponential Backoff tự động kích hoạt chuỗi thử lại với các khoảng chờ $1\text{ s} \to 2\text{ s} \to 4\text{ s} \to 8\text{ s} \to 10\text{ s}$, bảo đảm $100\%$ các phiên bị đứt kết nối tạm thời đều tự động tái lập mà không cần khởi tạo lại phiên từ đầu.
+Khi kết nối WebSocket bị gián đoạn do sự cố mạng, cơ chế Exponential Backoff tự động kích hoạt chuỗi thử lại với các khoảng chờ $1\text{ s} \to 2\text{ s} \to 4\text{ s} \to 8\text{ s} \to 10\text{ s}$, hỗ trợ tái lập các phiên bị đứt kết nối tạm thời mà không cần khởi tạo lại phiên từ đầu trong điều kiện mạng cho phép.
 
 \subsubsection{Kiểm định tích hợp dữ liệu và độ trễ chuỗi xử lý}
 
-\hspace{0.5cm} Các mô-đun nạp dữ liệu thực nghiệm (Geolife, mạng đường giao thông HCMC) cùng chuỗi xử lý vi mô 59 $\mu$s (đã phân tích tại Chương 5 và Chương 6) được tích hợp trực tiếp vào bộ kiểm thử tự động. Các ca kiểm thử xác nhận thuật toán PCHIP duy trì tính đơn điệu, không tạo cực trị giả và toàn bộ chuỗi tính toán hoàn tất trong thời gian quy chuẩn của chu kỳ 100 ms.
+\hspace{0.5cm} Các mô-đun nạp dữ liệu thực nghiệm (Geolife, mạng đường giao thông HCMC) cùng chuỗi xử lý với ngân sách thiết kế 59 $\mu$s (đã phân tích tại Chương 5 và Chương 6) được tích hợp trực tiếp vào bộ kiểm thử tự động. Các ca kiểm thử xác nhận thuật toán PCHIP duy trì tính đơn điệu, không tạo cực trị giả và toàn bộ chuỗi tính toán hoàn tất trong thời gian quy chuẩn của chu kỳ 100 ms.
 
 
-\subsubsection{Tối ưu hóa giao diện đồ họa đạt tốc độ khung hình 60 FPS}
+\subsubsection{Tối ưu hóa giao diện đồ họa}
 
-\hspace{0.5cm} Nhằm bảo đảm trải nghiệm quan sát chuyển động mượt mà, giao diện web React được tối ưu hóa chuyên sâu:
-
-\begin{table}[H]
-\centering
-\caption{Đo đạc hiệu năng giao diện người dùng trước và sau khi tối ưu hóa dựng hình}
-\label{tab:frontend-performance-optimization}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Chỉ số hiệu năng giao diện} & \textbf{Trước tối ưu (SVG Dom)} & \textbf{Sau tối ưu (Canvas/Memo)} & \textbf{Mức độ cải thiện} \\
-\midrule
-Tốc độ khung hình dựng hình & $24 - 35$ FPS & $\mathbf{60\text{ FPS}}$ (Cố định) & Tăng $100\%$ \\
-Thời gian xử lý một khung hình UI & $16{,}8$ ms & $\mathbf{3{,}5\text{ ms}}$ & Giảm $79{,}2\%$ \\
-Tỷ lệ rớt khung hình (Dropped Frames) & $8{,}4\%$ & $\mathbf{0{,}0\%}$ & Triệt tiêu hoàn toàn \\
-Số lần vẽ lại không cần thiết (Re-renders) & $120$ lần/giây & $\mathbf{10\text{ lần/giây}}$ & Giảm $91{,}7\%$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+\hspace{0.5cm} Nhằm bảo đảm trải nghiệm quan sát chuyển động mượt mà, giao diện web React áp dụng các kỹ thuật tối ưu dựng hình ở mức thiết kế: ưu tiên Canvas cho lớp quỹ đạo dày đặc thay vì nút DOM SVG, ghi nhớ (memo) các thành phần bản đồ ít thay đổi để hạn chế vẽ lại không cần thiết. Đồ án không thực hiện đo hiệu năng trình duyệt (không có profiling, Lighthouse hay Playwright benchmark) nên không tuyên bố bất kỳ số liệu khung hình, thời gian khung hay tỷ lệ rớt khung nào.
 
 \subsubsection{Ma trận kiểm thử hồi quy tự động (Automated Regression Test Suite)}
 
@@ -253,7 +205,7 @@ Số lần vẽ lại không cần thiết (Re-renders) & $120$ lần/giây & $\
 \begin{enumerate}
     \item Hoàn thiện kiến trúc 4 tầng kết hợp quản lý phiên thời gian thực, điều khiển trơn tru mọi luồng vận hành giữa máy chủ và giao diện.
     \item Chuẩn hóa cấu trúc truyền thông WebSocket 10 Hz và định dạng gói tin JSON gọn nhẹ bảo đảm tính toàn vẹn dữ liệu.
-    \item Chứng minh năng lực chịu tải 10 phiên đồng thời với độ trễ $15{,}7$ ms và độ ổn định liên tục trong 60 phút không rò rỉ bộ nhớ.
+    \item Hoàn thiện kiến trúc 4 tầng kết hợp quản lý phiên thời gian thực, điều khiển trơn tru mọi luồng vận hành giữa máy chủ và giao diện.
     \item Đạt 100\% tỷ lệ thành công trên toàn bộ 163 ca kiểm thử tự động, xác nhận độ ổn định và độ tin cậy của mã nguồn hệ thống.
 \end{enumerate}
 
@@ -274,15 +226,15 @@ Số lần vẽ lại không cần thiết (Re-renders) & $120$ lần/giây & $\
 \adjustbox{max width=\linewidth}{
 \begin{tabular}{p{0.20\linewidth}p{0.38\linewidth}p{0.34\linewidth}}
 \toprule
-\textbf{Nguồn gốc} & \textbf{Trường hợp biên mô phỏng} & \textbf{Mức độ nghiêm trọng \& Đáp ứng} \\
+\textbf{Nguồn gốc} & \textbf{Kịch bản rủi ro thiết kế} & \textbf{Mức độ nghiêm trọng \& Đáp ứng} \\
 \midrule
-Cảm biến & GPS mất tín hiệu hoàn toàn 3 đến 5 giây & Cao (Chuyển sang Dead-Reckoning) \\
-Cảm biến & Laser đo sai đột biến do tán xạ bề mặt & Trung bình (Cổng loại trừ Mahalanobis $\chi^2$) \\
+Cảm biến & Gián đoạn đo lường GNSS tạm thời & Cao (Chuyển sang Dead-Reckoning) \\
+Cảm biến & Laser đo sai đột biến do tán xạ bề mặt & Trung bình \\
 Cảm biến & IMU trôi lệch góc phương vị $5^\circ$/s & Trung bình (Hạ trọng số hợp nhất RSS) \\
 Động học & Mục tiêu phanh dừng khẩn cấp & Thấp (Mô hình thích nghi $\mathbf{Q}_k$) \\
-Động học & Mục tiêu quay đầu đổi hướng $180^\circ$ & Trung bình (Co giãn hiệp phương sai $\mathbf{R}_k^*$) \\
+Động học & Mục tiêu quay đầu đổi hướng $180^\circ$ & Trung bình (Độ lợi Kalman Gain $\mathbf{K}_k$ tự động điều chỉnh theo đổi mới) \\
 Môi trường & Tiếp cận và vượt bán kính ranh giới & Cao (Lực đẩy thế năng biên mềm $80\%$) \\
-Hệ thống & Tải đồng thời 10 phiên đa mục tiêu & Trung bình (Độc lập không gian trạng thái) \\
+Hệ thống & Kiến trúc cách ly trạng thái đa phiên & Trung bình (Độc lập không gian trạng thái) \\
 \bottomrule
 \end{tabular}
 }
@@ -304,43 +256,17 @@ Ma trận hiệp phương sai sai số ước lượng $\mathbf{P}_{k+m|k}$ tíc
 \label{eq:dead-reckoning-covariance-growth}
 \end{equation}
 
-\begin{figure}[H]
-\centering
-\adjustbox{max width=\linewidth}{
-\begin{tikzpicture}
-\begin{axis}[
-    width=0.85\textwidth, height=6.2cm,
-    xlabel={Thời gian mất tín hiệu GPS (giây)}, ylabel={Sai số RMSE bám bắt (m)},
-    xmin=0, xmax=5, ymin=0, ymax=19,
-    grid=major, grid style={dashed, gray!30},
-    legend style={at={(0.03,0.97)}, anchor=north west, font=\footnotesize},
-]
-\addplot[color=blue!80!black, mark=*, thick] coordinates {(0,0.86) (1,1.20) (2,2.10) (3,3.80) (4,5.90) (5,7.50)};
-\addlegendentry{Người đi bộ ($v=1{,}38$ m/s)}
-\addplot[color=red!80!black, mark=square*, thick] coordinates {(0,1.52) (1,2.80) (2,5.20) (3,8.50) (4,12.10) (5,15.30)};
-\addlegendentry{Xe máy mạng đường ($v=8{,}50$ m/s)}
-\addplot[color=green!60!black, mark=triangle*, thick] coordinates {(0,2.10) (1,3.50) (2,6.80) (3,10.20) (4,14.50) (5,18.00)};
-\addlegendentry{Drone 3D ($v=12{,}00$ m/s)}
-\addplot[color=gray!70, dashed, thick] coordinates {(0,5.0) (5,5.0)};
-\addlegendentry{Ngưỡng an toàn chỉ huy (5,0 m)}
-\end{axis}
-\end{tikzpicture}
-}
-\caption{Sự gia tăng sai số RMSE theo thời gian gián đoạn GPS khi không có cập nhật đo lường}
-\label{fig:gps-dropout}
-\end{figure}
-
-Đối với người đi bộ, nhờ vận tốc di chuyển chậm ($1{,}38$ m/s), hệ thống duy trì sai số dưới ngưỡng an toàn $5{,}0$ m trong thời gian gián đoạn lên tới $3{,}5$ giây. Với xe máy và drone cơ động cao, ngưỡng an toàn bị chạm tới sau lần lượt $1{,}9$ giây và $1{,}5$ giây, xác định giới hạn thời gian cho phép của chế độ suy đoán thuần túy.
+Về mặt thuật toán, bộ lọc Kalman hỗ trợ chế độ dự đoán thuần túy (predict-only) khi không có cập nhật đo lường, với hiệp phương sai lan truyền theo các phương trình \ref{eq:dead-reckoning-state-prediction}--\ref{eq:dead-reckoning-covariance-growth}. Đồ án hiện tại chưa thực hiện benchmark định lượng cho kịch bản gián đoạn tín hiệu GNSS/GPS trong luồng mô phỏng nên không đưa ra bất kỳ thời gian đảm bảo cụ thể nào; đánh giá dropout bằng thực nghiệm mô phỏng là hướng phát triển tiếp theo.
 
 \subsubsection{Đặc tính tái hội tụ khi tín hiệu GPS phục hồi}
 
-\hspace{0.5cm} Mô hình nhiễu ngẫu nhiên quá trình của IMU là nguyên nhân chính dẫn đến trôi dạt khi hệ thống phải chuyển sang chế độ suy đoán vị trí hoàn toàn. Thực nghiệm cho thấy, khi tín hiệu định vị vệ tinh bị ngắt, sai số tích lũy tăng phi tuyến theo thời gian. Khả năng tái hội tụ khi tín hiệu phục hồi phụ thuộc lớn vào việc điều chỉnh lại ma trận trọng số trong thuật toán hợp nhất, giúp kéo hệ thống về lại đúng quỹ đạo thực tế \cite{groves2013principles}.
+\hspace{0.5cm} Mô hình nhiễu ngẫu nhiên quá trình của IMU là nguyên nhân chính dẫn đến trôi dạt khi hệ thống phải chuyển sang chế độ suy đoán vị trí hoàn toàn. Theo mô hình lan truyền sai số, khi tín hiệu định vị vệ tinh bị ngắt, sai số tích lũy tăng phi tuyến theo thời gian. Khả năng tái hội tụ khi tín hiệu phục hồi phụ thuộc lớn vào việc điều chỉnh lại ma trận trọng số trong thuật toán hợp nhất, giúp kéo hệ thống về lại đúng quỹ đạo thực tế \cite{groves2013principles}.
 
-Khi tín hiệu GPS tái lập, do ma trận hiệp phương sai $\mathbf{P}$ đã tăng lớn trong giai đoạn mất tín hiệu, ma trận độ lợi Kalman Gain $\mathbf{K}_k = \mathbf{P}_{k|k-1} \mathbf{H}^T (\mathbf{H} \mathbf{P}_{k|k-1} \mathbf{H}^T + \mathbf{R}_k)^{-1}$ tự động mở rộng biên độ tiệm cận giá trị 1. Nhờ đó, phép đo mới lập tức kéo vector trạng thái về sát vị trí thực chỉ sau 2 đến 3 chu kỳ lấy mẫu ($0{,}2 - 0{,}3$ giây).
+Khi tín hiệu GPS tái lập, do ma trận hiệp phương sai $\mathbf{P}$ đã tăng lớn trong giai đoạn mất tín hiệu, ma trận độ lợi Kalman Gain $\mathbf{K}_k = \mathbf{P}_{k|k-1} \mathbf{H}^T (\mathbf{H} \mathbf{P}_{k|k-1} \mathbf{H}^T + \mathbf{R}_k)^{-1}$ tự động mở rộng biên độ tiệm cận giá trị 1. Nhờ đó, phép đo mới kéo vector trạng thái về sát vị trí thực sau vài chu kỳ lấy mẫu đầu tiên khi phép đo được tái lập.
 
-\subsubsection{Thực nghiệm phục hồi sau sự cố cảm biến kép (Dual Sensor Fault)}
+\subsubsection{Kịch bản mô phỏng minh họa phục hồi sau sự cố cảm biến kép (Dual Sensor Fault)}
 
-\hspace{0.5cm} Kịch bản nghiêm trọng nhất xảy ra khi hai cảm biến gặp sự cố đồng thời (ví dụ máy thu GPS mất hoàn toàn tín hiệu trong 5 giây kết hợp cảm biến Laser bị che khuất quang học):
+\hspace{0.5cm} Kịch bản mô phỏng minh họa sau đây xét trường hợp nghiêm trọng nhất khi hai cảm biến gặp sự cố đồng thời (ví dụ máy thu GPS mất hoàn toàn tín hiệu trong 5 giây kết hợp cảm biến Laser bị che khuất quang học). Đây là kịch bản tổng hợp minh họa, không phải thực nghiệm phần cứng đo đạc:
 
 \begin{figure}[H]
 \centering
@@ -348,72 +274,42 @@ Khi tín hiệu GPS tái lập, do ma trận hiệp phương sai $\mathbf{P}$ đ
 \begin{tikzpicture}
 \begin{axis}[
     width=0.85\textwidth, height=5.8cm,
-    xlabel={Thời gian thực nghiệm (giây)}, ylabel={Sai số RMSE bám bắt (m)},
-    xmin=0, xmax=20, ymin=0, ymax=8,
+    xlabel={Thời gian (đơn vị quy ước)}, ylabel={Chỉ số sai số tương đối (đơn vị quy ước)},
+    xmin=0, xmax=20, ymin=0, ymax=1.1,
+    xtick=\empty, ytick=\empty,
     grid=major, grid style={dashed, gray!30},
     legend style={at={(0.98,0.98)}, anchor=north east, font=\footnotesize},
 ]
-\addplot[color=blue!80!black, thick] coordinates {
-    (0,0.90) (2,0.90) (5,0.90) (5.1,3.20) (5.3,2.10) (6,1.20) (8,0.95) (10,0.92) (15,0.90) (20,0.90)
+\addplot[color=blue!80!black, thick, smooth] coordinates {
+    (0,0.12) (5,0.12) (6,0.35) (8,0.16) (12,0.12) (20,0.12)
 };
-\addlegendentry{Mất GPS đơn lẻ 5s}
-\addplot[color=red!80!black, thick, dashed] coordinates {
-    (0,0.90) (2,0.90) (5,0.90) (5.5,6.50) (6.7,3.80) (8,1.50) (10,1.15) (15,1.10) (20,1.10)
+\addlegendentry{Mất tín hiệu đơn lẻ (khái niệm)}
+\addplot[color=red!80!black, thick, dashed, smooth] coordinates {
+    (0,0.12) (5,0.12) (6.5,0.85) (9,0.30) (13,0.14) (20,0.14)
 };
-\addlegendentry{Sự cố cảm biến kép}
-\addplot[color=gray!70, dotted, line width=1.1pt] coordinates {(0,5.0) (20,5.0)};
-\addlegendentry{Ngưỡng an toàn 5{,}0 m}
+\addlegendentry{Sự cố cảm biến kép (khái niệm)}
 \end{axis}
 \end{tikzpicture}
 }
-\caption{Đặc tuyến sai số RMSE và thời gian tự phục hồi sau các sự cố cảm biến đơn và kép}
+\caption{Sơ đồ khái niệm minh họa định tính đặc tuyến sai số và khả năng tự phục hồi khi mất tín hiệu đơn lẻ và sự cố cảm biến kép (đơn vị quy ước, không phải kết quả đo đạc hay mô phỏng định lượng)}
 \label{fig:sensor-recovery}
 \end{figure}
 
-Trong tình huống sự cố kép, sai số đỉnh tạm thời vọt lên mức $6{,}50$ m do hệ thống phải dựa hoàn toàn vào tích phân quán tính IMU. Dù vậy, ngay khi tín hiệu quang học hoặc vệ tinh được tái lập, bộ lọc phục hồi ổn định trong vòng $1{,}2$ giây và đưa sai số trở lại mức $1{,}10$ m, khẳng định độ tin cậy vượt bậc của cấu trúc hợp nhất đa nguồn.
+Trong kịch bản minh họa này, khi cả hai cảm biến gặp sự cố, hệ thống phải dựa hoàn toàn vào tích phân quán tính IMU nên sai số tạm thời vọt lên cao; ngay khi tín hiệu quang học hoặc vệ tinh được tái lập, độ lợi Kalman mở rộng và kéo sai số trở lại gần mức ổn định. Hình vẽ là đường cong khái niệm minh họa định tính, mọi tọa độ điểm vẽ đều không có nguồn mô phỏng xác định và không phải kết quả đo thực nghiệm phần cứng hay chuẩn hiệu năng phục hồi.
 
-\subsubsection{Cơ chế loại trừ điểm đo ngoại lai bằng cổng kiểm định Mahalanobis \texorpdfstring{$\chi^2$}{Chi-Square}}
+\subsubsection{Cơ chế quản lý phiên bản và khắc phục rò rỉ bộ nhớ (R1/R2 Reliability)}
 
-\hspace{0.5cm} Khi cảm biến đo lường gặp nhiễu phản xạ đột biến từ bề mặt kính hoặc tán xạ sương mù, vector đo lường $\mathbf{z}_k$ có thể chứa sai số thô lên tới hàng chục mét. Nếu đưa trực tiếp vào bộ lọc Kalman, ma trận hiệp phương sai $\mathbf{P}_k$ sẽ bị biến dạng nghiêm trọng. Cổng loại trừ ngoại lai Mahalanobis (Chi-Square Innovation Gating) được thiết lập:
-\begin{equation}
-d_M^2 = \mathbf{y}_k^T \mathbf{S}_k^{-1} \mathbf{y}_k = (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})^T (\mathbf{H}\mathbf{P}_{k|k-1}\mathbf{H}^T + \mathbf{R}_k)^{-1} (\mathbf{z}_k - \mathbf{H}\hat{\mathbf{x}}_{k|k-1})
-\label{eq:mahalanobis-distance-formula}
-\end{equation}
+\hspace{0.5cm} Quá trình kiểm thử tích hợp vòng lặp đầu-cuối (End-to-End) trên trình duyệt thực tế phát hiện hai khiếm khuyết nghiêm trọng liên quan đến quản lý trạng thái luồng WebSocket:
+\begin{itemize}
+    \item \textbf{Rò rỉ phiên bản mô phỏng (R1 Session Leak):} Khi người dùng điều hướng khỏi giao diện bản đồ (ví dụ: chuyển sang trang Dashboard) mà không bấm nút "Dừng", kết nối WebSocket bị ngắt đột ngột ở phía máy khách nhưng máy chủ FastAPI vẫn duy trì vòng lặp tính toán liên tục, gây hao hụt bộ nhớ RAM.
+    \item \textbf{Xung đột đa kết nối (R2 Concurrency Conflict):} Nếu người dùng mở nhiều thẻ trình duyệt và cùng gọi API mô phỏng, máy chủ phát cùng một luồng tọa độ cho nhiều kết nối, làm hỏng kiến trúc đơn luồng (Single-Subscriber) và làm gián đoạn bộ đệm hàng đợi (Ring Buffer).
+\end{itemize}
 
-Trong không gian đo lường 3 chiều ($m=3$), bình phương khoảng cách Mahalanobis $d_M^2$ tuân theo phân phối Chi-bình phương với 3 bậc tự do ($d_M^2 \sim \chi^2(3)$). Với mức ý nghĩa thống kê $\alpha = 0{,}01$ (độ tin cậy $99{,}0\%$), ngưỡng kiểm định giả thuyết ngoại lai $\gamma$:
-\begin{equation}
-\gamma = \chi^2_{3, 0.99} = 11{,}345
-\label{eq:chi-square-threshold-value}
-\end{equation}
-
-Quy tắc quyết định lọc ngoại lai:
-\begin{equation}
-\begin{cases}
-d_M^2 \le \gamma \implies \text{Chấp nhận phép đo, thực hiện cập nhật } \hat{\mathbf{x}}_{k|k}, \mathbf{P}_{k|k} \\
-d_M^2 > \gamma \implies \text{Loại bỏ ngoại lai, gán } \hat{\mathbf{x}}_{k|k} = \hat{\mathbf{x}}_{k|k-1}, \; \mathbf{P}_{k|k} = \mathbf{P}_{k|k-1}
-\end{cases}
-\label{eq:mahalanobis-decision-rule}
-\end{equation}
-
-Trong kịch bản đánh giá mô phỏng xung nhiễu đột biến, các điểm đo lệch vượt quá khoảng cách cổng $\gamma = 11{,}345$ được phát hiện và loại bỏ với tỷ lệ loại trừ đạt $99{,}4\%$ (phù hợp với mức danh định lý thuyết $99{,}0\%$ của phân phối $\chi^2(3)$ ở mức ý nghĩa $\alpha = 0{,}01$). Việc loại bỏ ngoại lai giúp bảo vệ chuỗi đổi mới, ngăn chặn hiện tượng nhảy vọt tọa độ và bảo toàn tính ổn định của ma trận $\mathbf{P}_k$.
-
-\begin{table}[H]
-\centering
-\caption{Hiệu quả loại trừ nhiễu đột biến và bảo toàn quỹ đạo của cổng Mahalanobis $\chi^2$}
-\label{tab:mahalanobis-gating-results}
-\adjustbox{max width=\linewidth}{
-\begin{tabular}{lccc}
-\toprule
-\textbf{Kịch bản nhiễu đo lường} & \textbf{Không có cổng Mahalanobis} & \textbf{Kích hoạt cổng $\chi^2_{3, 0.99}$} & \textbf{Mức độ cải thiện} \\
-\midrule
-Nhiễu phản xạ Laser đột biến 15 m & RMSE đỉnh $= 7{,}42$ m & $\mathbf{RMSE\text{ đỉnh} = 1{,}08\text{ m}}$ & Giảm $85{,}4\%$ \\
-GPS trôi dạt đột ngột 25 m & RMSE đỉnh $= 12{,}80$ m & $\mathbf{RMSE\text{ đỉnh} = 1{,}15\text{ m}}$ & Giảm $91{,}0\%$ \\
-Hiện tượng giật quỹ đạo (Jitter) & Rất nghiêm trọng & \textbf{Giảm thiểu đáng kể} & Quỹ đạo mượt hơn \\
-Tỷ lệ loại trừ xung ngoại lai & -- & $\mathbf{99{,}4\%}$ & Ngưỡng lý thuyết $99{,}0\%$ \\
-\bottomrule
-\end{tabular}
-}
-\end{table}
+Để khắc phục, hệ thống triển khai hai cơ chế bảo vệ phần mềm cấp độ hệ thống:
+\begin{enumerate}
+    \item \textbf{Dọn dẹp vòng đời thành phần (Component Unmount Cleanup):} Lớp React UI tích hợp hàm hủy (\texttt{useEffect cleanup}) nhằm tự động gửi mã lệnh HTTP POST \texttt{/api/simulation/stop} ngay trước khi giao diện bị hủy khỏi DOM, kết hợp với việc đóng WebSocket hợp lệ (mã 1000). Giải pháp này ngăn ngừa hiệu quả các trường hợp rò rỉ phiên phát sinh khi người dùng chuyển trang trên giao diện web.
+    \item \textbf{Từ chối kết nối đa luồng (Explicit Rejection):} Máy chủ theo dõi trạng thái cờ \texttt{is\_streaming}. Nếu có yêu cầu khởi tạo mới trong khi luồng cũ đang phát, máy chủ từ chối ngay lập tức với mã lỗi \texttt{4409 ("Session already streaming")}. Máy khách nhận diện mã lỗi đặc biệt này và bỏ qua vòng lặp thử lại (bounded retry), duy trì tính ổn định của luồng dữ liệu hiện tại.
+\end{enumerate}
 
 \subsubsection{Khảo sát độ nhạy của bộ lọc trước sai lệch khởi tạo ma trận \texorpdfstring{$\mathbf{P}_0$ và $\mathbf{Q}_k$}{P0 và Qk}}
 
@@ -426,8 +322,7 @@ Nhờ cơ chế khởi tạo vận tốc từ sai phân hữu hạn hai điểm 
 \hspace{0.5cm} Công tác đánh giá độ tin cậy và xử lý trường hợp biên đã hoàn thành các mục tiêu đề ra:
 \begin{enumerate}
     \item Thiết lập ma trận đánh giá 7 trường hợp biên và cơ chế bù suy đoán vị trí khi mất tín hiệu GPS.
-    \item Đánh giá thực nghiệm đặc tuyến suy thoái và khả năng tự phục hồi của bộ lọc khi xảy ra sự cố mất GPS hoặc lỗi cảm biến kép (Hình \ref{fig:sensor-recovery}), khôi phục trạng thái ổn định trong vòng $1{,}2$ giây.
-    \item Triển khai cổng kiểm định ngoại lai Mahalanobis $\chi^2$ giúp triệt tiêu hiện tượng giật bước quỹ đạo và hạ thấp sai số đỉnh khi cảm biến chịu xung nhiễu đột biến lớn.
-    \item Khảo sát độ nhạy chứng minh tính bền vững số học của bộ lọc trước sai lệch khởi tạo ma trận hiệp phương sai ban đầu.
+    \item Minh họa định tính đặc tuyến suy thoái và khả năng tự phục hồi của bộ lọc khi xảy ra sự cố mất GPS hoặc lỗi cảm biến kép (Hình \ref{fig:sensor-recovery}), không tuyên bố thời gian phục hồi đo đạc.
+        \item Khảo sát độ nhạy chứng minh tính bền vững số học của bộ lọc trước sai lệch khởi tạo ma trận hiệp phương sai ban đầu.
     \item Thiết lập chuỗi quy trình tự động hóa kiểm soát chất lượng CI/CD phân tầng 163 ca kiểm thử, bảo đảm chất lượng phần mềm hạn chế nguy cơ bị hồi quy.
 \end{enumerate}

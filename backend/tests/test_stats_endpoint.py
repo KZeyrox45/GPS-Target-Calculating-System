@@ -325,7 +325,7 @@ class TestExportEndpoint:
         assert data["system_status"] == "NOMINAL"
         assert "hardware_telemetry" in data
         assert "gnss" in data["hardware_telemetry"]
-        assert "pipeline_budget" in data
-        assert data["pipeline_budget"]["total_latency_us"] == 59.0
+        assert "theoretical_pipeline_budget" in data
+        assert data["theoretical_pipeline_budget"]["total_latency_us"] == 59.0
         assert "verified_benchmarks" in data
 

@@ -179,7 +179,7 @@ export default function DashboardPage() {
         </div>
         <div style={{ textAlign: 'right', fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
           <div>LAST SYNC: <span style={{ color: 'var(--text-primary)' }}>{lastUpdated.toLocaleTimeString()}</span></div>
-          <div style={{ color: 'var(--accent-primary)', fontSize: '0.75rem' }}>CYCLE CLOCK: 10 Hz (100 ms) · RT LATENCY: 59.0 µs</div>
+          <div style={{ color: 'var(--accent-primary)', fontSize: '0.75rem' }}>CYCLE CLOCK: 10 Hz (100 ms) · THEORETICAL LATENCY: 59.0 µs</div>
         </div>
       </div>
 
@@ -196,11 +196,11 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Pipeline latency */}
+        {/* THEORETICAL LATENCY */}
         <div className="card" style={{ borderLeft: '3px solid var(--accent-info)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-label)', fontFamily: 'var(--font-mono)', marginBottom: '0.4rem' }}>PIPELINE LATENCY</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-label)', fontFamily: 'var(--font-mono)', marginBottom: '0.4rem' }}>THEORETICAL LATENCY</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-info)', fontFamily: 'var(--font-mono)' }}>
-            {telemetry?.pipeline_budget?.total_latency_us ?? 59.0} <span style={{ fontSize: '0.9rem' }}>µs</span>
+            {telemetry?.theoretical_pipeline_budget?.total_latency_us ?? 59.0} <span style={{ fontSize: '0.9rem' }}>µs</span>
           </div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>0.059% CPU Budget at 10 Hz</div>
         </div>
@@ -216,9 +216,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Crossover range */}
+        {/* THEORETICAL CROSSOVER */}
         <div className="card" style={{ borderLeft: '3px solid var(--accent-secondary)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-label)', fontFamily: 'var(--font-mono)', marginBottom: '0.4rem' }}>CROSSOVER RANGE</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-label)', fontFamily: 'var(--font-mono)', marginBottom: '0.4rem' }}>THEORETICAL CROSSOVER</div>
           <div style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--accent-secondary)', fontFamily: 'var(--font-mono)' }}>
             {telemetry?.reliability_metrics?.crossover_range_m ?? 794} <span style={{ fontSize: '0.9rem' }}>m</span>
           </div>
@@ -416,10 +416,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="badge badge-success" style={{ fontSize: '0.7rem' }}>10 Hz · ZERO-MEAN GAUSS</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 <div>Noise σ_GPS: <span style={{ color: 'var(--text-primary)' }}>5.0 m</span></div>
                 <div>Update Rate: <span style={{ color: 'var(--text-primary)' }}>10 Hz</span></div>
-                <div>Fault Prob: <span style={{ color: 'var(--text-primary)' }}>p = 0.020</span></div>
               </div>
             </div>
 
@@ -431,10 +430,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="badge badge-info" style={{ fontSize: '0.7rem' }}>100 Hz · SPHERICAL NOISE</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 <div>Azimuth σ_az: <span style={{ color: 'var(--text-primary)' }}>0.3° (0.0052 rad)</span></div>
                 <div>Elevation σ_el: <span style={{ color: 'var(--text-primary)' }}>0.2° (0.0035 rad)</span></div>
-                <div>Fault Prob: <span style={{ color: 'var(--text-primary)' }}>p = 0.005</span></div>
               </div>
             </div>
 
@@ -446,10 +444,9 @@ export default function DashboardPage() {
                 </span>
                 <span className="badge badge-warning" style={{ fontSize: '0.7rem' }}>PULSED ToF · 1000 m</span>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                 <div>Range σ_r: <span style={{ color: 'var(--text-primary)' }}>0.5 m</span></div>
                 <div>Max Range: <span style={{ color: 'var(--text-primary)' }}>1000 m</span></div>
-                <div>Mahalanobis Gate: <span style={{ color: 'var(--text-primary)' }}>χ² = 9.21 (p=0.01)</span></div>
               </div>
             </div>
 
@@ -465,7 +462,7 @@ export default function DashboardPage() {
         {/* Pipeline Profiling */}
         <div className="card">
           <h2 style={{ fontSize: '0.9rem', color: 'var(--text-label)', textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: 'var(--font-mono)', marginBottom: '1rem' }}>
-            Pipeline Latency &amp; CPU Cycle Budget
+            THEORETICAL LATENCY &amp; CPU Cycle Budget
           </h2>
 
           <div style={{ marginBottom: '1rem' }}>
