@@ -360,6 +360,17 @@ function handleCalculate() {
     const lonMin = parseFloat(document.getElementById('lonMin').value);
     const lonSec = parseFloat(document.getElementById('lonSec').value);
 
+    const latDmsError = window.CoordinateCalculator.validateDMS(latDeg, latMin, latSec, 'lat');
+    if (latDmsError) {
+      showError(`Vĩ độ DMS không hợp lệ: ${latDmsError}`);
+      return;
+    }
+    const lonDmsError = window.CoordinateCalculator.validateDMS(lonDeg, lonMin, lonSec, 'lon');
+    if (lonDmsError) {
+      showError(`Kinh độ DMS không hợp lệ: ${lonDmsError}`);
+      return;
+    }
+
     observerLat = window.CoordinateCalculator.dmsToDecimal(latDeg, latMin, latSec);
     observerLon = window.CoordinateCalculator.dmsToDecimal(lonDeg, lonMin, lonSec);
   }
@@ -659,8 +670,9 @@ function setupKeyboardShortcuts() {
       handleModeToggle();
     }
 
-    // Ctrl/Cmd + C (when result visible) = Copy coordinates
-    if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+    // Ctrl/Cmd + Shift + C (when result visible) = Copy coordinates
+    // (Shift required so normal browser text copy is not hijacked)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'C') {
       const resultSection = document.getElementById('resultSection');
       if (resultSection && resultSection.style.display === 'block') {
         e.preventDefault();
@@ -672,7 +684,7 @@ function setupKeyboardShortcuts() {
   console.log('Keyboard shortcuts enabled');
   console.log('  - Ctrl+Enter: Calculate');
   console.log('  - Ctrl+M: Toggle Mode');
-  console.log('  - Ctrl+C: Copy Result');
+  console.log('  - Ctrl+Shift+C: Copy Result');
 }
 
 // ==================== INITIALIZATION ====================

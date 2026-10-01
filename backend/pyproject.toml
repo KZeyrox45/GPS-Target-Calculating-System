@@ -1,0 +1,65 @@
+[project]
+name = "gps-tracking-backend"
+version = "2.0.0"
+description = "Real-Time Moving Target Tracking System - Backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.115.5",
+    "uvicorn[standard]==0.34.0",
+    "websockets==14.2",
+    "numpy==2.2.6",
+    "scipy==1.15.3",
+    "pydantic==2.13.4",
+    "python-dotenv==1.0.1",
+    "httpx==0.28.1",
+    "osmnx>=2.0.0",
+    "defusedxml>=0.7.1",
+]
+
+[dependency-groups]
+dev = [
+    "matplotlib>=3.11.0",
+    "pytest==8.4.1",
+    "pytest-asyncio==0.26.0",
+    "pytest-xdist>=3.5.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_default_fixture_loop_scope = "function"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "F",     # Pyflakes
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "BLE",   # flake8-blind-except
+    "S",     # flake8-bandit
+    "RUF",   # ruff-specific
+    "TRY",   # tryceratops
+    "PERF",  # perflint
+]
+ignore = [
+    "E402",  # module-level import not at top (scripts use sys.path.insert)
+    "E501",  # line too long (handled by formatter)
+    "RUF001",# ambiguous Unicode in strings (intentional math symbols)
+    "RUF002",# ambiguous Unicode in docstrings (intentional math symbols)
+    "RUF003",# ambiguous Unicode in comments (intentional math symbols)
+    "TRY003",# long exception messages (intentional for clarity)
+    "TRY300",# return in try block (cache-loading pattern)
+    "B905",  # zip() without strict= (not needed for parallel arrays)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E402"]
+"tests/*" = ["S101"]  # allow assert in tests

@@ -1,0 +1,248 @@
+\section{Lan truyền sai số từ ENU/ECEF sang đầu ra địa lý}
+\subsection{Các lỗi cảm biến và ảnh hưởng đến hệ thống định vị}
+\subsubsection{Lỗi GPS} 
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|p{7cm}|c|}
+\hline
+\textbf{Loại lỗi} & \textbf{Mô tả} & \textbf{Độ lệch (m)} \\
+\hline
+Ionospheric delay & Sai số do tín hiệu đi qua tầng ion, phụ thuộc tần số, khắc phục L1/L2 & $\pm 5$--$50$ \\
+\hline
+Tropospheric delay & Sai số do hơi ẩm, áp suất khí quyển & $\pm 0.5$--$30$ \\
+\hline
+Multipath distortion & Phản xạ đa đường (địa hình, mặt nước, nhà cửa) & $\pm 1$--$150$ \\
+\hline
+Ephemeris errors & Quỹ đạo vệ tinh bị lỗi thời gian, sai vị trí vệ tinh & $\pm 2$--$5$ \\
+\hline
+Satellite clock drift & Trôi đồng hồ nguyên tử trên vệ tinh & $\pm 0$--$1.5$ \\
+\hline
+Selective Availability & Sai số cố ý (đã tắt năm 2000) & $\sim 100$ \\
+\hline
+Natural/Artificial EMI & Gây sai lệch/tắt tín hiệu (bão từ, jammer) & Variable \\
+\hline
+\end{tabular}
+\caption{Các nguồn sai số trong tín hiệu GPS}
+\end{table}
+
+
+\noindent\textbf{Phân tích:} Các sai số trên cộng dồn thành tổng sai số định vị. Ở môi trường đô thị, hiệu ứng Multipath là nguyên nhân chính làm giảm đáng kể độ chính xác GPS.
+
+\subsubsection{Lỗi cảm biến IMU}
+    \begin{table}[h!]
+\centering
+\begin{tabular}{|l|p{6cm}|p{5cm}|}
+\hline
+\textbf{Loại lỗi} & \textbf{Biểu hiện} & \textbf{Độ lệch} \\
+\hline
+Bias & Lệch thông thường của gyro cả khi không có vận tốc góc & 0.1--1 $^\circ$/s (accel), 0.01--0.1 $^\circ$/s (gyro) \\
+\hline
+Scale factor & Sai số hệ số tỉ lệ giữa vận tốc góc và đầu ra & 0.1--1\% (typical acc/gyro) \\
+\hline
+Random walk & Sự lệch do tín hiệu noise, trôi dần theo thời gian & 0.01--0.1 $^\circ/\sqrt{\text{hr}}$ \\
+\hline
+Misalignment & Lệch trục cảm biến & $<0.1^\circ$ \\
+\hline
+Temperature drift & Lệch do nhiệt độ môi trường thay đổi & 0.1--1 mg/$^\circ$C; 0.1--1 $^\circ$/s/$^\circ$C \\
+\hline
+Nonlinearity / Vibration rectification & Đáp ứng phi tuyến, ảnh hưởng rung & Không xác định \\
+\hline
+\end{tabular}
+\caption{Các loại lỗi điển hình trong hệ thống quán tính (gyro)}
+\end{table}
+
+\noindent\textbf{Phân tích:} Lỗi \textit{bias} và \textit{random walk} của gyro làm drift lớn nhất cho hệ thống định vị quán tính; lỗi \textit{scale factor} thường bị bỏ qua nếu môi trường nhiệt ổn định, nhưng dễ xuất hiện trong di chuyển mạnh.
+\subsubsection{Lỗi laser rangefinder}
+
+ \begin{table}[h!]
+\centering
+\begin{tabular}{|l|p{7cm}|}
+\hline
+\textbf{Yếu tố ảnh hưởng} & \textbf{Tác động đến độ chính xác khoảng cách} \\
+\hline
+Độ ẩm, bụi, mưa & Khuếch tán tín hiệu, giảm SNR, tăng sai số \\
+\hline
+Nhiệt độ, áp suất cao & Giảm tốc độ ánh sáng, tăng sai số hệ thống \\
+\hline
+Nhiệt độ không phản xạ & Phổ tần bị dại hoặc mất thông tin \\
+\hline
+Phản xạ chùm tia & Sai số lớn ở khoảng cách xa \\
+\hline
+Hiệu ứng scintillation, beam wander & Gió/khí quyển gây lệch tia, mất thông tin \\
+\hline
+Mirage (ảo ảnh) & Biến đổi đường truyền, tăng sai số \\
+\hline
+\end{tabular}
+\caption{Các yếu tố môi trường ảnh hưởng đến độ chính xác đo khoảng cách trong truyền sóng sub-millimet}
+\end{table}
+
+\noindent\textbf{Tổng hợp:} Sai số dao động từ sub-millimet đến mét, càng tăng mạnh trong điều kiện môi trường khắc nghiệt hoặc vật cản động.
+
+\newpage
+\subsection{Công thức sai số (RSS)}
+
+Trong hệ thống tính toán tọa độ mục tiêu, sai số tổng hợp được ước lượng bằng phương pháp căn bậc hai tổng bình phương (root sum square) từ nhiều nguồn sai số khác nhau:
+
+$$ \sigma_{total} = \sqrt{\sigma_{GPS}^2 + (d \times \sigma_{azimuth})^2 + \sigma_{distance}^2} $$
+
+Trong đó:
+\begin{itemize}
+    \item $\sigma_{GPS}$: Sai số của hệ thống GPS (m, mặc định 10m)
+    \item $\sigma_{azimuth}$: Sai số của góc phương vị (độ, mặc định 0.5°)
+    \item $\sigma_{distance}$: Sai số của khoảng cách (m, mặc định 0.5m)
+    \item $d$: Khoảng cách từ người quan sát đến mục tiêu (km)
+\end{itemize}
+
+Sai số do azimuth được tính theo công thức: $\sigma_{azimuth\_meters} = d \times 1000 \times \sin(\sigma_{azimuth} \times \frac{\pi}{180})$
+
+\textbf{Ví dụ mẫu:}
+
+Giả sử người quan sát có các thông số:
+\begin{itemize}
+    \item Tọa độ: Vĩ độ 10.762622°, Kinh độ 106.660172°
+    \item Góc ngắm: 45°
+    \item Khoảng cách đến mục tiêu: 2.5 km
+    \item Sai số GPS: 10m
+    \item Sai số azimuth: 0.5°
+    \item Sai số khoảng cách: 0.5m
+\end{itemize}
+
+Tính toán sai số:
+\begin{enumerate}
+    \item Chuyển sai số azimuth sang radian: $0.5° \times \frac{\pi}{180} = 0.008727$ rad
+    \item Tính sai số do azimuth (vuông góc với hướng ngắm): $2500m \times \sin(0.008727) \approx 21.8m$
+    \item Áp dụng công thức tổng hợp sai số: 
+    $$\sigma_{total} = \sqrt{10^2 + 21.8^2 + 0.5^2} = \sqrt{100 + 475.24 + 0.25} = \sqrt{575.49} \approx 23.99m$$
+\end{enumerate}
+
+Vậy sai số ước lượng cho mục tiêu ở khoảng cách 2.5km là khoảng ±24 mét.
+
+Công thức này cho phép người dùng hiểu được độ tin cậy của vị trí mục tiêu được tính toán, dựa trên các thành phần sai số của từng cảm biến đầu vào (GPS, compass, laser rangefinder).
+\subsection{Lan truyền Hiệp phương sai (Covariance Propagation) qua các Ma trận Jacobian}
+\subsubsection{Độ lệch Chuẩn (Vô hướng) đến Ma trận Hiệp phương sai (Vector/Matrix)}
+Một phép đo cảm biến (như GPS) không được biểu diễn bằng một giá trị sai số vô hướng duy nhất ($\sigma$), mà bằng một ma trận hiệp phương sai ($\Sigma$).
+Ma trận này cho chúng ta biết:
+\begin{itemize}
+    \item Độ lớn của sai số trong mỗi trục (các phương sai trên đường chéo).
+    \item Hướng của sai số (các eigenvector của ma trận, chỉ ra trục chính dài nhất và ngắn nhất của elip).
+    \item Sự tương quan giữa các sai số (các phần tử ngoài đường chéo).
+
+\end{itemize}
+Ví dụ, một kết quả có thể cho thấy sai số lớn nhất là 40m theo hướng Tây Bắc-Đông Nam, nhưng chỉ là 5m theo hướng Đông Bắc-Tây Nam. Thông tin này có ý nghĩa quan trọng trong các ứng dụng quân sự (ví dụ: xác định khu vực hỏa lực) hơn nhiều so với một con số "24m" duy nhất.
+
+\subsubsection{Luật Lan truyền Bất định (LPU) và Ma trận Jacobian}
+Khi một hàm $Y = f(X)$ là phi tuyến (nonlinear), chúng ta không thể cộng các phương sai một cách đơn giản. Vấn đề của chúng ta, chuyển đổi từ các phép đo cảm biến (hệ tọa độ cầu) sang tọa độ mục tiêu (hệ tọa độ Descartes), là một hàm phi tuyến của $\sin$ và $\cos$.
+\begin{enumerate}
+    \item Khai triển Taylor và Ma trận Jacobian
+    \begin{itemize}
+        \item Luật Lan truyền Bất định (LPU) tổng quát dựa trên việc tuyến tính hóa hàm phi tuyến $f$ bằng cách sử dụng khai triển Taylor bậc nhất (first-order Taylor series expansion) xung quanh điểm đo lường $\mu_X$.
+        \item Ma trận của các đạo hàm riêng bậc nhất này được gọi là Ma trận Jacobian (Jacobian Matrix), $J$.27 Đối với $Y = f(X)$, trong đó $Y$ là vectơ $m$ chiều và $X$ là vectơ $n$ chiều, Jacobian là một ma trận $m \times n$:
+        $$J_{ij} = \frac{\partial f_i}{\partial x_j}$$
+    \end{itemize}
+    \item Công thức LPU Tổng quát
+    \begin{itemize}
+        \item Khi đã có Jacobian $J$ và ma trận hiệp phương sai của đầu vào $\Sigma_X$, ma trận hiệp phương sai của đầu ra $\Sigma_Y$ được xấp xỉ là 30:$$\Sigma_Y \approx J \Sigma_X J^T$$
+        \item Công thức RSS của 1 là một trường hợp rất đặc biệt và đơn giản hóa quá mức của công thức này, chỉ áp dụng nếu $f$ là một phép cộng tuyến tính ($Y = X_1 + X_2$) và $\Sigma_X$ là ma trận đường chéo (không tương quan). Vấn đề của chúng ta vi phạm cả hai điều kiện này.
+    \end{itemize}
+    \item Dẫn xuất Jacobian cho Bài toán Định vị Mục tiêu
+    \begin{itemize}
+        \item Vectơ Đầu vào (Phép đo): $X = [\rho, \alpha, \epsilon]^T$
+        \begin{itemize}
+            \item $\rho$: Khoảng cách (range) từ laser.
+            \item $\alpha$: Phương vị (azimuth) từ IMU/la bàn.
+            \item $\epsilon$: Góc ngẩng (elevation) từ IMU.
+        \end{itemize}
+        \item Vectơ Đầu ra (Vị trí Tương đối): $Y = [E, N, U]^T$
+        \item Hàm Phi tuyến $f$:
+        
+            $$E = \rho \cdot \cos(\epsilon) \cdot \sin(\alpha)$$
+            $$N = \rho \cdot \cos(\epsilon) \cdot \cos(\alpha)$$
+            $$U = \rho \cdot \sin(\epsilon)$$
+        
+        \item Ma trận Jacobian $J_{S \rightarrow ENU}$: Đây là ma trận 3x3 của các đạo hàm riêng:
+$J = \frac{\partial(E, N, U)}{\partial(\rho, \alpha, \epsilon)}$
+$$ J = \begin{bmatrix} \frac{\partial E}{\partial \rho} & \frac{\partial E}{\partial \alpha} & \frac{\partial E}{\partial \epsilon} \ \\ \frac{\partial N}{\partial \rho} & \frac{\partial N}{\partial \alpha} & \frac{\partial N}{\partial \epsilon} \ \\ \frac{\partial U}{\partial \rho} & \frac{\partial U}{\partial \alpha} & \frac{\partial U}{\partial \epsilon} \end{bmatrix} $$
+
+    \item Tính toán các đạo hàm riêng:
+    \begin{itemize}
+        \item $\frac{\partial E}{\partial \rho} = \cos(\epsilon) \sin(\alpha)$
+        \item $\frac{\partial E}{\partial \alpha} = \rho \cos(\epsilon) \cos(\alpha)$
+        \item $\frac{\partial E}{\partial \epsilon} = -\rho \sin(\epsilon) \sin(\alpha)$
+        \item Tương tự với các phần tử khác
+    \end{itemize}
+    \item Ma trận Hiệp phương sai Đầu vào $\Sigma_X$: Giả sử các lỗi của ba cảm biến (laser, con quay hồi chuyển, gia tốc kế) là độc lập, ma trận này là ma trận đường chéo:
+$$ \Sigma_X = \begin{bmatrix} \sigma_\rho^2 & 0 & 0 \\ 0 & \sigma_\alpha^2 & 0 \\ 0 & 0 & \sigma_\epsilon^2 \end{bmatrix} $$
+(Lưu ý: $\sigma_\alpha, \sigma_\epsilon$ đơn vị radian).
+
+    \item Ma trận Hiệp phương sai Đầu ra (Vị trí Tương đối):
+    $$\Sigma_{Tgt\_Rel} = J_{S \rightarrow ENU} \cdot \Sigma_X \cdot J_{S \rightarrow ENU}^T$$
+    \end{itemize}
+Một điểm quan trọng là: ngay cả khi $\Sigma_X$ là ma trận đường chéo (các lỗi cảm biến độc lập), ma trận kết quả $\Sigma_{Tgt\_Rel}$ sẽ không phải là đường chéo. Các phần tử ngoài đường chéo sẽ được lấp đầy. Điều này được gọi là tương quan phát sinh (emergent correlation). Ví dụ, một sai số dương trong phương vị ($\alpha$) sẽ gây ra sai số ở cả $E$ và $N$, làm cho chúng có tương quan. Mô hình RSS của 1 hoàn toàn không thể nắm bắt được hiện tượng này.
+    
+\end{enumerate}
+\subsubsection{Lan truyền Sai số thông qua các Phép biến đổi Địa lý (Geodetic)}
+Phân tích ở trên mới chỉ cho chúng ta ma trận hiệp phương sai của mục tiêu so với người quan sát ($\Sigma_{Tgt\_Rel}$), trong hệ tọa độ ENU cục bộ. Nhưng bản thân người quan sát cũng có một vùng bất định, thường được cung cấp bởi GPS dưới dạng WGS84 (Lat, Lon, Alt) hoặc ECEF (Earth-Centered, Earth-Fixed) với ma trận hiệp phương sai $C_{ECEF\_obs}$.
+Để có được hiệp phương sai tổng của mục tiêu trong một hệ tọa độ toàn cầu (ví dụ: ECEF), chúng ta phải thực hiện các bước sau:
+\begin{enumerate}
+    \item  Đưa tất cả về cùng một Hệ tọa độ (ví dụ: ECEF): Chúng ta có hai thành phần:
+    \begin{itemize}
+        \item $C_{ECEF\_obs}$: Hiệp phương sai của người quan sát trong ECEF (từ GPS).
+        \item $\Sigma_{Tgt\_Rel}$: Hiệp phương sai của mục tiêu so với người quan sát (trong ENU).
+    \end{itemize}
+    Chúng ta cần chuyển $\Sigma_{Tgt\_Rel}$ từ ENU sang ECEF.
+    \item Phép biến đổi ENU sang ECEF và Lan truyền Hiệp phương sai:
+    \begin{itemize}
+        \item 
+Phép biến đổi tọa độ từ ENU sang ECEF là một phép quay tuyến tính (linear rotation), $P_{ECEF} = R^T \cdot P_{ENU}$.32 Ma trận quay $R$ (từ ECEF sang ENU) phụ thuộc vào vĩ độ ($\phi$) và kinh độ ($\lambda$) của người quan sát:
+$$ R = \begin{pmatrix} -\sin \lambda & \cos \lambda &0 \\ - \cos \lambda \sin \varphi & -\sin \lambda \sin \varphi & \cos \varphi\\ \cos \lambda \cos \varphi & \sin \lambda \cos \varphi & \sin \varphi\ \end{pmatrix} $$
+        \item Theo Luật Lan truyền Bất định cho một phép biến đổi tuyến tính $Y = A X$, chúng ta có $\Sigma_Y = A \Sigma_X A^T$.30 Do đó, để chuyển hiệp phương sai từ ENU sang ECEF, chúng ta sử dụng ma trận chuyển vị $R^T$:
+        $$C_{ECEF\_Rel} = R^T \cdot \Sigma_{Tgt\_Rel} \cdot (R^T)^T = R^T \cdot \Sigma_{Tgt\_Rel} \cdot R$$
+        
+    \end{itemize}
+    \item Kết hợp Sai số (Trong ECEF):
+    \begin{itemize}
+        \item Vì $C_{ECEF\_obs}$ và $C_{ECEF\_Rel}$ là các nguồn sai số độc lập, chúng ta có thể cộng các ma trận hiệp phương sai của chúng: $$C_{ECEF\_Total} = C_{ECEF\_obs} + C_{ECEF\_Rel}$$
+    \end{itemize} \newpage
+    \item Chuyển đổi sang WGS84 
+    \begin{itemize}
+        \item Để có được sai số cuối cùng dưới dạng Vĩ độ, Kinh độ, Độ cao (Lat, Lon, Alt), chúng ta phải thực hiện một phép biến đổi cuối cùng. Phép biến đổi từ ECEF (X, Y, Z) sang LLA ($\phi, \lambda, h$) là phi tuyến cao (highly non-linear).33 Do đó, chúng ta phải sử dụng LPU một lần nữa với một ma trận Jacobian mới, $J_{E \rightarrow LLA}$:
+        $$C_{LLA\_Total} = J_{E \rightarrow LLA} \cdot C_{ECEF\_Total} \cdot J_{E \rightarrow LLA}^T$$
+    \end{itemize}
+\end{enumerate}
+\subsubsection{So sánh Định lượng: RSS so với Lan truyền Hiệp phương sai (Jacobian)}
+Chúng ta sẽ tái lập kịch bản ví dụ từ phần \textbf{Công thức sai số (RSS)}, nhưng sử dụng phương pháp lan truyền hiệp phương sai (Jacobian) 
+\begin{itemize}
+    \item Người quan sát: $\sigma_{GPS} = 10m$. Để phân tích, chúng ta giả sử điều này có nghĩa là $\sigma_{North} = 10m, \sigma_{East} = 10m$, và chúng không tương quan.
+    $\Sigma_{Obs} = \begin{bmatrix} \sigma_E^2 & 0 \\ 0 & \sigma_N^2 \end{bmatrix} = \begin{bmatrix} 100 & 0 \\ 0 & 100 \end{bmatrix}$ (đơn vị $m^2$).
+    \item Cảm biến:
+    \begin{itemize}
+        \item Khoảng cách (d): $d = 2500m$.
+        \item Phương vị ($\alpha$): $\alpha = 45^\circ$.
+        \item $\sigma_{distance}$ ($\sigma_\rho$): $0.5m$.
+        \item $\sigma_{azimuth}$ ($\sigma_\alpha$): $0.5^\circ = 0.008727 \text{ rad}$.
+    \end{itemize}
+    \item Bước 1: Tính toán Hiệp phương sai Tương đối ($\Sigma_{Tgt\_Rel}$).
+    \begin{itemize}
+        \item Hàm 2D: $E = \rho \sin \alpha$, $N = \rho \cos \alpha$.
+        \item Jacobian 2D ($J$) tại ($\rho=2500, \alpha=45^\circ$):
+$$ J = \begin{bmatrix} \frac{\partial E}{\partial \rho} & \frac{\partial E}{\partial \alpha} \\ \frac{\partial N}{\partial \rho} & \frac{\partial N}{\partial \alpha} \end{bmatrix} = \begin{bmatrix} \sin \alpha & \rho \cos \alpha \\ \cos \alpha & -\rho \sin \alpha \end{bmatrix} $$       $$ J = \begin{bmatrix} \sin(45^\circ) & 2500 \cos(45^\circ) \\ \cos(45^\circ) & -2500 \sin(45^\circ) \end{bmatrix} = \begin{bmatrix} 0.707 & 1767.8 \\ 0.707 & -1767.8 \end{bmatrix} $$
+        \item Hiệp phương sai Đầu vào (Cảm biến): $$ \Sigma_X = \begin{bmatrix} \sigma_\rho^2 & 0 \\ 0 & \sigma_\alpha^2 \end{bmatrix} = \begin{bmatrix} 0.5^2 & 0 \\ 0 & 0.008727^2 \end{bmatrix} = \begin{bmatrix} 0.25 & 0 \\ 0 & 7.616e-5 \end{bmatrix} $$
+        \item Hiệp phương sai Tương đối ($\Sigma_{Tgt\_Rel} = J \Sigma_X J^T$):
+$$ \Sigma_{Tgt_Rel} = \begin{bmatrix} 0.707 & 1767.8 \\ 0.707 & -1767.8 \end{bmatrix} \begin{bmatrix} 0.25 & 0 \\ 0 & 7.616e-5 \end{bmatrix} \begin{bmatrix} 0.707 & 0.707 \\ 1767.8 & -1767.8 \end{bmatrix} $$       $$ \Sigma_{Tgt_Rel} = \begin{bmatrix} 238.8 & -238.6 \\ -238.6 & 238.8 \end{bmatrix} \text{ (đơn vị } m^2) $$
+    \end{itemize}
+    \item Bước 2: Tính toán Hiệp phương sai Tổng cộng
+    ($C_{Total} = \Sigma_{Obs} + \Sigma_{Tgt\_Rel}$).
+$$ C_{Total} = \begin{bmatrix} 100 & 0 \\ 0 & 100 \end{bmatrix} + \begin{bmatrix} 238.8 & -238.6 \\ -238.6 & 238.8 \end{bmatrix} $$   $$ C_{Total} = \begin{bmatrix} 338.8 & -238.6 \\ -238.6 & 338.8 \end{bmatrix} \text{ (đơn vị } m^2) $$
+\end{itemize}
+\textbf{So sánh Kết quả:}
+\begin{itemize}
+    \item Mô hình 1 (RSS): Cung cấp một giá trị vô hướng $\pm 24m$. Giá trị này ngụ ý một vùng sai số hình tròn, trong đó sai số ở mọi hướng là như nhau.
+    \item Mô hình Jacobian: Cung cấp một ma trận hiệp phương sai 2x2.
+    \begin{itemize}
+        \item Phương sai (Đường chéo): $\sigma_E^2 = 338.8 \Rightarrow \sigma_E \approx 18.4m$. Tương tự, $\sigma_N \approx 18.4m$.
+        \item Hiệp phương sai (Ngoài đường chéo): $\sigma_{EN} = -238.6$.
+        \item Giá trị hiệp phương sai âm rất lớn này là thông tin quan trọng nhất. Nó cho chúng ta biết rằng các sai số $E$ và $N$ có tương quan nghịch mạnh. Vì phép đo ở $45^\circ$, điều này có nghĩa là hình elip sai số 2D bị nghiêng mạnh, với trục chính dài nhất của nó nằm vuông góc với hướng ngắm (hướng 45°) và trục chính ngắn nhất của nó nằm dọc theo hướng ngắm.
+        \item Cụ thể, (phân tích eigenvector của $C_{Total}$), trục chính dài nhất (sai số cross-track) có phương sai $\approx 577.4 m^2$ ($\sigma \approx 24.03m$). Trục chính ngắn nhất (sai số in-track) có phương sai $\approx 100.2 m^2$ ($\sigma \approx 10.01m$).
+    \end{itemize}
+\end{itemize}
+$\Rightarrow$ \textbf{Kết luận:} Phân tích cho thấy vùng bất định không phải là một vòng tròn 24m. Nó là một hình elip hẹp, có kích thước $24.0m \times 10.0m$. Sai số lớn nhất (24m) gần như hoàn toàn là do sai số azimuth, trong khi sai số nhỏ nhất (10m) gần như hoàn toàn là do sai số GPS của người quan sát. Sai số 0.5m của laser bị lấn át. Mô hình RSS của 1 đã tình cờ tính toán đúng độ lớn của trục lớn nhất của elip, nhưng nó đã hoàn toàn bỏ lỡ thông tin về hình dạng và hướng của vùng sai số.

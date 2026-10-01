@@ -1,0 +1,13 @@
+﻿\section*{Lời kết}
+\thispagestyle{empty}
+\addcontentsline{toc}{section}{Lời kết}
+
+\hspace{0.5cm} Báo cáo đã trình bày quá trình xây dựng hệ thống bám bắt mục tiêu di động thời gian thực, từ cơ sở lý thuyết về chuỗi xử lý tọa độ và hai thuật toán lọc ước lượng, đến thiết kế kiến trúc máy chủ kết hợp trình duyệt, tích hợp dữ liệu quỹ đạo thực tế từ ba nguồn, và đánh giá định lượng trên ba loại mục tiêu. Các con số trong báo cáo đều được sinh ra từ điều kiện thử nghiệm có kiểm soát, có thể tái lập nhờ hạt ngẫu nhiên cố định, và được kiểm chứng bằng bộ kiểm thử tự động gồm 163 trường hợp.
+
+So với giai đoạn một, hệ thống mở rộng từ tính toán tọa độ tĩnh sang bám bắt liên tục mục tiêu chuyển động, đòi hỏi thêm ước lượng vận tốc, dự báo vị trí và cơ chế lọc thích nghi; hình thái cũng chuyển từ chạy hoàn toàn trên trình duyệt sang kiến trúc máy chủ kết hợp trình duyệt. Sai số của bộ lọc alpha-beta đạt dưới một mét rưỡi cho cả ba loại mục tiêu, với ngân sách thiết kế chuỗi xử lý chỉ 59,0 microgiây mỗi khung. Đây là cơ sở để cân nhắc khả năng mở rộng hệ thống lên các nền tảng có tài nguyên hạn chế hơn, trong đó có phần cứng nhúng ARM Cortex-M; tuy nhiên việc triển khai trên phần cứng thực tế chưa nằm trong phạm vi đồ án và chỉ được đề cập như hướng phát triển trong tương lai.
+
+Nhóm cũng trình bày thẳng thắn các giới hạn của hệ thống. Toàn bộ kết quả hiện tại dựa trên mô hình nhiễu cảm biến mô phỏng theo thông số công bố, chưa có phép đo với phần cứng thật trong điều kiện thật. Người đi bộ sau khi lọc khó phân biệt trên bản đồ vì tốc độ di chuyển nhỏ hơn nhiễu định vị rất nhiều. Khi mất tín hiệu định vị hoàn toàn, hệ thống chỉ duy trì được vài giây trước khi sai số vượt ngưỡng chấp nhận. Chính những giới hạn này là cơ sở cho các hướng phát triển tiếp theo: chạy thử với cảm biến thật để thu dữ liệu thực nghiệm, nâng cấp định vị lên độ chính xác cấp centimét, kết hợp dữ liệu quán tính để kéo dài thời gian chịu mất tín hiệu, và mở rộng sang bám nhiều mục tiêu đồng thời với nhiều trạm quan sát.
+
+Nhóm xin cảm ơn quý thầy cô đã hướng dẫn trong suốt quá trình thực hiện, cùng những người bạn đã hỗ trợ và góp ý. Nhóm mong nhận được thêm ý kiến đóng góp từ hội đồng để báo cáo và hệ thống hoàn thiện hơn.
+
+\clearpage
