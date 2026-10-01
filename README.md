@@ -126,7 +126,7 @@ cd backend
 uv run pytest tests/ -v
 ```
 
-Kết quả hiện tại: **163 tests passed**.
+Kết quả hiện tại: **163 tests passed** (125 core + 38 loader/engine, đã xác minh bằng `pytest --collect-only`).
 
 Các nhóm test bao gồm:
 - `TestPedestrianTrajectory` - kiểm tra tốc độ, pause, waypoint navigation
@@ -257,6 +257,33 @@ Theo đặc tả đề tài (sai số < 5m ở cự ly < 1km), kết quả từ 
 | Người đi bộ | 0,48 m | 0,26 m | 0,86 m | ✅ |
 | Xe máy | 1,89 m | 1,02 m | 1,80 m | ✅ |
 | Drone (3D) | 1,94 m | 1,06 m | 2,10 m | ✅ |
+
+---
+
+## Tái hiện kết quả (Reproducibility)
+
+Mọi lệnh dưới chạy từ `backend/` với `uv` (Python 3.11+). Kết quả số phụ thuộc phần cứng/môi trường; bảng trên ghi theo máy đo chuẩn của báo cáo, không cam kết tái hiện từng chữ số trên mọi máy.
+
+```bash
+cd backend
+uv run pytest tests/ -v                 # 163 tests: 125 core + 38 loader/engine
+uv run python tests/benchmark_rmse.py   # seed 42, 120 s, 10 Hz, boundary 400 m
+uv run python tests/statistical_analysis.py  # seeds 1-10, kiểm tra độ nhạy realization
+uv run python scripts/measure_timing.py # timing lõi thuật toán, 10.000 lần chạy
+```
+
+### Dữ liệu
+
+- **Geolife (Microsoft Research Asia)**: quỹ đạo đi bộ thực, thư mục `data/Geolife Trajectories 1.3/`. Sau lọc 3 lớp còn 252 đoạn đạt chuẩn (từ 6.460 nhãn walk). Bộ nạp: `app/simulation/data_loaders.py:GeolifeWalkLoader`.
+- **Mạng đường TP.HCM (OpenStreetMap)**: file `data/hcmc_roads.graphml`, tải bằng `uv run python scripts/download_hcmc_road_network.py`. Xe máy random-walk trên topology đường thật. Bộ nạp: `app/simulation/data_loaders.py:RoadNetworkMotorcycleLoader`.
+- **Drone**: quỹ đạo synthetic tuân giới hạn khí động DJI Matrice 100, không dùng dataset ngoài.
+
+### Phạm vi áp dụng kết quả
+
+1. Mọi đánh giá đều dựa trên mô phỏng phần mềm, chưa đo kiểm phần cứng thật.
+2. 10 Hz là tần số cập nhật mô phỏng (design condition), không phải tốc độ sensor phần cứng.
+3. Hiệu năng vi điều khiển nhúng chưa được thiết lập (chỉ đo lõi thuật toán trên desktop).
+4. 10 seed dùng để kiểm tra độ nhạy với realization ngẫu nhiên, không đại diện toàn bộ không gian ngẫu nhiên.
 
 ---
 
