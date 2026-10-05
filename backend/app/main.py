@@ -15,6 +15,7 @@ Routing layout
   /docs                   GET    - Swagger UI
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -32,16 +33,15 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
-import asyncio
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("🚀 Target Tracking System backend starting up")
-    # Pre-warm road network loader in background thread so motorcycle start is instant
+    # Pre-warm road network cache in a worker thread (measured: warm load ~0.9 s
+    # vs ~7.7 s cold GraphML parse; lifespan stays non-blocking, ready ~1-2 s).
     try:
         from .simulation.data_loaders import RoadNetworkMotorcycleLoader
-        asyncio.create_task(asyncio.to_thread(RoadNetworkMotorcycleLoader.warmup))
-    except Exception as e:
+        app.state.warmup_task = asyncio.create_task(asyncio.to_thread(RoadNetworkMotorcycleLoader.warmup))
+    except Exception as e:  # noqa: BLE001 - boot must never fail because of warmup
         log.warning("Warmup task failed: %s", e)
     yield
     log.info("🛑 Backend shutting down")

@@ -121,7 +121,7 @@ Frontend sẽ chạy tại `http://localhost:5173` và tự proxy API/WebSocket 
 
 1. **Bộ nhớ cache đồ thị giao thông backend (`data/hcmc_roads.pickle`)**:
    - Tự động sinh từ `data/hcmc_roads.graphml` khi backend khởi chạy hoặc khi chạy kịch bản xe máy lần đầu.
-   - Lưu trữ đồ thị đã nạp sẵn cùng chỉ mục không gian `scipy.spatial.KDTree` (rút ngắn thời gian khởi động mô phỏng từ ~7,2 s xuống ~20 ms).
+   - Lưu trữ đồ thị đã nạp sẵn cùng chỉ mục không gian `scipy.spatial.KDTree` (rút ngắn thời gian khởi động mô phỏng từ ~7,7 s xuống ~0,9 s theo đo thực tế; lần chạy đầu khi chưa có cache vẫn mất ~7-8 s để dựng cache trong background).
    - **An toàn khi xóa**: File này nằm trong `.gitignore`. Nếu xóa, backend sẽ tự động đọc lại file GraphML gốc và tái tạo cache pickle mới trong background.
 
 2. **Tối ưu hóa render thời gian thực trên frontend**:

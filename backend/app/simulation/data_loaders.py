@@ -608,11 +608,11 @@ class RoadNetworkMotorcycleLoader:
         if cls._graph is not None:
             return cls._graph
 
-        # Try fast binary cache first (sub-500ms vs ~7000ms GraphML parsing)
+        # Try fast binary cache first (~0.9 s measured vs ~7.7 s GraphML parsing)
         if cls._CACHE_PICKLE_PATH.exists():
             try:
                 with open(cls._CACHE_PICKLE_PATH, "rb") as f:
-                    cls._graph = pickle.load(f)
+                    cls._graph = pickle.load(f)  # noqa: S301 - trusted local cache built from data/hcmc_roads.graphml
                 logger.info(
                     "RoadNetworkMotorcycleLoader: loaded graph from binary cache %s (%d nodes, %d edges)",
                     cls._CACHE_PICKLE_PATH,
@@ -621,7 +621,7 @@ class RoadNetworkMotorcycleLoader:
                 )
                 cls._build_spatial_index(cls._graph)
                 return cls._graph
-            except Exception as e:
+            except Exception as e:  # noqa: BLE001 - corrupt cache must fall back to GraphML, never crash start
                 logger.warning("Failed to load binary road graph cache, falling back to GraphML: %s", e)
 
         if not _ROAD_GRAPH_PATH.exists():
