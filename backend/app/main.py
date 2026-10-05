@@ -32,9 +32,17 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 
+import asyncio
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     log.info("🚀 Target Tracking System backend starting up")
+    # Pre-warm road network loader in background thread so motorcycle start is instant
+    try:
+        from .simulation.data_loaders import RoadNetworkMotorcycleLoader
+        asyncio.create_task(asyncio.to_thread(RoadNetworkMotorcycleLoader.warmup))
+    except Exception as e:
+        log.warning("Warmup task failed: %s", e)
     yield
     log.info("🛑 Backend shutting down")
 

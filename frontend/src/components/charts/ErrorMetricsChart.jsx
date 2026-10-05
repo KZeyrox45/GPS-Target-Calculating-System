@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Legend, Filler,
@@ -47,12 +47,35 @@ const BASE_OPTIONS = {
 };
 
 export default function ErrorMetricsChart({ defaultCollapsed }) {
-  const { metricsHistory } = useTrackingStore();
-  const [collapsed, setCollapsed] = React.useState(defaultCollapsed ?? false);
-  const visible = metricsHistory.slice(-CHART_MAX_POINTS);
+  const metricsHistory = useTrackingStore((s) => s.metricsHistory);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed ?? false);
+  const [displayHistory, setDisplayHistory] = useState(metricsHistory);
+  const lastUpdateRef = useRef(0);
 
-  const labels = visible.map((m) => m.step);
-  const data = {
+  // Throttle canvas redraws to ~3 Hz to preserve main-thread smoothness
+  useEffect(() => {
+    if (collapsed) return;
+    const now = performance.now();
+    if (metricsHistory.length === 0 || now - lastUpdateRef.current >= 330) {
+      lastUpdateRef.current = now;
+      setDisplayHistory(metricsHistory);
+    } else {
+      const timeoutId = setTimeout(() => {
+        lastUpdateRef.current = performance.now();
+        setDisplayHistory(metricsHistory);
+      }, 350);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [metricsHistory, collapsed]);
+
+  const visible = useMemo(
+    () => displayHistory.slice(-CHART_MAX_POINTS),
+    [displayHistory]
+  );
+
+  const labels = useMemo(() => visible.map((m) => m.step), [visible]);
+
+  const data = useMemo(() => ({
     labels,
     datasets: [
       {
@@ -87,9 +110,9 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
         tension: 0.3,
       },
     ],
-  };
+  }), [visible, labels]);
 
-  const options = {
+  const options = useMemo(() => ({
     ...BASE_OPTIONS,
     plugins: {
       ...BASE_OPTIONS.plugins,
@@ -100,7 +123,7 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
       x: { ...BASE_OPTIONS.scales.x, title: { display: true, text: 'STEP', color: AXIS_COLOR, font: { size: 11, ...MONO } } },
       y: { ...BASE_OPTIONS.scales.y, title: { display: true, text: 'ERR (m)', color: AXIS_COLOR, font: { size: 11, ...MONO } }, min: 0 },
     },
-  };
+  }), []);
 
   return (
     <div className="card" style={{ height: collapsed ? '48px' : '220px', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'height 200ms ease' }}>
@@ -118,7 +141,7 @@ export default function ErrorMetricsChart({ defaultCollapsed }) {
       {!collapsed && (
         <div style={{ flex: 1, minHeight: 0 }}>
           {metricsHistory.length < 2 ? (
-              <div className="flex items-center justify-center" style={{ height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
+            <div className="flex items-center justify-center" style={{ height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
               NO DATA
             </div>
           ) : (

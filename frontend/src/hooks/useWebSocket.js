@@ -14,7 +14,11 @@ export function useWebSocket() {
   const intentionalCloseRef = useRef(false);
   const retryCountRef = useRef(0);
   const connectRef = useRef(null);
-  const { setConnected, setFrame, appendHistories, appendMetrics, setFps, setIsRunning, setSimulationEnded } = useTrackingStore();
+  const setConnected = useTrackingStore(s => s.setConnected);
+  const addFrame = useTrackingStore(s => s.addFrame);
+  const setFps = useTrackingStore(s => s.setFps);
+  const setIsRunning = useTrackingStore(s => s.setIsRunning);
+  const setSimulationEnded = useTrackingStore(s => s.setSimulationEnded);
 
   // FPS measurement
   const fpsCountRef = useRef(0);
@@ -97,9 +101,7 @@ export function useWebSocket() {
       }
 
       fpsCountRef.current += 1;
-      setFrame(data);
-      appendHistories(data);
-      appendMetrics(data);
+      addFrame(data);
     };
 
     ws.onclose = (event) => {
@@ -125,7 +127,7 @@ export function useWebSocket() {
     ws.onerror = (err) => {
       console.error('[WS] Error:', err);
     };
-  }, [setConnected, setFrame, appendHistories, appendMetrics, setIsRunning, setSimulationEnded, startFpsCounter, stopFpsCounter, scheduleReconnect]);
+  }, [setConnected, addFrame, setIsRunning, setSimulationEnded, startFpsCounter, stopFpsCounter, scheduleReconnect]);
 
   useEffect(() => {
     connectRef.current = connect;

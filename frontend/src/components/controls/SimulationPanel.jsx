@@ -4,7 +4,16 @@ import { useWebSocket } from '../../hooks/useWebSocket';
 import formatApiError from '../../utils/apiError';
 
 export default function SimulationPanel() {
-  const { simConfig, setSimConfig, setTargetType, isRunning, setIsRunning, setSessionId, reset, clearHistory, clearMetrics, setSimulationEnded } = useTrackingStore();
+  const simConfig = useTrackingStore((s) => s.simConfig);
+  const setSimConfig = useTrackingStore((s) => s.setSimConfig);
+  const setTargetType = useTrackingStore((s) => s.setTargetType);
+  const isRunning = useTrackingStore((s) => s.isRunning);
+  const setIsRunning = useTrackingStore((s) => s.setIsRunning);
+  const setSessionId = useTrackingStore((s) => s.setSessionId);
+  const reset = useTrackingStore((s) => s.reset);
+  const clearHistory = useTrackingStore((s) => s.clearHistory);
+  const clearMetrics = useTrackingStore((s) => s.clearMetrics);
+  const setSimulationEnded = useTrackingStore((s) => s.setSimulationEnded);
   const { connect, disconnect } = useWebSocket();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

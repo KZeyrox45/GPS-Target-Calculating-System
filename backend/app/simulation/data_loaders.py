@@ -21,12 +21,14 @@ Data directories (relative to project root):
 import csv
 import logging
 import math
+import pickle
 from datetime import datetime
 from pathlib import Path
 
 import networkx as nx
 import numpy as np
 from scipy.interpolate import PchipInterpolator
+from scipy.spatial import KDTree
 
 logger = logging.getLogger(__name__)
 
@@ -556,12 +558,72 @@ class RoadNetworkMotorcycleLoader:
     """
 
     _graph: nx.MultiDiGraph | None = None
+    _CACHE_PICKLE_PATH = _PROJECT_ROOT / "data" / "hcmc_roads.pickle"
+
+    # Spatial indices for fast nearest start node lookups (O(log N) vs O(N))
+    _tree_deg2: KDTree | None = None
+    _nodes_deg2: list[str] | None = None
+    _coords_deg2: np.ndarray | None = None
+    _tree_deg1: KDTree | None = None
+    _nodes_deg1: list[str] | None = None
+    _coords_deg1: np.ndarray | None = None
+
+    @classmethod
+    def _build_spatial_index(cls, graph: nx.MultiDiGraph) -> None:
+        """Build KDTree spatial indices for fast candidate lookup."""
+        if cls._tree_deg2 is not None:
+            return
+
+        nodes_deg2 = []
+        coords_deg2 = []
+        nodes_deg1 = []
+        coords_deg1 = []
+
+        for node, data in graph.nodes(data=True):
+            out_deg = graph.out_degree(node)
+            if out_deg == 0:
+                continue
+            lat = float(data["y"])
+            lon = float(data["x"])
+            if out_deg >= 2:
+                nodes_deg2.append(node)
+                coords_deg2.append((lat, lon))
+            else:
+                nodes_deg1.append(node)
+                coords_deg1.append((lat, lon))
+
+        cls._nodes_deg2 = nodes_deg2
+        cls._coords_deg2 = np.array(coords_deg2, dtype=np.float64) if coords_deg2 else np.empty((0, 2))
+        cls._tree_deg2 = KDTree(cls._coords_deg2) if len(coords_deg2) > 0 else None
+
+        all_nodes = nodes_deg2 + nodes_deg1
+        all_coords = coords_deg2 + coords_deg1
+        cls._nodes_deg1 = all_nodes
+        cls._coords_deg1 = np.array(all_coords, dtype=np.float64) if all_coords else np.empty((0, 2))
+        cls._tree_deg1 = KDTree(cls._coords_deg1) if len(all_coords) > 0 else None
 
     @classmethod
     def _load_graph(cls) -> nx.MultiDiGraph | None:
-        """Load and cache the road network graph from GraphML."""
+        """Load and cache the road network graph from binary cache or GraphML."""
         if cls._graph is not None:
             return cls._graph
+
+        # Try fast binary cache first (sub-500ms vs ~7000ms GraphML parsing)
+        if cls._CACHE_PICKLE_PATH.exists():
+            try:
+                with open(cls._CACHE_PICKLE_PATH, "rb") as f:
+                    cls._graph = pickle.load(f)
+                logger.info(
+                    "RoadNetworkMotorcycleLoader: loaded graph from binary cache %s (%d nodes, %d edges)",
+                    cls._CACHE_PICKLE_PATH,
+                    cls._graph.number_of_nodes(),
+                    cls._graph.number_of_edges(),
+                )
+                cls._build_spatial_index(cls._graph)
+                return cls._graph
+            except Exception as e:
+                logger.warning("Failed to load binary road graph cache, falling back to GraphML: %s", e)
+
         if not _ROAD_GRAPH_PATH.exists():
             logger.warning("Road network not found at %s", _ROAD_GRAPH_PATH)
             return None
@@ -572,10 +634,23 @@ class RoadNetworkMotorcycleLoader:
                 cls._graph.number_of_nodes(),
                 cls._graph.number_of_edges(),
             )
+            cls._build_spatial_index(cls._graph)
+            # Save binary cache for subsequent instant startup
+            try:
+                with open(cls._CACHE_PICKLE_PATH, "wb") as f:
+                    pickle.dump(cls._graph, f, protocol=pickle.HIGHEST_PROTOCOL)
+                logger.info("RoadNetworkMotorcycleLoader: saved binary cache to %s", cls._CACHE_PICKLE_PATH)
+            except OSError as e:
+                logger.warning("Could not save binary road graph cache: %s", e)
         except (OSError, nx.NetworkXError) as e:
             logger.warning("Failed to load road network: %s", e)
             return None
         return cls._graph
+
+    @classmethod
+    def warmup(cls) -> None:
+        """Preload graph and build spatial index at application startup."""
+        cls._load_graph()
 
     @classmethod
     def _find_nearest_start_node(
@@ -583,6 +658,9 @@ class RoadNetworkMotorcycleLoader:
         rng: np.random.Generator | None = None,
     ) -> str | None:
         """Find a well-connected start node for a random walk.
+
+        Uses spatial indexing (KDTree) to retrieve candidates in O(log N)
+        instead of scanning 337K nodes.
 
         Strategy: collect all candidate nodes within a radius, then
         randomly select one (weighted by inverse distance) so each
@@ -599,6 +677,9 @@ class RoadNetworkMotorcycleLoader:
         if rng is None:
             rng = np.random.default_rng()
 
+        # Ensure spatial index is built
+        cls._build_spatial_index(graph)
+
         def _pick_random(candidates: list[str]) -> str:
             """Weighted random selection: inversely proportional to distance²."""
             if len(candidates) == 1:
@@ -612,46 +693,26 @@ class RoadNetworkMotorcycleLoader:
             idx = int(rng.choice(len(candidates), p=weights))
             return candidates[idx]
 
-        # Pass 1: intersection within ~1 km
-        candidates: list[str] = []
-        max_d2_pass1 = 0.01 ** 2
-        for node, data in graph.nodes(data=True):
-            if graph.out_degree(node) < 2:
-                continue
-            nlat = float(data["y"])
-            nlon = float(data["x"])
-            d2 = (nlat - lat) ** 2 + (nlon - lon) ** 2
-            if d2 <= max_d2_pass1:
-                candidates.append(node)
-        if candidates:
-            return _pick_random(candidates)
+        # Pass 1: intersection within ~1 km (r = 0.01°)
+        if cls._tree_deg2 is not None and cls._nodes_deg2:
+            indices = cls._tree_deg2.query_ball_point([lat, lon], r=0.01)
+            if indices:
+                candidates = [cls._nodes_deg2[i] for i in indices]
+                return _pick_random(candidates)
 
-        # Pass 2: intersection within ~5 km
-        candidates = []
-        max_d2_pass2 = 0.05 ** 2
-        for node, data in graph.nodes(data=True):
-            if graph.out_degree(node) < 2:
-                continue
-            nlat = float(data["y"])
-            nlon = float(data["x"])
-            d2 = (nlat - lat) ** 2 + (nlon - lon) ** 2
-            if d2 <= max_d2_pass2:
-                candidates.append(node)
-        if candidates:
-            return _pick_random(candidates)
+            # Pass 2: intersection within ~5 km (r = 0.05°)
+            indices = cls._tree_deg2.query_ball_point([lat, lon], r=0.05)
+            if indices:
+                candidates = [cls._nodes_deg2[i] for i in indices]
+                return _pick_random(candidates)
 
-        # Pass 3: any node with outgoing edges within ~5 km (fallback)
-        candidates = []
-        for node, data in graph.nodes(data=True):
-            if graph.out_degree(node) == 0:
-                continue
-            nlat = float(data["y"])
-            nlon = float(data["x"])
-            d2 = (nlat - lat) ** 2 + (nlon - lon) ** 2
-            if d2 <= max_d2_pass2:
-                candidates.append(node)
-        if candidates:
-            return _pick_random(candidates)
+        # Pass 3: any node with outgoing edges within ~5 km (r = 0.05°)
+        if cls._tree_deg1 is not None and cls._nodes_deg1:
+            indices = cls._tree_deg1.query_ball_point([lat, lon], r=0.05)
+            if indices:
+                candidates = [cls._nodes_deg1[i] for i in indices]
+                return _pick_random(candidates)
+
         return None
 
     @classmethod

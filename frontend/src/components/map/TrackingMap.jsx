@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Circle, useMap } from 'react-leaflet';
 import TargetMarker from './TargetMarker';
 import TrajectoryPolyline from './TrajectoryPolyline';
@@ -6,37 +6,54 @@ import RoadNetwork from './RoadNetwork';
 import useTrackingStore from '../../store/trackingStore';
 import { cssVar } from '../../utils/themeColors';
 
-// Continuously re-centre map on Kalman-estimated position
+// Deadband and throttled camera tracking to prevent animation backlog
 function MapAutoCenter() {
   const map = useMap();
-  const { currentFrame } = useTrackingStore();
-  const hasCentered = React.useRef(false);
+  const currentFrame = useTrackingStore((s) => s.currentFrame);
 
-  React.useEffect(() => {
+  const hasCentered = useRef(false);
+  const lastPanTime = useRef(0);
+
+  useEffect(() => {
     if (!currentFrame) return;
-
-    const frame = currentFrame;
-    const pos = frame.kalman ?? frame.ground_truth;
+    const pos = currentFrame.kalman ?? currentFrame.ground_truth;
     if (!pos) return;
-
     const { lat, lon } = pos;
 
     if (!hasCentered.current) {
-      map.setView([lat, lon], map.getZoom(), { animate: true, duration: 0.3 });
+      map.setView([lat, lon], map.getZoom(), { animate: false });
       hasCentered.current = true;
+      lastPanTime.current = performance.now();
       return;
     }
 
+    // Do not fight active user interaction (panning / dragging)
+    if (map.dragging && map.dragging.moving()) return;
+
+    const now = performance.now();
+    // Throttle camera updates to at most once per 600 ms
+    if (now - lastPanTime.current < 600) return;
+
     const center = map.getCenter();
     const dist = map.distance(center, [lat, lon]);
-    if (dist > 20) map.panTo([lat, lon], { animate: true, duration: 0.5 });
+
+    // Deadband: only pan if target drifted more than 50 m from viewport center
+    if (dist > 50) {
+      lastPanTime.current = now;
+      map.panTo([lat, lon], {
+        animate: true,
+        duration: 0.25,
+        easeLinearity: 0.5,
+        noMoveStart: true,
+      });
+    }
   }, [currentFrame, map]);
 
   return null;
 }
 
 // Range rings around observer position
-function RangeRings({ center, radii = [200, 400, 600] }) {
+const RangeRings = React.memo(function RangeRings({ center, radii = [200, 400, 600] }) {
   if (!center) return null;
   return radii.map(r => (
     <Circle
@@ -51,33 +68,56 @@ function RangeRings({ center, radii = [200, 400, 600] }) {
       }}
     />
   ));
-}
+});
 
-// Invalidate map size on mount to prevent gray or misaligned tiles
+// Robust container resize observer with requestAnimationFrame debouncing
 function MapResizer() {
   const map = useMap();
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 100);
-    return () => clearTimeout(timer);
+  useEffect(() => {
+    const container = map.getContainer();
+    if (!container) return;
+
+    let rafId = null;
+    const handleResize = () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        map.invalidateSize({ debounceMoveend: true });
+      });
+    };
+
+    handleResize();
+    const observer = new ResizeObserver(handleResize);
+    observer.observe(container);
+
+    return () => {
+      observer.disconnect();
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [map]);
+
   return null;
 }
 
 export default function TrackingMap({ observerPos }) {
-  const {
-    currentFrame, showGroundTruth, showRaw, showKalman, showAlphaBeta, showRoads,
-    groundTruthHistory, rawHistory, kalmanHistory, alphaBetaHistory,
-  } = useTrackingStore();
+  const currentFrame = useTrackingStore((s) => s.currentFrame);
+  const showGroundTruth = useTrackingStore((s) => s.showGroundTruth);
+  const showRaw = useTrackingStore((s) => s.showRaw);
+  const showKalman = useTrackingStore((s) => s.showKalman);
+  const showAlphaBeta = useTrackingStore((s) => s.showAlphaBeta);
+  const showRoads = useTrackingStore((s) => s.showRoads);
+  const groundTruthHistory = useTrackingStore((s) => s.groundTruthHistory);
+  const rawHistory = useTrackingStore((s) => s.rawHistory);
+  const kalmanHistory = useTrackingStore((s) => s.kalmanHistory);
+  const alphaBetaHistory = useTrackingStore((s) => s.alphaBetaHistory);
 
-  const center = observerPos || [10.7743, 106.7031];
+  const center = useMemo(() => observerPos || [10.7743, 106.7031], [observerPos]);
 
   return (
     <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
       <MapContainer
         center={center}
         zoom={16}
+        preferCanvas={true}
         style={{ width: '100%', height: '100%' }}
         zoomControl={true}
       >
@@ -85,6 +125,7 @@ export default function TrackingMap({ observerPos }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           maxZoom={19}
+          keepBuffer={4}
         />
 
         <RoadNetwork center={center} showRoads={showRoads} />

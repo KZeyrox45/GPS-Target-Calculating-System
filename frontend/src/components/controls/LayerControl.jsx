@@ -10,10 +10,15 @@ const LAYERS = [
 ];
 
 export default function LayerControl() {
-  const store = useTrackingStore();
-  const metricsHistory = useTrackingStore((s) => s.metricsHistory);
+  const showGroundTruth = useTrackingStore((s) => s.showGroundTruth);
+  const showRaw = useTrackingStore((s) => s.showRaw);
+  const showKalman = useTrackingStore((s) => s.showKalman);
+  const showAlphaBeta = useTrackingStore((s) => s.showAlphaBeta);
+  const showRoads = useTrackingStore((s) => s.showRoads);
+  const toggleLayer = useTrackingStore((s) => s.toggleLayer);
+  const lastMetrics = useTrackingStore((s) => s.currentFrame?.metrics);
 
-  const lastMetrics = metricsHistory[metricsHistory.length - 1];
+  const layerState = { showGroundTruth, showRaw, showKalman, showAlphaBeta, showRoads };
 
   return (
     <div className="card">
@@ -31,8 +36,8 @@ export default function LayerControl() {
             <input
               id={`toggle-${key}`}
               type="checkbox"
-              checked={store[key]}
-              onChange={() => store.toggleLayer(key)}
+              checked={layerState[key]}
+              onChange={() => toggleLayer(key)}
             />
             <span className="toggle-track" />
           </label>

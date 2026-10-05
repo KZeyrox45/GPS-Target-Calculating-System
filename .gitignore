@@ -41,6 +41,8 @@ __pycache__/
 
 # Runtime caches (OSM Overpass responses etc.)
 backend/cache/
+*.pickle
+data/*.pickle
 
 # JS dependencies (any folder)
 node_modules/

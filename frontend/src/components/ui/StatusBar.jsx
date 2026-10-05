@@ -2,7 +2,11 @@ import React from 'react';
 import useTrackingStore from '../../store/trackingStore';
 
 export default function StatusBar() {
-  const { connected, isRunning, fps, sessionId, simulationEnded } = useTrackingStore();
+  const connected = useTrackingStore((s) => s.connected);
+  const isRunning = useTrackingStore((s) => s.isRunning);
+  const fps = useTrackingStore((s) => s.fps);
+  const sessionId = useTrackingStore((s) => s.sessionId);
+  const simulationEnded = useTrackingStore((s) => s.simulationEnded);
 
   const showWsStatus = sessionId !== null && sessionId !== undefined;
 

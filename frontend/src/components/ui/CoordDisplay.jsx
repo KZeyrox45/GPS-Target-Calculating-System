@@ -14,8 +14,8 @@ function CoordRow({ label, value, unit, color }) {
 }
 
 export default function CoordDisplay() {
-  const { currentFrame, simConfig } = useTrackingStore();
-  const isDrone = simConfig?.target_type === 'drone';
+  const currentFrame = useTrackingStore((s) => s.currentFrame);
+  const isDrone = useTrackingStore((s) => s.simConfig?.target_type === 'drone');
 
   if (!currentFrame) {
     return (

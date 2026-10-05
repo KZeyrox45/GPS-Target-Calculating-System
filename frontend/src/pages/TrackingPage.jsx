@@ -9,8 +9,13 @@ import useTrackingStore from '../store/trackingStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 export default function TrackingPage() {
-  const { simConfig, isRunning, simulationEnded } = useTrackingStore();
-  const observerPos = [simConfig.observer_lat, simConfig.observer_lon];
+  const simConfig = useTrackingStore((s) => s.simConfig);
+  const isRunning = useTrackingStore((s) => s.isRunning);
+  const simulationEnded = useTrackingStore((s) => s.simulationEnded);
+  const observerPos = React.useMemo(
+    () => [simConfig.observer_lat, simConfig.observer_lon],
+    [simConfig.observer_lat, simConfig.observer_lon]
+  );
   const { disconnect } = useWebSocket();
 
   useEffect(() => {

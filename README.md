@@ -117,6 +117,19 @@ npm run dev
 
 Frontend sẽ chạy tại `http://localhost:5173` và tự proxy API/WebSocket sang port 8000.
 
+### Tối ưu hóa hiệu năng & Hành vi Cache
+
+1. **Bộ nhớ cache đồ thị giao thông backend (`data/hcmc_roads.pickle`)**:
+   - Tự động sinh từ `data/hcmc_roads.graphml` khi backend khởi chạy hoặc khi chạy kịch bản xe máy lần đầu.
+   - Lưu trữ đồ thị đã nạp sẵn cùng chỉ mục không gian `scipy.spatial.KDTree` (rút ngắn thời gian khởi động mô phỏng từ ~7,2 s xuống ~20 ms).
+   - **An toàn khi xóa**: File này nằm trong `.gitignore`. Nếu xóa, backend sẽ tự động đọc lại file GraphML gốc và tái tạo cache pickle mới trong background.
+
+2. **Tối ưu hóa render thời gian thực trên frontend**:
+   - Sử dụng HTML5 Canvas cho vector layers của Leaflet (`preferCanvas={true}`).
+   - Gom các frame dữ liệu 10 Hz vào một hành động cập nhật state duy nhất trong Zustand store (`addFrame`).
+   - Tự động tải nền và lưu cache các đoạn đường (Overpass) trong `sessionStorage` và RAM để tránh spam request mạng khi người dùng thao tác.
+   - Throttled biểu đồ RMSE và Altitude về chu kỳ vẽ ~3 Hz (330 ms) trong khi vẫn lưu toàn bộ 100% dữ liệu để xuất CSV.
+
 ---
 
 ## Chạy tests

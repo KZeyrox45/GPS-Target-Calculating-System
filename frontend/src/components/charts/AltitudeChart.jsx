@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, Title, Tooltip, Legend,
@@ -47,15 +47,38 @@ const BASE_OPTIONS = {
 };
 
 export default function AltitudeChart({ defaultCollapsed }) {
-  const { groundTruthHistory, kalmanHistory } = useTrackingStore();
-  const [collapsed, setCollapsed] = React.useState(defaultCollapsed ?? false);
+  const groundTruthHistory = useTrackingStore((s) => s.groundTruthHistory);
+  const kalmanHistory = useTrackingStore((s) => s.kalmanHistory);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed ?? false);
 
-  const visibleGT = groundTruthHistory.slice(-CHART_MAX_POINTS);
-  const visibleKF = kalmanHistory.slice(-CHART_MAX_POINTS);
+  const [displayGT, setDisplayGT] = useState(groundTruthHistory);
+  const [displayKF, setDisplayKF] = useState(kalmanHistory);
+  const lastUpdateRef = useRef(0);
 
-  const labels = visibleGT.map((_, i) => i + 1);
+  // Throttle canvas redraws to ~3 Hz to preserve main-thread responsiveness
+  useEffect(() => {
+    if (collapsed) return;
+    const now = performance.now();
+    if (groundTruthHistory.length === 0 || now - lastUpdateRef.current >= 330) {
+      lastUpdateRef.current = now;
+      setDisplayGT(groundTruthHistory);
+      setDisplayKF(kalmanHistory);
+    } else {
+      const timeoutId = setTimeout(() => {
+        lastUpdateRef.current = performance.now();
+        setDisplayGT(groundTruthHistory);
+        setDisplayKF(kalmanHistory);
+      }, 350);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [groundTruthHistory, kalmanHistory, collapsed]);
 
-  const data = {
+  const visibleGT = useMemo(() => displayGT.slice(-CHART_MAX_POINTS), [displayGT]);
+  const visibleKF = useMemo(() => displayKF.slice(-CHART_MAX_POINTS), [displayKF]);
+
+  const labels = useMemo(() => visibleGT.map((_, i) => i + 1), [visibleGT]);
+
+  const data = useMemo(() => ({
     labels,
     datasets: [
       {
@@ -79,9 +102,9 @@ export default function AltitudeChart({ defaultCollapsed }) {
         tension: 0.3,
       },
     ],
-  };
+  }), [visibleGT, visibleKF, labels]);
 
-  const options = {
+  const options = useMemo(() => ({
     ...BASE_OPTIONS,
     plugins: {
       ...BASE_OPTIONS.plugins,
@@ -98,7 +121,7 @@ export default function AltitudeChart({ defaultCollapsed }) {
         title: { display: true, text: 'ALT (m)', color: AXIS_COLOR, font: { size: 11, ...MONO } },
       },
     },
-  };
+  }), []);
 
   return (
     <div className="card" style={{ height: collapsed ? '48px' : '180px', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'height 200ms ease' }}>
@@ -116,7 +139,7 @@ export default function AltitudeChart({ defaultCollapsed }) {
       {!collapsed && (
         <div style={{ flex: 1, minHeight: 0 }}>
           {groundTruthHistory.length < 2 ? (
-              <div className="flex items-center justify-center" style={{ height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
+            <div className="flex items-center justify-center" style={{ height: '100%', color: 'var(--text-muted)', fontSize: '0.85rem', fontFamily: 'var(--font-mono)' }}>
               NO DATA
             </div>
           ) : (

@@ -20,6 +20,48 @@ const useTrackingStore = create((set) => ({
   setConnected: (v) => set({ connected: v }),
   setSessionId: (id) => set({ sessionId: id }),
 
+  // --- Batched single-transaction frame dispatch ---
+  addFrame: (frame) => {
+    const append = (arr, point) => {
+      const next = [...arr, point];
+      return next.length > MAX_HISTORY ? next.slice(next.length - MAX_HISTORY) : next;
+    };
+    const metricsEntry = {
+      step: frame.step,
+      kalman_rmse:     frame.metrics.kalman_rmse,
+      alpha_beta_rmse: frame.metrics.alpha_beta_rmse,
+      raw_error:       frame.metrics.raw_error,
+      kalman_error:    frame.metrics.kalman_error ?? 0,
+      alpha_beta_error: frame.metrics.alpha_beta_error ?? 0,
+      speed:           frame.kalman?.speed ?? frame.ground_truth?.speed ?? 0,
+      alt:             frame.kalman?.alt ?? frame.kalman?.up ?? frame.ground_truth?.alt ?? 0,
+      uncertainty_m:   frame.kalman?.uncertainty_m ?? 0,
+    };
+    set((s) => ({
+      currentFrame: frame,
+      groundTruthHistory: append(s.groundTruthHistory, {
+        lat: frame.ground_truth.lat,
+        lon: frame.ground_truth.lon,
+        alt: frame.ground_truth.alt ?? frame.ground_truth.up ?? 0,
+      }),
+      rawHistory: append(s.rawHistory, {
+        lat: frame.raw_measurement.lat, lon: frame.raw_measurement.lon,
+      }),
+      kalmanHistory: append(s.kalmanHistory, {
+        lat: frame.kalman.lat,
+        lon: frame.kalman.lon,
+        kf_up: frame.kalman.up ?? frame.kalman.alt ?? 0,
+      }),
+      alphaBetaHistory: append(s.alphaBetaHistory, {
+        lat: frame.alpha_beta.lat, lon: frame.alpha_beta.lon,
+      }),
+      metricsHistory: [
+        ...s.metricsHistory.slice(-(MAX_HISTORY - 1)),
+        metricsEntry,
+      ],
+    }));
+  },
+
   // --- Current frame (latest tracking data) ---
   currentFrame: null,
   setFrame: (frame) => set({ currentFrame: frame }),
