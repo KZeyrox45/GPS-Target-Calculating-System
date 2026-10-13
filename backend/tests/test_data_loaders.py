@@ -434,3 +434,68 @@ class TestSimulationEngineRealisticMode:
         )
         engine = SimulationEngine(cfg)
         assert getattr(engine._traj, 'is_dataset_based', False) is True
+
+
+# -----------------------------------------------------------------------
+# 9. Regression: datetime.UTC bug (issue #fix/timezone-utc)
+# -----------------------------------------------------------------------
+
+class TestDatetimeUTCRegression:
+    """
+    Regression tests for the datetime.UTC bug in _parse_trajectory and
+    _parse_labels. The old code used `datetime.UTC` which is an attribute
+    of the datetime *module*, not of the `datetime.datetime` *class*.
+    After `from datetime import datetime`, calling `datetime.UTC` raises
+    AttributeError on all Python versions.
+
+    Fix: import `timezone` from `datetime` and use `timezone.utc`.
+    """
+
+    def test_parse_trajectory_returns_timezone_aware_datetimes(self, tmp_path):
+        """_parse_plt must return timezone-aware datetimes without raising AttributeError."""
+        from app.simulation.data_loaders import _parse_plt
+
+        # Geolife .plt format: 6 header lines, then lat,lon,0,altitude,days_since_1899,date,time
+        plt_content = (
+            "Geolife trajectory\n"
+            "WGS 84\n"
+            "Altitude is in Feet\n"
+            "Reserved 3\n"
+            "0,2,255,My Track,0,0,2,8421376\n"
+            "0\n"
+            "39.906631,116.385564,0,492,39925.5208333333,2009-04-17,12:30:00\n"
+            "39.906700,116.385600,0,492,39925.5215277778,2009-04-17,12:30:04\n"
+        )
+        plt_file = tmp_path / "test.plt"
+        plt_file.write_text(plt_content, encoding="utf-8")
+
+        records = _parse_plt(plt_file)
+
+        assert len(records) == 2, f"Expected 2 records, got {len(records)}"
+        for dt, _lat, _lon in records:
+            # Must not raise AttributeError (the old bug) and must be timezone-aware
+            assert dt.tzinfo is not None, "datetime must be timezone-aware"
+            assert dt.utcoffset().total_seconds() == 0, "timezone must be UTC"
+
+    def test_parse_labels_returns_timezone_aware_datetimes(self, tmp_path):
+        """_parse_labels must return timezone-aware start/end datetimes without raising."""
+        from app.simulation.data_loaders import _parse_labels
+
+        # Geolife labels.txt format: header + tab-separated rows
+        labels_content = (
+            "Start Time\tEnd Time\tTransportation Mode\n"
+            "2009/04/17 12:30:00\t2009/04/17 12:31:30\twalk\n"
+            "2009/04/17 12:35:00\t2009/04/17 12:38:00\twalk\n"
+        )
+        labels_file = tmp_path / "labels.txt"
+        labels_file.write_text(labels_content, encoding="utf-8")
+
+        labels = _parse_labels(labels_file)
+
+        assert len(labels) == 2, f"Expected 2 labels, got {len(labels)}"
+        for start, end, mode in labels:
+            assert start.tzinfo is not None, "start datetime must be timezone-aware"
+            assert end.tzinfo is not None, "end datetime must be timezone-aware"
+            assert start.utcoffset().total_seconds() == 0
+            assert end.utcoffset().total_seconds() == 0
+            assert mode == "walk"

@@ -22,7 +22,7 @@ import csv
 import logging
 import math
 import pickle
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import networkx as nx
@@ -108,7 +108,7 @@ def _parse_plt(path: Path) -> list[tuple[datetime, float, float]]:
                     time_str = parts[6].strip()
                     dt = datetime.strptime(
                         f"{date_str} {time_str}", "%Y-%m-%d %H:%M:%S"
-                    ).replace(tzinfo=datetime.UTC)
+                    ).replace(tzinfo=UTC)
                     records.append((dt, lat, lon))
                 except (ValueError, IndexError):
                     continue
@@ -133,8 +133,8 @@ def _parse_labels(path: Path) -> list[tuple[datetime, datetime, str]]:
                 if len(parts) < 3:
                     continue
                 try:
-                    start = datetime.strptime(parts[0].strip(), "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.UTC)
-                    end = datetime.strptime(parts[1].strip(), "%Y/%m/%d %H:%M:%S").replace(tzinfo=datetime.UTC)
+                    start = datetime.strptime(parts[0].strip(), "%Y/%m/%d %H:%M:%S").replace(tzinfo=UTC)
+                    end = datetime.strptime(parts[1].strip(), "%Y/%m/%d %H:%M:%S").replace(tzinfo=UTC)
                     mode = parts[2].strip().lower()
                     labels.append((start, end, mode))
                 except (ValueError, IndexError):

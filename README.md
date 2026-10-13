@@ -74,9 +74,6 @@ GPS-Target-Calculating-System/
 │   │   ├── store/trackingStore.js  # Zustand global state
 │   │   └── hooks/useWebSocket.js
 │   └── package.json
-├── docs/
-│   ├── 01-architecture.md ... 10-demo-guide.md   # Tài liệu kỹ thuật theo chủ đề
-│   └── codebase/                   # Tài liệu kiến trúc codebase (STACK, STRUCTURE, ...)
 └── README.md
 ```
 
@@ -324,7 +321,7 @@ GitHub Actions (`.github/workflows/ci.yml`) chạy tự động trên mọi push
 - **Backend**: `uv sync --group dev` → `ruff check app/ tests/` → `pytest tests/`
 - **Frontend**: `npm ci` → `npm run lint` → `npm run build`
 
-Không có pre-commit hooks — chạy `Commands/run_tests.bat` trước khi commit.
+Không có pre-commit hooks — chạy `cd backend && uv run pytest tests/` trước khi commit.
 
 ---
 
