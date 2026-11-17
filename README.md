@@ -61,7 +61,7 @@ GPS-Target-Calculating-System/
 │   │   │   └── simulation.py       # POST /api/simulation/start + WebSocket
 │   │   ├── models/schemas.py
 │   │   └── main.py
-│   ├── tests/                      # 163 pytest tests
+│   ├── tests/                      # 165 pytest tests
 │   └── requirements.txt
 ├── frontend/
 │   ├── src/
@@ -136,7 +136,7 @@ cd backend
 uv run pytest tests/ -v
 ```
 
-Kết quả hiện tại: **163 tests passed** (125 core + 38 loader/engine, đã xác minh bằng `pytest --collect-only`).
+Kết quả hiện tại: **165 tests passed** (125 core + 40 loader/engine, đã xác minh bằng `pytest --collect-only`).
 
 Các nhóm test bao gồm:
 - `TestPedestrianTrajectory` - kiểm tra tốc độ, pause, waypoint navigation
@@ -276,7 +276,7 @@ Mọi lệnh dưới chạy từ `backend/` với `uv` (Python 3.11+). Kết qu�
 
 ```bash
 cd backend
-uv run pytest tests/ -v                 # 163 tests: 125 core + 38 loader/engine
+uv run pytest tests/ -v                 # 165 tests: 125 core + 40 loader/engine
 uv run python tests/benchmark_rmse.py   # seed 42, 120 s, 10 Hz, boundary 400 m
 uv run python tests/statistical_analysis.py  # seeds 1-10, kiểm tra độ nhạy realization
 uv run python scripts/measure_timing.py # timing lõi thuật toán, 10.000 lần chạy
@@ -303,7 +303,7 @@ uv run python scripts/measure_timing.py # timing lõi thuật toán, 10.000 lầ
 - Python 3.11 + FastAPI + Uvicorn
 - NumPy, SciPy
 - Pydantic v2
-- pytest (163 tests)
+- pytest (165 tests)
 
 **Frontend**
 - React 19 + Vite 8
